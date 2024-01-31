@@ -7,18 +7,19 @@ import pandas as pd
 import importlib_resources as resources
 import figeno.data
 from figeno.genes import read_transcripts
-from figeno.tracks_utils import split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
+from figeno.utils import split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
 
 class copynumber_track:
-    def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True, min_cn=None,max_cn=None,round_cn=False,
+    def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_minor=True, min_cn=None,max_cn=None,round_cn=False,
                  color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes_highlighted=[],reference="hg19",genes_file="",chr_lengths={},
                  label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5):
         self.freec_ratios = freec_ratios
         self.freec_CNAs = freec_CNAs
-        self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs.
+        self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs , instead of providing freec_CNAs
         self.ploidy=ploidy
         self.purple_cn=purple_cn
         self.grid=grid
+        self.grid_minor=grid_minor
         self.min_cn=min_cn
         self.max_cn = max_cn
         self.round_cn=round_cn
@@ -79,7 +80,7 @@ class copynumber_track:
     def draw_region_ratios(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
         
-        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid)
+        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,showX=self.grid_minor)
 
         #elif purple_cn_filename is not None: # Purple
         #    df_segments_cn = read_cnsegments_purple(purple_cn_filename=purple_cn_filename,scale=1e6)
@@ -313,7 +314,7 @@ def read_cnsegments_CNAs(CNAs,round_cn=False,chr_lengths={},ploidy=2):
     return pd.DataFrame(d)
 
 
-def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True):
+def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,minorX=True):
     # Vertical lines
     if vertical_lines:
         if "projection" in box and box["projection"]=="polar":
@@ -339,7 +340,8 @@ def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True):
             x = box["left"] + (box["right"]-box["left"]) * (pos-region.start) / (region.end-region.start)
             if pos%major_scale==0: box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.5,color="#AAAAAA")
             else:
-                box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.2,color="#AAAAAA",linestyle="dashed")
+                if minorX:
+                    box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.2,color="#AAAAAA",linestyle="dashed")
             pos+=minor_scale
 
     # Horizontal lines

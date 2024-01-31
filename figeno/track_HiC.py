@@ -7,7 +7,7 @@ import matplotlib
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.collections import PatchCollection
 
-from figeno.tracks_utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
+from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
 
 class hic_track:
     def __init__(self,file,max_dist=700,color_map="Red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,

@@ -6,14 +6,14 @@ Path = mpath.Path
 import numpy as np
 import pandas as pd
 import vcfpy
-from figeno.tracks_utils import correct_region_chr, split_box,draw_bounding_box
+from figeno.utils import correct_region_chr, split_box,draw_bounding_box, chr_to_int
 
 class sv_track:
     def __init__(self,vcf=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
                  color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",
                  fontscale=1,bounding_box=True,height=10,margin_above=1.5):
         self.vcf=vcf
-        self.df_SVs = df_SVs
+        self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a vcf.
         self.sv_across_regions=sv_across_regions
         self.upside_down=upside_down
         self.label=label
@@ -230,13 +230,3 @@ def add_arc(ax,x1,x2,y1,y2,height,color,upside_down=False):
         pp1 = patches.PathPatch(mpath.Path([(x1, y1), (x1, (y1+y2)/2), (x2, (y1+y2)/2),(x2,y2)],[Path.MOVETO, Path.CURVE4, Path.CURVE4,Path.CURVE4]),facecolor="none",edgecolor=color,lw=0.5)
         ax.add_patch(pp1)
    
-
-def chr_to_int(chr):
-    chr=str(chr)
-    if chr.isdigit():
-        return int(chr)
-    elif chr=="X":
-        return 23
-    else:
-        return 24
-    

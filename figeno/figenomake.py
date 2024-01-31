@@ -1,4 +1,4 @@
-from figeno.tracks_plot import tracks_plot
+from figeno.figeno import tracks_plot
 import sys
 
 

@@ -7,18 +7,18 @@ import pathlib
 import importlib_resources as resources
 import figeno.data
 
-from figeno.tracks_utils import Region, Highlight, draw_highlights
-from figeno.tracks_chr import chr_track
-from figeno.tracks_genes import genes_track
-from figeno.tracks_bed import bed_track
-from figeno.tracks_bigwig import bigwig_track
-from figeno.tracks_coverage import coverage_track
-from figeno.tracks_alignments import alignments_track
-from figeno.tracks_metfreq import metfreq_track
-from figeno.tracks_HiC import hic_track
-from figeno.tracks_copynumber import copynumber_track
-from figeno.tracks_sv import sv_track
-from figeno.tracks_ase import ase_track
+from figeno.utils import Region, Highlight, draw_highlights
+from figeno.track_chr import chr_track
+from figeno.track_genes import genes_track
+from figeno.track_bed import bed_track
+from figeno.track_bigwig import bigwig_track
+from figeno.track_coverage import coverage_track
+from figeno.track_alignments import alignments_track
+from figeno.track_metfreq import metfreq_track
+from figeno.track_HiC import hic_track
+from figeno.track_copynumber import copynumber_track
+from figeno.track_sv import sv_track
+from figeno.track_ase import ase_track
 
 
 matplotlib.use("svg")
@@ -108,68 +108,41 @@ class tracks_plot:
                     if not "type" in t: raise Exception("Must specify the type for track: " +str(t))
                     track_type = t.pop("type")
                     if track_type == "alignments":
-                        self.add_alignments_track(**t)
+                        self.tracks_list.append(alignments_track(**t))
                     elif track_type=="coverage":
-                        self.add_coverage_track(**t)
+                        self.tracks_list.append(coverage_track(**t))
                     elif track_type=="bigwig":
-                        self.add_bigwig_track(**t)
+                        self.tracks_list.append(bigwig_track(**t))
                     elif track_type=="bed":
-                        self.add_bed_track(**t)
+                        self.tracks_list.append(bed_track(**t))
                     elif track_type=="Met freq" or track_type=="methylation_freq":
-                        self.add_metfreq_track(**t)
+                        self.tracks_list.append(metfreq_track(**t))
                     elif track_type=="HiC":
-                        self.add_hic_track(**t)
+                        self.tracks_list.append(hic_track(**t))
                     elif track_type=="genes":
                         t["reference"] = self.reference
                         t["genes_file"] = self.genes_file
-                        self.add_genes_track(**t)
+                        self.tracks_list.append(genes_track(**t))
                     elif track_type=="chr axis":
-                        self.add_chraxis_track(**t)
+                        self.tracks_list.append(chr_track(**t))
                     elif track_type=="copynumber":
                         t["reference"] = self.reference
                         t["genes_file"] = self.genes_file
                         t["chr_lengths"] = self.chr_lengths
-                        self.add_copynumber_track(**t)
+                        self.tracks_list.append(copynumber_track(**t))
                     elif track_type=="SV":
-                        self.add_sv_track(**t)
+                        self.tracks_list.append(sv_track(**t))
                     elif track_type=="ase":
                         t["reference"] = self.reference
                         t["genes_file"] = self.genes_file
-                        self.add_ase_track(**t)
+                        self.tracks_list.append(ase_track(**t))
                     else:
                         pass
-                        #raise Exception("Unrecognized track type: " + str(track_type)+". Please use one of: alignments, coverage, bigwig, bed, methylation_freq, genes or chr_axis.")
-
 
             self.figure_type = config["general"]["figure_type"]
             self.output = None
             if "output" in config: self.output=config["output"]
 
-
-
-    def add_alignments_track(self,**args):
-        self.tracks_list.append(alignments_track(**args))
-    def add_coverage_track(self,**args):
-        self.tracks_list.append(coverage_track(**args))
-    def add_bigwig_track(self,**args):
-        self.tracks_list.append(bigwig_track(**args))
-    def add_bed_track(self,**args):
-        self.tracks_list.append(bed_track(**args))
-    def add_metfreq_track(self,**args):
-        self.tracks_list.append(metfreq_track(**args))
-    def add_hic_track(self,**args):
-        self.tracks_list.append(hic_track(**args))
-    def add_genes_track(self,**args):
-        self.tracks_list.append(genes_track(**args))
-    def add_chraxis_track(self,**args):
-        self.tracks_list.append(chr_track(**args))
-
-    def add_copynumber_track(self,**args):
-        self.tracks_list.append(copynumber_track(**args))
-    def add_sv_track(self,**args):
-        self.tracks_list.append(sv_track(**args))
-    def add_ase_track(self,**args):
-        self.tracks_list.append(ase_track(**args))
 
     def add_region(self,chr,start,end,orientation="+",color="#000000",width=20):
         self.regions.append((Region(chr,start,end,orientation,color),width))
@@ -306,17 +279,6 @@ class tracks_plot:
         fig,ax = plt.subplots(figsize=(width/25.4,total_height*len(self.regions)/25.4)) # convert from mm to inches
         ax.set_xlim((-5,width+5))
         ax.set_ylim((-4-total_height*(len(self.regions)-1),total_height+4))
-
-        # Highlights
-        #highlight_bottom=0
-        #highlight_top = total_height
-        #if isinstance(self.tracks_list[0],chr_track): 
-        #    highlight_top+=self.tracks_list[0].get_highlights_offsets()[0]
-        #if isinstance(self.tracks_list[-1],chr_track): 
-        #    highlight_bottom+=self.tracks_list[-1].get_highlights_offsets()[1]
-        #draw_highlights(box={"ax":ax,"bottom":highlight_bottom,"top":highlight_top,"left":0,"right":total_width},
-        #               highlights=self.highlights,regions=self.regions,hmargin=1.5)
-        
         
         # Tracks
         current_height=0
@@ -426,3 +388,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
+def make_figeno(config=None,config_file=None):
+    if config is None and config_file is None: raise Exception("ERROR: a config or a config_file is required for make_figeno.")
+    tp = tracks_plot(config=config,config_file=config_file)
+    tp.draw()

@@ -1,6 +1,4 @@
-import pysam
-
-from figeno.tracks_utils import correct_region_chr
+from figeno.utils import correct_region_chr
 
 
 def add_read_pile(read,l,margin=0):

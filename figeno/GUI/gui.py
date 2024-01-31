@@ -8,7 +8,7 @@ from figeno.GUI.gui_colors import ColorButton, color2hovercolor
 from figeno.GUI.gui_regions import RegionsFrame, HighlightsFrame
 from figeno.GUI.gui_tracks import TracksFrame
 from figeno.GUI.gui_utils import EntryPath
-from figeno.tracks_plot import tracks_plot
+from figeno.figeno import tracks_plot
 import figeno.GUI.data
 import json
 font_title=("inter",16,"bold")

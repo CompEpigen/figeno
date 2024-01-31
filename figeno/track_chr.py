@@ -6,7 +6,7 @@ import importlib_resources as resources
 import colorsys
 
 import figeno.data
-from figeno.tracks_utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text
+from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text
 
 class chr_track:
     def __init__(self,style="Default",unit="kb",ticks_pos="below",no_margin=False,reference="hg19",cytobands_file="",

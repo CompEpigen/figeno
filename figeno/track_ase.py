@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 import numpy as np
 import pandas as pd
 
-from figeno.tracks_utils import split_box, draw_bounding_box
+from figeno.utils import split_box, draw_bounding_box
 from figeno.genes import read_transcripts
 from figeno.ase import read_SNPs_RNA, read_SNPs_DNA
 

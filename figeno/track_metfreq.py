@@ -10,7 +10,7 @@ import matplotlib.patches as patches
 
 #from figeno.genes import draw_genes, draw_genes_transcript
 #from figeno.plot_ase import draw_chr_axis
-from figeno.tracks_utils import correct_region_chr, split_box,draw_bounding_box
+from figeno.utils import correct_region_chr, split_box,draw_bounding_box
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class metfreq_track:

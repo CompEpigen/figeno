@@ -5,7 +5,7 @@ from matplotlib.collections import PatchCollection
 import numpy as np
 import pandas as pd
 
-from figeno.tracks_utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
+from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
 from figeno.vcf import read_phased_vcf
 from figeno.bam import read_read_groups, decode_read_basemods
 

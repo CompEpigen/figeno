@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
-from figeno.tracks_utils import split_box, draw_bounding_box
+from figeno.utils import split_box, draw_bounding_box
 
 
 class bed_track:

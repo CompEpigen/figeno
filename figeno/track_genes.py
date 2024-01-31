@@ -4,7 +4,7 @@ import numpy as np
 import importlib_resources as resources
 import figeno.data
 from figeno.genes import read_transcripts
-from figeno.tracks_utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text
+from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text
 
 
 class genes_track:

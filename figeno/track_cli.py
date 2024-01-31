@@ -1,5 +1,5 @@
 import json
-from figeno.tracks_plot import tracks_plot
+from figeno.figeno import tracks_plot
 
 
 #/home/e840r/Documents/Scripts/pyGenViz/figeno/config_16PB3075_TEKT1_enhancer2.json

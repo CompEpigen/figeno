@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 import pandas as pd 
-from figeno.tracks_utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
+from figeno.utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
     def __init__(self,bigwig,n_bins=500,scale="auto",scale_pos="left",color="gray",label="",label_rotate=False,fontscale=1,
