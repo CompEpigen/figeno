@@ -214,7 +214,7 @@ class tracks_plot:
         else:
             raise Exception("Unknown figure type: "+self.figure_type)
 
-    def draw_onerow(self,file,width=183,dpi=150):
+    def draw_onerow(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
@@ -256,12 +256,12 @@ class tracks_plot:
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
         plt.tight_layout(pad=0)
-        fig.savefig(file,dpi=dpi)
+        fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
     
-    def draw_multilines(self,file,width=183,dpi=150):
+    def draw_multilines(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width_multilines()
         self.update_margins()
@@ -292,12 +292,12 @@ class tracks_plot:
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
         plt.tight_layout(pad=0)
-        fig.savefig(file,dpi=dpi)
+        fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
 
-    def draw_tworows(self,file,width=183,dpi=150):
+    def draw_tworows(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width_tworows()
         self.update_margins()
@@ -337,12 +337,12 @@ class tracks_plot:
             current_height+=t.height
         plt.axis('off')
         plt.tight_layout(pad=0)
-        fig.savefig(file,dpi=dpi)
+        fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
 
-    def draw_circle(self,file,width=183,dpi=150):
+    def draw_circle(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
@@ -383,7 +383,7 @@ class tracks_plot:
         ax.set_rmin(0)
         ax.set_rmax(current_r)
         plt.tight_layout(pad=0)
-        fig.savefig(file,dpi=dpi)
+        fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
