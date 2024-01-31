@@ -10,7 +10,7 @@ from figeno.genes import read_transcripts
 from figeno.utils import split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
 
 class copynumber_track:
-    def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_minor=True, min_cn=None,max_cn=None,round_cn=False,
+    def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
                  color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes_highlighted=[],reference="hg19",genes_file="",chr_lengths={},
                  label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5):
         self.freec_ratios = freec_ratios
@@ -18,8 +18,10 @@ class copynumber_track:
         self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs , instead of providing freec_CNAs
         self.ploidy=ploidy
         self.purple_cn=purple_cn
-        self.grid=grid
-        self.grid_minor=grid_minor
+        self.grid=grid # True for showing a grid for the axes
+        self.grid_major = grid_major # vertical lines for major ticks
+        self.grid_minor=grid_minor # vertical line for minor ticks
+        self.grid_cn = grid_cn # horizontal lines for copy numbers
         self.min_cn=min_cn
         self.max_cn = max_cn
         self.round_cn=round_cn
@@ -80,7 +82,7 @@ class copynumber_track:
     def draw_region_ratios(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
         
-        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,showX=self.grid_minor)
+        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,major=self.grid_major,minor=self.grid_minor,cn=self.grid_cn)
 
         #elif purple_cn_filename is not None: # Purple
         #    df_segments_cn = read_cnsegments_purple(purple_cn_filename=purple_cn_filename,scale=1e6)
@@ -314,7 +316,7 @@ def read_cnsegments_CNAs(CNAs,round_cn=False,chr_lengths={},ploidy=2):
     return pd.DataFrame(d)
 
 
-def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,minorX=True):
+def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,major=True,minor=True,cn=True):
     # Vertical lines
     if vertical_lines:
         if "projection" in box and box["projection"]=="polar":
@@ -338,24 +340,25 @@ def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,minorX=Tr
         if pos==region.start: pos+=minor_scale
         while pos<region.end:
             x = box["left"] + (box["right"]-box["left"]) * (pos-region.start) / (region.end-region.start)
-            if pos%major_scale==0: box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.5,color="#AAAAAA")
+            if pos%major_scale==0 and major: box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.5,color="#AAAAAA")
             else:
-                if minorX:
+                if minor:
                     box["ax"].plot([x,x],[box["top"],box["bottom"]],zorder=0,linewidth=0.2,color="#AAAAAA",linestyle="dashed")
             pos+=minor_scale
 
     # Horizontal lines
-    if "projection" in box and box["projection"]=="polar":
-        for y in range(round(ymin),round(ymax)+1):
-            if y>=ymin and y<=ymax:
-                y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
-                n_points = round(abs(box["right"]-box["left"])*100)
-                x_list = np.linspace(box["left"],box["right"],n_points)
-                y_list = [y_converted]*n_points
-                box["ax"].plot(x_list,y_list,zorder=0,linewidth=0.5,color="#AAAAAA")
-    else:
-        for y in range(round(ymin),round(ymax)+1):
-            if y>=ymin and y<=ymax:
-                y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
-                box["ax"].plot([box["left"],box["right"]],[y_converted,y_converted],zorder=0,linewidth=0.5,color="#AAAAAA")
+    if cn:
+        if "projection" in box and box["projection"]=="polar":
+            for y in range(round(ymin),round(ymax)+1):
+                if y>=ymin and y<=ymax:
+                    y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
+                    n_points = round(abs(box["right"]-box["left"])*100)
+                    x_list = np.linspace(box["left"],box["right"],n_points)
+                    y_list = [y_converted]*n_points
+                    box["ax"].plot(x_list,y_list,zorder=0,linewidth=0.5,color="#AAAAAA")
+        else:
+            for y in range(round(ymin),round(ymax)+1):
+                if y>=ymin and y<=ymax:
+                    y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
+                    box["ax"].plot([box["left"],box["right"]],[y_converted,y_converted],zorder=0,linewidth=0.5,color="#AAAAAA")
                
