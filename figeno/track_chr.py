@@ -70,7 +70,6 @@ class chr_track:
 
         #ticks
         if self.scale < 1.2 * 1e8:
-
             # First identify the rightmost tick
             rightmost_tick=0
             for x in range((region.end-region.start)//self.scale +2):
@@ -82,11 +81,11 @@ class chr_track:
                 else:
                     pos_transformed = box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
                 rightmost_tick  = max(rightmost_tick,pos_transformed)
+
             # Then, actually draw the tick
             for x in range((region.end-region.start)//self.scale +2):
                 pos = self.scale * (region.start//self.scale + x)
                 if pos<region.start or pos>region.end: continue
-
                 # x 
                 if region.orientation=="+":
                     pos_transformed = box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
@@ -105,18 +104,18 @@ class chr_track:
 
                 # x ticks
                 #box["ax"].plot([pos_transformed],[y],marker="|",markersize=100,color="black")
-                
+                pos_text = pos_transformed
                 if abs(pos_transformed-box["left"])<5: 
                     halign="left"
-                    pos_transformed = box["left"]
+                    pos_text = box["left"]
                 elif abs(pos_transformed-box["right"])<5: 
                     halign="right"
-                    pos_transformed=box["right"]
+                    pos_text=box["right"]
                 else: halign="center"
                 if self.ticks_pos=="below" and (not "upside_down" in box):
-                    box["ax"].text(pos_transformed,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale)
+                    box["ax"].text(pos_text,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale)
                 else:
-                    box["ax"].text(pos_transformed,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale)
+                    box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale)
         # Chr label
         if self.ticks_pos=="below" and (not "upside_down" in box):
             box["ax"].text((box["left"]+box["right"])/2,box["bottom"],"chr"+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
