@@ -55,7 +55,7 @@ class tracks_plot:
         
         self.chr_lengths={}
         self.centromeres={}
-        if self.chrarms_file is not None:
+        if self.chrarms_file is not None and self.chrarms_file!="":
             with open(self.chrarms_file,"r") as infile2:
                 for line in infile2:
                     linesplit = line.rstrip("\n").split(" ")
