@@ -108,6 +108,7 @@ class coverage_track:
             
     def draw_title(self,box):
         if len(self.label)>0:
+            self.label = self.label.replace("\\n","\n")
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)

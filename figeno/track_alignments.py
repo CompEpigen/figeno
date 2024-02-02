@@ -143,7 +143,7 @@ class alignments_track:
         total_rows = np.sum(n_rows_group)
         total_rows_margin = total_rows + max(0,len(groups)-1) # Use one empty row as spacer between groups.
         margin = (box["top"]-box["bottom"]) * 0.03
-        height = (box["top"]-box["bottom"]-margin)/total_rows_margin * 0.7
+        height = (box["top"]-box["bottom"]-margin)/total_rows_margin * 0.85
         if "projection" in box and box["projection"]=="polar":
             arrow_width=-0.01
         else:
@@ -284,10 +284,11 @@ class alignments_track:
             else: labels_pos = box["left"]-0.1
             for i in range(min(len(self.group_sizes),len(self.group_labels))):
                 box["ax"].text(labels_pos,(self.group_boundaries[i]+self.group_boundaries[i+1])/2,self.group_labels[i],horizontalalignment="right",verticalalignment="center",rotation=90,fontsize=7*self.fontscale)
-                if len(self.label)>0:
-                    rotation = 90 if self.label_rotate else 0
-                    box["ax"].text(labels_pos - 3.0,(box["top"]+box["bottom"])/2,
-                            self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            if len(self.label)>0:
+                self.label = self.label.replace("\\n","\n")
+                rotation = 90 if self.label_rotate else 0
+                box["ax"].text(labels_pos - 3.0,(box["top"]+box["bottom"])/2,
+                        self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
         else:
             x1,y1 = polar2cartesian((box["left"],box["bottom"]))
             x2,_ = polar2cartesian((box["left"]+0.001,box["bottom"]))
