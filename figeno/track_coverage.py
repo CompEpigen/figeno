@@ -135,7 +135,7 @@ class coverage_track:
                 if new_value==new_value:coverage_bin.append(new_value)
                 coverage_bin+= []
             max_cov=max(max_cov,np.max(coverage_bin) * 1.1)
-        return max_cov
+        return round(max_cov)
 
 
 
