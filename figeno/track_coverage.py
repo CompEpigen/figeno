@@ -38,21 +38,19 @@ class coverage_track:
     def draw_region(self,region,box,show_scale_inside):
         region = correct_region_chr(region,self.samfile.references)
         if self.bounding_box: draw_bounding_box(box)
-        if region.end-region.start<5000000:
-            coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
-            n_bins = min(self.n_bins,len(coverage))
-            n_bases_per_bin = (region.end-region.start) // n_bins
-            coverage_bin = [np.mean(coverage[i*n_bases_per_bin:(i+1)*n_bases_per_bin]) for i in range(n_bins)]
-            if (region.end-region.start) % n_bins > 0:
-                coverage_bin+= [np.mean(coverage_bin[n_bases_per_bin*(n_bins-1):])]
-        else:
-            n_bins = self.n_bins
-            coverage_bin=[]
-            for i in range(n_bins):
-                start = region.start + i* (region.end-region.start)/n_bins
-                end = start + (region.end-region.start)/n_bins
-                cov = self.samfile.count(region.chr,start,end)
-                coverage_bin.append(cov)
+        #if region.end-region.start<5000000:
+        coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
+        n_bins = min(self.n_bins,len(coverage))
+        n_bases_per_bin = (region.end-region.start) / n_bins
+        coverage_bin = [np.mean(coverage[int(i*n_bases_per_bin):int((i+1)*n_bases_per_bin)]) for i in range(n_bins)]
+        #else:
+        #    n_bins = self.n_bins
+        #    coverage_bin=[]
+        #    for i in range(n_bins):
+        #        start = region.start + i* (region.end-region.start)/n_bins
+        #        end = start + (region.end-region.start)/n_bins
+        #        cov = self.samfile.count(region.chr,start,end)
+        #        coverage_bin.append(cov)
 
 
         
@@ -60,22 +58,22 @@ class coverage_track:
         if self.scale=="auto per region": self.scale_max=max_coverage
         rect_width = (box["right"] - box["left"]) / len(coverage_bin)
 
-        SNPs=[]
-        if self.vcf is not None:
-            SNPs = read_phased_vcf(self.vcf,region.chr,region.start,region.end)
-        if self.SNP_colors=="auto": self.SNP_colors = ["#1a7242","#e67e22"]
-        bin2vaf={}
-        nuc_to_index = {"A":0,"C":1,"G":2,"T":3}
-        for i in range(len(SNPs)):
-            pos,nuc1,nuc2 = SNPs[i]
-            if nuc1 in nuc_to_index and nuc2 in nuc_to_index:
-                if self.exchange_haplotypes: nuc1, nuc2 = nuc2, nuc1
-                coverage_SNP=self.samfile.count_coverage(region.chr,pos,pos+1)
-                cov1=coverage_SNP[nuc_to_index[nuc1]][0]
-                cov2=coverage_SNP[nuc_to_index[nuc2]][0]
-                total_cov = np.sum(coverage_SNP) 
-                if total_cov>=5:
-                    bin2vaf[(pos-region.start)//n_bases_per_bin] = (cov1/total_cov,cov2/total_cov)
+        #SNPs=[]
+        #if self.vcf is not None:
+        #    SNPs = read_phased_vcf(self.vcf,region.chr,region.start,region.end)
+        #if self.SNP_colors=="auto": self.SNP_colors = ["#1a7242","#e67e22"]
+        #bin2vaf={}
+        #nuc_to_index = {"A":0,"C":1,"G":2,"T":3}
+        #for i in range(len(SNPs)):
+        #    pos,nuc1,nuc2 = SNPs[i]
+        #    if nuc1 in nuc_to_index and nuc2 in nuc_to_index:
+        #        if self.exchange_haplotypes: nuc1, nuc2 = nuc2, nuc1
+        #        coverage_SNP=self.samfile.count_coverage(region.chr,pos,pos+1)
+        #        cov1=coverage_SNP[nuc_to_index[nuc1]][0]
+        #        cov2=coverage_SNP[nuc_to_index[nuc2]][0]
+        #        total_cov = np.sum(coverage_SNP) 
+        #       if total_cov>=5:
+        #           bin2vaf[(pos-region.start)//n_bases_per_bin] = (cov1/total_cov,cov2/total_cov)
 
         # Draw rectangles for each bin
         vertices=[(box["right"],box["bottom"]),(box["left"],box["bottom"])]
@@ -91,13 +89,13 @@ class coverage_track:
             vertices.append((rect_left,box["bottom"]+rect_height))
             vertices.append((rect_left+rect_width,box["bottom"]+rect_height))
             
-            if i in bin2vaf: # if there is a SNP in the bin
-                rect = patches.Rectangle((rect_left,box["bottom"]),
-                                    rect_width,rect_height*bin2vaf[i][0],color=self.SNP_colors[0],lw=0.2,zorder=1.1)  
-                box["ax"].add_patch(rect)
-                rect = patches.Rectangle((rect_left,box["bottom"] + rect_height*bin2vaf[i][0]),
-                                    rect_width,rect_height*bin2vaf[i][1],color=self.SNP_colors[1],lw=0.2,zorder=1.1)  
-                box["ax"].add_patch(rect)
+            #if i in bin2vaf: # if there is a SNP in the bin
+            #    rect = patches.Rectangle((rect_left,box["bottom"]),
+            #                        rect_width,rect_height*bin2vaf[i][0],color=self.SNP_colors[0],lw=0.2,zorder=1.1)  
+            #    box["ax"].add_patch(rect)
+            #   rect = patches.Rectangle((rect_left,box["bottom"] + rect_height*bin2vaf[i][0]),
+            #                        rect_width,rect_height*bin2vaf[i][1],color=self.SNP_colors[1],lw=0.2,zorder=1.1)  
+            #    box["ax"].add_patch(rect)
         polygon = patches.Polygon(vertices,lw=0,zorder=1,color=self.color)
         box["ax"].add_patch(polygon)
 
@@ -132,7 +130,9 @@ class coverage_track:
             n_bases_per_bin = (region.end-region.start) // n_bins
             coverage_bin = [np.mean(coverage[i*n_bases_per_bin:(i+1)*n_bases_per_bin]) for i in range(n_bins)]
             if (region.end-region.start) % n_bins > 0:
-                coverage_bin+= [np.mean(coverage_bin[n_bases_per_bin*(n_bins-1):])]
+                new_value = np.mean(coverage[n_bases_per_bin*(n_bins-1):])
+                if new_value==new_value:coverage_bin.append(new_value)
+                coverage_bin+= []
             max_cov=max(max_cov,np.max(coverage_bin) * 1.1)
         return max_cov
 
