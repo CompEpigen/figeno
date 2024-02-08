@@ -182,6 +182,7 @@ class chr_track:
             y= (box["bottom"]+box["top"]) / 2
 
         df_cytobands_chr = self.df_cytobands.loc[self.df_cytobands["chr"]==region.chr,:].reset_index(drop=True)
+        chr_length = np.max(df_cytobands_chr["end"])
         for i in df_cytobands_chr.index:
             start,end = df_cytobands_chr.loc[i,"start"],df_cytobands_chr.loc[i,"end"]
             # Color based on cytoband
@@ -199,12 +200,13 @@ class chr_track:
                 print("Unrecognized cytoband value: "+ df_cytobands_chr.loc[i,"value2"])
             color_adjusted = change_color(region.color,color_coef=color_coef)
 
+
             if region.orientation=="+":
-                x_start = box["left"] + (box["right"]-box["left"]) * (start-region.start)/(region.end-region.start)
-                x_end = box["left"] + (box["right"]-box["left"]) * (end-region.start)/(region.end-region.start)
+                x_start = box["left"] + (box["right"]-box["left"]) * (start)/(chr_length)
+                x_end = box["left"] + (box["right"]-box["left"]) * (end)/(chr_length)
             else:
-                x_start = box["right"] - (box["right"]-box["left"]) * (start-region.start)/(region.end-region.start)
-                x_end = box["right"] - (box["right"]-box["left"]) * (end-region.start)/(region.end-region.start)
+                x_start = box["right"] - (box["right"]-box["left"]) * (start)/(chr_length)
+                x_end = box["right"] - (box["right"]-box["left"]) * (end)/(chr_length)
             
             # Rectangle for most cytobands, and half-ellipses for telomeres and centromeres.
             if (i==0  and region.orientation=="+") or (i==df_cytobands_chr.shape[0]-1 and region.orientation=="-"): # Telomere 1
@@ -232,7 +234,22 @@ class chr_track:
                 vertices = [(x_start,y-height/2) , (x_start, y+height/2) , (x_end,y+height/2) , (x_end,y-height/2)]
                 rect = patches.Polygon(vertices,facecolor=color_adjusted,edgecolor="black",lw=0.2)
                 box["ax"].add_patch(rect)
-        
+
+        # If the region is not the whole chromosome, show where we are in the chromosome
+        if region.start>1 or region.end<chr_length-2:
+            if region.orientation=="+":
+                print((region.start,region.end,chr_length))
+                rect_left = box["left"] + region.start/chr_length * (box["right"]-box["left"])
+                rect_right = box["left"] + region.end/chr_length * (box["right"]-box["left"])
+                print((box["left"],box["right"],rect_left,rect_right))
+            else:
+                rect_left = box["right"] - region.start/chr_length * (box["right"]-box["left"])
+                rect_right = box["right"] - region.end/chr_length * (box["right"]-box["left"])
+            vertices=[(rect_left,y+height*0.5) , (rect_right,y+height*0.5) ,  (rect_right,y-height*0.5) , (rect_left,y-height*0.5)]
+            box["ax"].add_patch(patches.Polygon(vertices,edgecolor="red",zorder=2))
+
+
+
     def tick_text(self,pos,show_unit=True):
         if self.unit=="kb": 
             if show_unit:

@@ -76,7 +76,7 @@ def readcolor(read,color_splitread=False,breakpoints=[]):
             return bp.color
     if color_splitread:
         if read.has_tag("SA"): return "#e74c3c"
-    return "#b3b3b3"
+    return "#cccccc"
 
 class alignments_track:
     def __init__(self,bam,label="",label_rotate=False,color_splitread=False,breakpoints_file=None,
@@ -127,7 +127,8 @@ class alignments_track:
 
     def draw_region(self,region,box):
         region = correct_region_chr(region,self.samfile.references)
-        draw_bounding_box(box)
+        if self.bounding_box:
+            draw_bounding_box(box)
         if self.group_by=="haplotype":
             if self.show_unphased:
                 groups = read_read_groups(self.samfile,region)[:-1] 
@@ -163,13 +164,15 @@ class alignments_track:
             return box["top"] - margin/2 - y/total_rows_margin * (box["top"]-box["bottom"] - margin)
         
         # Line between groups
-        if self.bounding_box:
+        if True or self.bounding_box:
             for y_loc in self.group_boundaries[1:-1]:
                 if (not "projection" in box) or box["projection"]!="polar":
                     if self.group_by=="haplotype" and self.color_haplotypes:
-                        box["ax"].plot([box["left"]-self.width_color_group,box["right"]],[y_loc,y_loc],linewidth=0.7,color="black",zorder=4)
+                        box["ax"].add_patch(patches.Rectangle((box["left"]-self.width_color_group,y_loc-0.15),width=box["right"]-box["left"]+self.width_color_group,height=0.3,color="black",zorder=2,lw=0))
+                        #box["ax"].plot([box["left"]-self.width_color_group,box["right"]],[y_loc,y_loc],linewidth=0.7,color="black",zorder=4)
                     else:
-                        box["ax"].plot([box["left"],box["right"]],[y_loc,y_loc],linewidth=1,color="black")
+                        box["ax"].add_patch(patches.Rectangle((box["left"],y_loc-0.15),width=box["right"]-box["left"],height=0.3,color="black",zorder=2,lw=0))
+                        #box["ax"].plot([box["left"],box["right"]],[y_loc,y_loc],linewidth=1,color="black")
                 else:
                     box["ax"].plot(np.linspace(box["left"],box["right"],300),[y_loc]*300,linewidth=0.7,color="black",zorder=4)
             
@@ -206,16 +209,16 @@ class alignments_track:
                         for a,b in read.get_aligned_pairs(matches_only=True):
                             if b-last_b > 50:
                                 rect = patches.Rectangle((convert_x(block_start),y_converted),convert_x(last_b)-convert_x(block_start),
-                                                height,color="#b3b3b3",lw=0)  # color="#fff2cc"
+                                                height,color="#cccccc",lw=0)  # color="#fff2cc"
                                 box["ax"].add_patch(rect)
                                 rect = patches.Rectangle((convert_x(last_b),y_converted_thin),convert_x(b)-convert_x(last_b),
-                                                height*0.1,color="#b3b3b3",lw=0)  # color="#fff2cc"
+                                                height*0.1,color="#cccccc",lw=0)  # color="#fff2cc"
                                 box["ax"].add_patch(rect)
                                 block_start=b
                             last_b = b
                         if  last_b-block_start > 4:
                             rect = patches.Rectangle((convert_x(block_start),y_converted),convert_x(last_b)-convert_x(block_start),
-                                            height,color="#b3b3b3",lw=0)  # color="#fff2cc"
+                                            height,color="#cccccc",lw=0)  # color="#fff2cc"
                             box["ax"].add_patch(rect)
                             
                     else:

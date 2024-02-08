@@ -22,20 +22,6 @@ colorC="gray16"
 colorB="gray13"
 colorA="gray10"
 
-"""
-colorA="#fcf5e0"
-colorB="#fbf1d5"
-colorC="#f9ebc4"
-colorD="#f6e1a7"
-colorE="#f1d892"
-colorF="#ebcf81"
-colorG="#e5c774"
-
-BcolorA="#e2af1e"
-BcolorB="#6c400c"
-BcolorC="#6c400c"
-"""
-
 
 class TracksFrame(ctk.CTkFrame):
     def __init__(self, master,params_list=[]):
@@ -326,7 +312,7 @@ class ChrOptionsFrame(ctk.CTkFrame):
         else: self.unit_menu.set("kb")
         self.unit_menu.grid(row=0,column=3,pady=4,padx=(1,5))
         ctk.CTkLabel(self,10,10,text="Ticks position: ",font=font).grid(row=0,column=4,pady=4,padx=(5,0))
-        self.ticks_menu = ctk.CTkOptionMenu(self,values=["below", "above"],font=font,dropdown_font=font,height=12,width=80)
+        self.ticks_menu = ctk.CTkOptionMenu(self,values=["below", "above","none"],font=font,dropdown_font=font,height=12,width=80)
         if "ticks_pos" in params: self.ticks_menu.set(params["ticks_pos"])
         self.ticks_menu.grid(row=0,column=5,pady=4,padx=(1,5))
 
@@ -344,18 +330,16 @@ class GenesOptionsFrame(ctk.CTkFrame):
     def __init__(self, master,params={},**kwargs):
         super().__init__(master,fg_color="transparent",border_width=0)
 
-
-
         # Row1: style and exon color and gene _names
         self.row1=ctk.CTkFrame(self,corner_radius=0,border_width=0,fg_color="transparent")
         self.label_style=ctk.CTkLabel(self.row1,10,10,text="Style:",font=font)
-        self.stylemenu = ctk.CTkOptionMenu(self.row1,values=["Default", "Arrow"],font=font,dropdown_font=font,height=12)
+        self.stylemenu = ctk.CTkOptionMenu(self.row1,values=["Default", "TSS_arrow"],font=font,dropdown_font=font,height=12)
         if "style" in params: self.stylemenu.set(params["style"])
         self.label_style.grid(row=0,column=0,pady=4,sticky="w")
         self.stylemenu.grid(row=0,column=1,padx=10,pady=4,sticky="w")
         ctk.CTkLabel(self.row1,10,10,text="Exon color:",font=font).grid(row=0,column=2,pady=4,padx=(5,0))
 
-        self.buttoncolor = ColorButton(self.row1,25,25,color="#000080")
+        self.buttoncolor = ColorButton(self.row1,25,25,color="#2178b0")
         if "exon_color" in params: self.buttoncolor.set(params["exon_color"])
         self.buttoncolor.grid(row=0,column=3,padx=5,pady=4)
 
@@ -462,6 +446,7 @@ class BigwigOptionsFrame(ctk.CTkFrame):
         self.max_stringvariable = tkinter.StringVar(self, "auto")
         if "scale_max" in params and self.scale=="custom": self.max_stringvariable.set(str(params["scale_max"]))
         self.max_entry=ctk.CTkEntry(self.row3,width=50,textvariable=self.max_stringvariable,font=font,height=12,state="disabled")
+        if "scale" in params and params["scale"]=="custom":self.max_entry.configure(state="normal")
         self.max_entry.grid(row=0,column=3,padx=(0,5),pady=5)
         ctk.CTkLabel(self.row3,10,10,text="Position: ",font=font).grid(row=0,column=4,padx=5,pady=5)
         self.scalepos_menu = ctk.CTkOptionMenu(self.row3,values=["left","corner","corner all","none"],font=font,dropdown_font=font,height=12,width=80)
@@ -503,7 +488,11 @@ class BigwigOptionsFrame(ctk.CTkFrame):
         params["label"] = self.label_entry.get()
         params["label_rotate"] = self.label_switch.get() == 1
         params["scale"] = self.scalemenu.get()
-        if self.scalemenu.get()=="custom": params["scale_max"] = float(self.max_entry.get())
+        if self.scalemenu.get()=="custom": 
+            if "," in self.max_entry.get():
+                params["scale_max"] = self.max_entry.get()
+            else:
+                params["scale_max"] = float(self.max_entry.get())
         params["scale_pos"] = self.scalepos_menu.get()
         params["color"] = self.buttoncolor.get()
 
@@ -660,7 +649,7 @@ class AlignmentsOptionsFrame(ctk.CTkFrame):
         self.grouplabel3_entry=ctk.CTkEntry(self.row_grouplabels,width=150,textvariable=self.grouplabel3_stringvariable,font=font,height=12)
 
         self.colors_buttons=[]
-        self.colors_buttons.append(ColorButton(self.row_grouplabels,20,20,color="#1a7242"))
+        self.colors_buttons.append(ColorButton(self.row_grouplabels,20,20,color="#27ae60"))
         self.colors_buttons.append(ColorButton(self.row_grouplabels,20,20,color="#e67e22"))
         self.colors_buttons.append(ColorButton(self.row_grouplabels,20,20,color="#808080"))
 
@@ -683,7 +672,7 @@ class AlignmentsOptionsFrame(ctk.CTkFrame):
         self.colorby_menu = ctk.CTkOptionMenu(self.colorby_frame,values=["none", "basemod","breakpoints"],font=font,dropdown_font=font,height=12,command=self.update_colorby)
         self.colorby_menu.grid(row=0,column=1,pady=5)
         self.label_unmodified =  ctk.CTkLabel(self.colorby_frame,10,10,text="Unmodified: ",font=font)
-        self.colorbutton_unmodified = ColorButton(self.colorby_frame,20,20,color="#1155dd")
+        self.colorbutton_unmodified = ColorButton(self.colorby_frame,20,20,color="#0f57e5")
         if "color_unmodified" in params: 
             self.colorbutton_unmodified.set(params["color_unmodified"])
         self.label_basemod1 =  ctk.CTkLabel(self.colorby_frame,10,10,text="Basemod 1: ",font=font)
@@ -691,7 +680,7 @@ class AlignmentsOptionsFrame(ctk.CTkFrame):
         self.entry_base1 = ctk.CTkEntry(self.colorby_frame,30,15,textvariable=self.string_base1,font=font)
         self.string_mod1 = tkinter.StringVar(self, "m")
         self.entry_mod1 = ctk.CTkEntry(self.colorby_frame,30,15,textvariable=self.string_mod1,font=font)
-        self.colorbutton_basemod1 = ColorButton(self.colorby_frame,20,20,color="#ed0303")
+        self.colorbutton_basemod1 = ColorButton(self.colorby_frame,20,20,color="#f40202")
         self.label_basemod2 =  ctk.CTkLabel(self.colorby_frame,10,10,text="Basemod 2: ",font=font)
         self.string_base2 = tkinter.StringVar(self, "C")
         self.entry_base2 = ctk.CTkEntry(self.colorby_frame,30,15,textvariable=self.string_base2,font=font)
@@ -1205,7 +1194,7 @@ class HiCOptionsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.row3,10,10,text="Pixel border: ",font=font).grid(row=0,column=2,pady=5,padx=(10,0))
         self.pixelborder_switch = ctk.CTkSwitch(self.row3,10,10,text="",font=font)
         self.pixelborder_switch.grid(row=0,column=3,pady=5,padx=(0,5))
-        if (not "pixel_border" in params) or params["pixel_border"]: self.pixelborder_switch.select()
+        if ("pixel_border" in params) and params["pixel_border"]: self.pixelborder_switch.select()
         ctk.CTkLabel(self.row3,10,10,text="Upside down: ",font=font).grid(row=0,column=8,pady=5,padx=(10,0))
         self.upsidedown_switch = ctk.CTkSwitch(self.row3,10,10,text="",font=font)
         self.upsidedown_switch.grid(row=0,column=9,pady=5,padx=(0,5))

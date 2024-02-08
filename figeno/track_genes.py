@@ -152,7 +152,7 @@ class genes_track:
                         triangle = plt.Polygon([[right_coord2+rect_width*1.3,(bottom_coord2+top_coord)/2],[right_coord2,bottom_coord2-rect_height*0.8],[right_coord2,top_coord+rect_height*0.8]], color=self.color)
                         box["ax"].add_patch(triangle)
                     else:
-                        right_coord =  transform_coord(transcript.end) if transcript.strand=="+" else transform_coord(transcript.start) 
+                        right_coord =  transform_coord(transcript.start) if transcript.strand=="+" else transform_coord(transcript.end) 
                         rect_width =(box["top"]-box["bottom"])*0.1
                         left_coord = right_coord - rect_width
                         height1 = height_exon*0.5
@@ -161,9 +161,9 @@ class genes_track:
                         top_coord = bottom_coord+height1
                         rect_height = rect_width * xy_scale
                         bottom_coord2 = top_coord - rect_height
-                        rect = patches.Rectangle((left_coord,bottom_coord),right_coord-left_coord,height1,color=self.color)
+                        rect = patches.Rectangle((left_coord,bottom_coord),right_coord-left_coord,height1,color=self.exon_color)
                         box["ax"].add_patch(rect)
-                        rect = patches.Rectangle((left_coord2,bottom_coord2),right_coord-left_coord2,rect_height,color=self.color)
+                        rect = patches.Rectangle((left_coord2,bottom_coord2),right_coord-left_coord2,rect_height,color=self.exon_color)
                         box["ax"].add_patch(rect)
                         triangle = plt.Polygon([[left_coord2-rect_width*1.3,(bottom_coord2+top_coord)/2],[left_coord2,bottom_coord2-rect_height*0.8],[left_coord2,top_coord+rect_height*0.8]], color="#4a69bd")
                         box["ax"].add_patch(triangle)

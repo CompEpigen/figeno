@@ -6,7 +6,7 @@ import pandas as pd
 from figeno.utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
-    def __init__(self,bigwig,n_bins=500,scale="auto",scale_pos="left",color="gray",label="",label_rotate=False,fontscale=1,
+    def __init__(self,bigwig,n_bins=500,scale="auto",scale_max=None,scale_pos="left",color="gray",label="",label_rotate=False,fontscale=1,
                  bounding_box=True,height=10,margin_above=1.5):
         self.bw = pyBigWig.open(bigwig)
         self.n_bins = n_bins
@@ -14,6 +14,7 @@ class bigwig_track:
         self.label=label
         self.label_rotate=label_rotate
         self.scale = scale
+        self.scale_max=scale_max
         self.scale_pos = scale_pos
         if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
         self.fontscale=fontscale
@@ -28,9 +29,16 @@ class bigwig_track:
         # Autoscale across all regions
         if self.scale=="auto": self.scale_max = self.compute_max_regions(regions,bins_regions)
 
+        if self.scale=="custom" and isinstance(self.scale_max,str) and "," in self.scale_max:
+            scale_max_regions = [float(x) for x in self.scale_max.split(",")]
+        else:
+            scale_max_regions=None
+
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             show_scale_inside = self.scale_pos=="corner all" or (self.scale_pos=="corner" and i==0)
+            if scale_max_regions is not None:
+                self.scale_max = scale_max_regions[i]
             self.draw_region(regions[i][0],boxes[i],nbins=bins_regions[i],show_scale_inside=show_scale_inside)
         self.draw_title(box)
 

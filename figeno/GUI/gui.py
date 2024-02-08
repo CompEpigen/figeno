@@ -8,7 +8,7 @@ from figeno.GUI.gui_colors import ColorButton, color2hovercolor
 from figeno.GUI.gui_regions import RegionsFrame, HighlightsFrame
 from figeno.GUI.gui_tracks import TracksFrame
 from figeno.GUI.gui_utils import EntryPath
-from figeno.figeno import tracks_plot
+from figeno.figeno import make_figeno
 import figeno.GUI.data
 import json
 font_title=("inter",16,"bold")
@@ -269,9 +269,8 @@ class App(ctk.CTk):
         self.tracks_frame.reload()
        
     def run(self):
-        tp = tracks_plot(self.get_config())
-        tp.draw()
         try:
+            make_figeno(self.get_config())
             #tp = tracks_plot(self.get_config())
             tkinter.messagebox.showinfo("Success", "Figure was successfully generated.") 
         except Exception as e:

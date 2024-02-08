@@ -139,8 +139,6 @@ def draw_metfreq(samfile,box,margin_y,region,colors,exchange_haplotypes=False,li
     df_met1 = smooth_methylation(create_methylation_table(reads_HP1,region.chr,region.start-200,region.end+200,min_coverage=min_coverage),w=4,start=region.start,end=region.end)
     df_met2 = smooth_methylation(create_methylation_table(reads_HP2,region.chr,region.start-200,region.end+200,min_coverage=min_coverage),w=4,start=region.start,end=region.end)
 
-
-
     # Plot
     hp=0
     for df in [df_met1,df_met2]:

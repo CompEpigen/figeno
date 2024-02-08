@@ -53,6 +53,6 @@ class bed_track:
     def draw_title(self,box):
         if len(self.label)>0:
             rotation = 90 if self.label_rotate else 0
-            box["ax"].text(box["left"] - (box["right"]-box["left"])*0.005,(box["top"]+box["bottom"])/2,
+            box["ax"].text(box["left"] - 1,(box["top"]+box["bottom"])/2,
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
 

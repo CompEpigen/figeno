@@ -11,7 +11,7 @@ from figeno.utils import correct_region_chr, split_box, draw_bounding_box, inter
 
 class hic_track:
     def __init__(self,file,max_dist=700,color_map="Red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,
-                 extend=True,upside_down=False,pixel_border=True,rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
+                 extend=True,upside_down=False,pixel_border=False,rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         self.file = file # must be in cool format
         self.max_dist = max_dist *1000
         self.color_map=color_map
@@ -220,7 +220,7 @@ class hic_track:
             self.label = self.label.replace("\\n","\n")
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
-                        self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=8*self.fontscale)
+                        self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
         
 
 
