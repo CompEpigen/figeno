@@ -191,9 +191,9 @@ class tracks_plot:
     def update_margins(self):
         for i in range(len(self.tracks_list)):
             if isinstance(self.tracks_list[i],chr_track):
-                if i>0 and self.tracks_list[i].ticks_pos=="below" and self.tracks_list[i].margin_above==0:
+                if i>0 and self.tracks_list[i].ticklabels_pos=="below" and self.tracks_list[i].margin_above==0:
                     self.tracks_list[i].no_margin=True
-                elif i<len(self.tracks_list)-1 and self.tracks_list[i].ticks_pos=="above" and self.tracks_list[i+1].margin_above==0:
+                elif i<len(self.tracks_list)-1 and self.tracks_list[i].ticklabels_pos=="above" and self.tracks_list[i+1].margin_above==0:
                     self.tracks_list[i].no_margin=True
             if isinstance(self.tracks_list[i],sv_track) and isinstance(self.tracks_list[i+1],copynumber_track):
                 self.tracks_list[i+1].margin_above=max(self.tracks_list[i+1].margin_above,0.3)
