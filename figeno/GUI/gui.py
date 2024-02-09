@@ -52,8 +52,8 @@ class GeneralFrame(ctk.CTkFrame):
 
         # Row 1: reference genome
         self.row1=ctk.CTkFrame(self,corner_radius=0,border_width=0,fg_color="transparent")
-        ctk.CTkLabel(self.row1,10,20,text="Figure type: ",font=font).grid(row=0,column=0,padx=0,pady=5)
-        self.type_menu=ctk.CTkOptionMenu(self.row1,values=["1 row", "2 rows", "circle"],font=font,dropdown_font=font,height=14,width=110)
+        ctk.CTkLabel(self.row1,10,20,text="Figure layout: ",font=font).grid(row=0,column=0,padx=0,pady=5)
+        self.type_menu=ctk.CTkOptionMenu(self.row1,values=["horizontal", "circular", "symmetrical", "stacked"],font=font,dropdown_font=font,height=14,width=150)
         self.type_menu.grid(row=0,column=1,padx=(1,10),pady=5)
         ctk.CTkLabel(self.row1,10,20,text="Reference: ",font=font).grid(row=0,column=2,padx=0,pady=5)
         self.reference="hg19"
@@ -101,7 +101,7 @@ class GeneralFrame(ctk.CTkFrame):
         else: self.chrarms_entry.set("")
         if "genes_file" in params: self.genes_entry.set(params["genes_file"])
         else: self.genes_entry.set("")
-        if "figure_type" in params: self.type_menu.set(params["figure_type"])
+        if "figure_layout" in params: self.type_menu.set(params["figure_layout"])
         else: self.type_menu.set("1 row")
         
 
@@ -111,7 +111,7 @@ class GeneralFrame(ctk.CTkFrame):
         if self.reference_menu.get()=="custom":
             params["chrarms_file"] = self.chrarms_entry.get()
             params["genes_file"] = self.genes_entry.get()
-        params["figure_type"] = self.type_menu.get()
+        params["figure_layout"] = self.type_menu.get()
 
         return params
     

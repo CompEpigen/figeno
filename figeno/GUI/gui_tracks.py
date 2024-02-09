@@ -451,6 +451,7 @@ class BigwigOptionsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.row3,10,10,text="Position: ",font=font).grid(row=0,column=4,padx=5,pady=5)
         self.scalepos_menu = ctk.CTkOptionMenu(self.row3,values=["left","corner","corner all","none"],font=font,dropdown_font=font,height=12,width=80)
         if "scale_pos" in params: self.scalepos_menu.set(params["scale_pos"])
+        else:  self.scalepos_menu.set(params["corner"])
         if self.scale=="auto per region": self.scalepos_menu.configure(values=["corner all"])
         self.scalepos_menu.grid(row=0,column=5,padx=(0,5),pady=5)
 
@@ -546,6 +547,7 @@ class CoverageOptionsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.row3,10,10,text="Position: ",font=font).grid(row=0,column=4,padx=5,pady=5)
         self.scalepos_menu = ctk.CTkOptionMenu(self.row3,values=["left","corner","corner all","none"],font=font,dropdown_font=font,height=12)
         if "scale_pos" in params: self.scalepos_menu.set(params["scale_pos"])
+        else:  self.scalepos_menu.set(params["corner"])
         if self.scale=="auto per region": self.scalepos_menu.configure(values=["corner all","none"])
         self.scalepos_menu.grid(row=0,column=5,padx=(0,5),pady=5)
 

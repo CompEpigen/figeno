@@ -139,7 +139,7 @@ class tracks_plot:
                     else:
                         pass
 
-            self.figure_type = config["general"]["figure_type"]
+            self.figure_layout = config["general"]["figure_layout"]
             self.output = None
             if "output" in config: self.output=config["output"]
 
@@ -155,14 +155,14 @@ class tracks_plot:
             for reg,_ in self.regions:
                 new_regions.append((reg,self.total_width * (reg.end-reg.start) / total_length))
             self.regions = new_regions
-    def update_regions_width_multilines(self):
+    def update_regions_width_stacked(self):
         if self.total_width is not None:
             max_length= np.max([(reg.end-reg.start) for reg,_ in self.regions])
             new_regions=[]
             for reg,_ in self.regions:
                 new_regions.append((reg,self.total_width * (reg.end-reg.start) / max_length))
             self.regions = new_regions
-    def update_regions_width_tworows(self):
+    def update_regions_width_symmetrical(self):
         if self.total_width is not None:
             total_length= np.sum([(reg.end-reg.start) for reg,_ in self.regions])
             # Assign regions to rows
@@ -203,32 +203,30 @@ class tracks_plot:
         if output_config is not None: self.output = output_config
         if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise Exception("Must specify the output file")
 
-        if self.figure_type=="1 row": 
-            self.draw_onerow(**self.output)
-        elif self.figure_type=="multilines":
-            self.draw_multilines(**self.output)
-        elif self.figure_type=="2 rows":
-            self.draw_tworows(**self.output)
-        elif self.figure_type=="circle":
-            self.draw_circle(**self.output)
+        if self.figure_layout=="horizontal": 
+            self.draw_horizontal(**self.output)
+        elif self.figure_layout=="stacked":
+            self.draw_stacked(**self.output)
+        elif self.figure_layout=="symmetrical":
+            self.draw_symmetrical(**self.output)
+        elif self.figure_layout=="circular":
+            self.draw_circular(**self.output)
         else:
-            raise Exception("Unknown figure type: "+self.figure_type)
+            raise Exception("Unknown figure layout: "+self.figure_layout)
 
-    def draw_onerow(self,file,width=183,dpi=150,transparent=False):
+    def draw_horizontal(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
 
-        #for i in range(0,len(self.tracks_list)-1):
-        #    if isinstance(self.tracks_list[i],sv_track) and isinstance(self.tracks_list[i+1],copynumber_track):
-        #        self.tracks_list[i+1].margin_above=max(self.tracks_list[i+1].margin_above,0.3)
+
         total_height = 0
         for ind,t in enumerate(self.tracks_list): 
             total_height+=t.height
             if ind>0: total_height+=t.margin_above
         total_width=0
         for _,w in self.regions: total_width+=w
-        #fig,ax = plt.subplots(figsize=(total_width,total_height))
+
         fig,ax = plt.subplots(figsize=(width/25.4,total_height/25.4)) # convert from mm to inches
         ax.set_xlim((-5,total_width+5))
         ax.set_ylim((-4,total_height+4))
@@ -261,9 +259,9 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
     
-    def draw_multilines(self,file,width=183,dpi=150,transparent=False):
+    def draw_stacked(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
-        self.update_regions_width_multilines()
+        self.update_regions_width_stacked()
         self.update_margins()
 
         #for i in range(0,len(self.tracks_list)-1):
@@ -297,9 +295,9 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-    def draw_tworows(self,file,width=183,dpi=150,transparent=False):
+    def draw_symmetrical(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
-        self.update_regions_width_tworows()
+        self.update_regions_width_symmetrical()
         self.update_margins()
 
         #for i in range(0,len(self.tracks_list)-1):
@@ -342,7 +340,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-    def draw_circle(self,file,width=183,dpi=150,transparent=False):
+    def draw_circular(self,file,width=183,dpi=150,transparent=False):
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
