@@ -9,11 +9,11 @@ import figeno.data
 from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text
 
 class chr_track:
-    def __init__(self,style="Default",unit="kb",ticks_pos="below",no_margin=False,reference="hg19",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",no_margin=False,reference="hg19",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5):
         self.style=style
         self.unit=unit
-        self.ticks_pos=ticks_pos
+        self.ticklabels_pos=ticklabels_pos
         self.no_margin=no_margin
         self.reference=reference
         self.fontscale=fontscale
@@ -21,7 +21,7 @@ class chr_track:
         self.height = height
         self.margin_above=margin_above
 
-        if self.style=="Ideogram":
+        if self.style=="ideogram":
             if cytobands_file is None or cytobands_file=="":
                 if self.reference in ["hg19","hg38"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_cytobands.tsv")) as infile:
@@ -44,20 +44,19 @@ class chr_track:
         for i in range(len(regions)):
             if "projection" in box and box["projection"]=="polar":
                 self.draw_region_circos(regions[i][0],boxes[i])
-            elif self.style=="Default" or self.style=="default":
-                self.draw_region(regions[i][0],boxes[i]) 
-            elif self.style=="Ideogram":
-                self.draw_region_ideogram(regions[i][0],boxes[i]) 
-            else:
+            elif self.style=="arrow":
                 self.draw_region_arrow(regions[i][0],boxes[i])
+            elif self.style=="ideogram":
+                self.draw_region_ideogram(regions[i][0],boxes[i]) 
+            else: # default
+                self.draw_region(regions[i][0],boxes[i]) 
+                
 
     def draw_region(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
         tick_width = 0.3
-        #tick_height = (box["top"]-box["bottom"]) * 0.2
         tick_height = 1.6
-        #y = box["top"] - tick_height/2 
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             if self.no_margin: y=box["top"]
             else: y = box["top"] - tick_height/2
         else:
@@ -66,11 +65,10 @@ class chr_track:
 
         if not self.no_margin:
             box["ax"].add_patch(patches.Rectangle((box["left"],y-0.7/2),width=box["right"]-box["left"],height=0.7,lw=0,color="#000000"))
-            #box["ax"].plot([box["left"],box["right"]],[y,y],linewidth=2,color="black")
 
         #ticks
         if self.scale < 1.2 * 1e8:
-            # First identify the rightmost tick
+            # First identify the rightmost tick (only show unit for the rightmost tick)
             rightmost_tick=0
             for x in range((region.end-region.start)//self.scale +2):
                 pos = self.scale * (region.start//self.scale + x)
@@ -96,7 +94,7 @@ class chr_track:
                 if not self.no_margin:
                     rect = patches.Rectangle((pos_transformed-tick_width/2,y-tick_height/2),tick_width, tick_height,color="black",lw=0)  
                 else:
-                    if self.ticks_pos=="below" and (not "upside_down" in box):
+                    if self.ticklabels_pos=="below" and (not "upside_down" in box):
                         rect = patches.Rectangle((pos_transformed-tick_width/2,y-tick_height/2),tick_width, tick_height/2,color="black",lw=0)  
                     else:
                         rect = patches.Rectangle((pos_transformed-tick_width/2,y),tick_width, tick_height/2,color="black",lw=0)  
@@ -112,12 +110,12 @@ class chr_track:
                     halign="right"
                     pos_text=box["right"]
                 else: halign="center"
-                if self.ticks_pos=="below" and (not "upside_down" in box):
+                if self.ticklabels_pos=="below" and (not "upside_down" in box):
                     box["ax"].text(pos_text,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale)
                 else:
                     box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale)
         # Chr label
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             box["ax"].text((box["left"]+box["right"])/2,box["bottom"],"chr"+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
         else:
             box["ax"].text((box["left"]+box["right"])/2,box["top"],"chr"+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
@@ -126,7 +124,7 @@ class chr_track:
         arrow_height = (box["top"]-box['bottom']) * 0.5
         line_height = arrow_height*0.5
         arrow_width = arrow_height
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             h1=box["top"]-arrow_height/2+line_height/2
         else:
             h1=box["bottom"]+arrow_height/2+line_height/2
@@ -141,7 +139,7 @@ class chr_track:
         polygon = patches.Polygon(polygon_vertices,lw=0.0,color=region.color)
         box["ax"].add_patch(polygon)
 
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             ytext=box["top"]-arrow_height*1.2
             valign = "top"
         else:
@@ -159,7 +157,7 @@ class chr_track:
             box["ax"].text(box["right"],ytext,self.tick_text(region.start),horizontalalignment="right",verticalalignment=valign,
                            fontsize=8*self.fontscale)
 
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             box["ax"].text((box["right"]+box["left"])/2,box["top"]-arrow_height*1.5,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="top",
                            fontsize=10*self.fontscale)
         else:
@@ -168,12 +166,12 @@ class chr_track:
             
     def draw_region_ideogram(self,region,box):
         height = (box["top"]-box["bottom"]) * 0.5
-        if self.ticks_pos=="below" and (not "upside_down" in box):
+        if self.ticklabels_pos=="below" and (not "upside_down" in box):
             y = box["bottom"] + (box["top"]-box["bottom"]) * 0.75
             if self.fontscale>0:
                 box["ax"].text((box["left"]+box["right"])/2, box["top"]-height-1, "chr"+region.chr,
                            horizontalalignment="center", verticalalignment="top",fontsize=10*self.fontscale)
-        elif self.ticks_pos=="above":
+        elif self.ticklabels_pos=="above":
             y = box["bottom"] + (box["top"]-box["bottom"]) * 0.25
             if self.fontscale>0:
                 box["ax"].text((box["left"]+box["right"])/2, box["bottom"] + height+1, "chr"+region.chr,
@@ -198,7 +196,7 @@ class chr_track:
                 color_coef = 0.2
             else:
                 print("Unrecognized cytoband value: "+ df_cytobands_chr.loc[i,"value2"])
-            color_adjusted = change_color(region.color,color_coef=color_coef)
+            color_adjusted = change_color("#ffffff",color_coef=color_coef)
 
 
             if region.orientation=="+":
@@ -238,10 +236,8 @@ class chr_track:
         # If the region is not the whole chromosome, show where we are in the chromosome
         if region.start>1 or region.end<chr_length-2:
             if region.orientation=="+":
-                print((region.start,region.end,chr_length))
                 rect_left = box["left"] + region.start/chr_length * (box["right"]-box["left"])
                 rect_right = box["left"] + region.end/chr_length * (box["right"]-box["left"])
-                print((box["left"],box["right"],rect_left,rect_right))
             else:
                 rect_left = box["right"] - region.start/chr_length * (box["right"]-box["left"])
                 rect_right = box["right"] - region.end/chr_length * (box["right"]-box["left"])
@@ -300,12 +296,12 @@ class chr_track:
             return (0,0)
 
         if self.style=="Default":
-            if self.ticks_pos=="below":
+            if self.ticklabels_pos=="below":
                 return (0,self.height-0.5)
             else:
                 return (-self.height+0.5,0)
         else:
-            if self.ticks_pos=="below":
+            if self.ticklabels_pos=="below":
                 return (0,self.height *7/8)
             else:
                 return (-7/8*self.height,0)

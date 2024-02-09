@@ -8,7 +8,7 @@ from figeno.utils import correct_region_chr, split_box, draw_bounding_box, inter
 
 
 class genes_track:
-    def __init__(self,reference="custom",genes_file="",style="Default",gene_names="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5):
+    def __init__(self,reference="custom",genes_file="",style="default",gene_names="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5):
         self.reference=reference
         self.genes_file = genes_file
         self.style=style
@@ -60,7 +60,7 @@ class genes_track:
                 i+=1
             l.append([transcript])
         lines = []
-        if self.style=="Default":
+        if self.style=="default":
             for transcript in transcripts:
                 add_transcript_pile(transcript,lines)
         else:
@@ -109,7 +109,7 @@ class genes_track:
                         start_coord = transform_coord(exon[0])
                         end_coord = transform_coord(exon[1])
                         if region.orientation=="-": start_coord, end_coord = end_coord,start_coord
-                        if self.style=="Default" and \
+                        if self.style=="default" and \
                             ((exon_count==len(exons)-1 and transcript.strand=="+" and region.orientation=="+") or (exon_count==0 and transcript.strand=="-" and region.orientation =="-")) :
                             vertices=[(start_coord,y+height_exon/2) , (end_coord,y+height_exon/2), (end_coord+arrow_width,y) ,
                                                     (end_coord,y-height_exon/2) , (start_coord,y-height_exon/2)]
@@ -117,7 +117,7 @@ class genes_track:
                                 vertices = interpolate_polar_vertices(vertices)
                             polygon = patches.Polygon(vertices,color=self.exon_color)
                             box["ax"].add_patch(polygon)
-                        elif self.style=="Default" and \
+                        elif self.style=="default" and \
                             ((exon_count==len(exons)-1 and transcript.strand=="+" and region.orientation=="-") or (exon_count==0 and transcript.strand=="-" and region.orientation =="+")) :
                             vertices=[(start_coord-arrow_width,y) , (start_coord,y+height_exon/2) , (end_coord,y+height_exon/2),
                                                     (end_coord,y-height_exon/2) , (start_coord,y-height_exon/2)]
@@ -149,7 +149,7 @@ class genes_track:
                         box["ax"].add_patch(rect)
                         rect = patches.Rectangle((left_coord,bottom_coord2),right_coord2-left_coord,rect_height,color=self.exon_color)
                         box["ax"].add_patch(rect)
-                        triangle = plt.Polygon([[right_coord2+rect_width*1.3,(bottom_coord2+top_coord)/2],[right_coord2,bottom_coord2-rect_height*0.8],[right_coord2,top_coord+rect_height*0.8]], color=self.color)
+                        triangle = plt.Polygon([[right_coord2+rect_width*1.3,(bottom_coord2+top_coord)/2],[right_coord2,bottom_coord2-rect_height*0.8],[right_coord2,top_coord+rect_height*0.8]], color=self.exon_color)
                         box["ax"].add_patch(triangle)
                     else:
                         right_coord =  transform_coord(transcript.start) if transcript.strand=="+" else transform_coord(transcript.end) 
@@ -165,7 +165,7 @@ class genes_track:
                         box["ax"].add_patch(rect)
                         rect = patches.Rectangle((left_coord2,bottom_coord2),right_coord-left_coord2,rect_height,color=self.exon_color)
                         box["ax"].add_patch(rect)
-                        triangle = plt.Polygon([[left_coord2-rect_width*1.3,(bottom_coord2+top_coord)/2],[left_coord2,bottom_coord2-rect_height*0.8],[left_coord2,top_coord+rect_height*0.8]], color="#4a69bd")
+                        triangle = plt.Polygon([[left_coord2-rect_width*1.3,(bottom_coord2+top_coord)/2],[left_coord2,bottom_coord2-rect_height*0.8],[left_coord2,top_coord+rect_height*0.8]], color=self.exon_color)
                         box["ax"].add_patch(triangle)
 
 

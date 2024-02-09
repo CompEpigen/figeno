@@ -102,7 +102,7 @@ class GeneralFrame(ctk.CTkFrame):
         if "genes_file" in params: self.genes_entry.set(params["genes_file"])
         else: self.genes_entry.set("")
         if "figure_layout" in params: self.type_menu.set(params["figure_layout"])
-        else: self.type_menu.set("1 row")
+        else: self.type_menu.set("horizontal")
         
 
         

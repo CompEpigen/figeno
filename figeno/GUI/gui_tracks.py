@@ -145,7 +145,7 @@ class TrackFrame(ctk.CTkFrame):
 
         typelabel = ctk.CTkLabel(self,text="Track type:",font=font)
         #typevar = ctk.StringVar(value=self.current_type)
-        self.typemenu = ctk.CTkOptionMenu(self,values=["", "chr axis", "genes" ,"bed" ,"bigwig", "coverage", "alignments", "Met freq", "HiC","SV", "copynumber", "ase"],
+        self.typemenu = ctk.CTkOptionMenu(self,values=["", "chr axis", "genes" ,"bed" ,"bigwig", "coverage", "alignments", "basemod freq", "hic","sv", "copynumber", "ase"],
                                          command=self.optionmenu_type,font=font,dropdown_font=font_small,height=14,width=110)
         
         self.height_label = ctk.CTkLabel(self,text="Height (mm):",font=font)
@@ -215,36 +215,36 @@ class TrackFrame(ctk.CTkFrame):
                 self.options_frame=ChrOptionsFrame(self,params)
             elif value=="alignments":
                 self.options_frame=AlignmentsOptionsFrame(self,params)
-            elif value=="Met freq":
-                self.options_frame=MetfreqOptionsFrame(self,params)
-            elif value=="HiC":
-                self.options_frame=HiCOptionsFrame(self,params)
-            elif value=="SV":
-                self.options_frame=SVOptionsFrame(self,params)
+            elif value=="basemod freq":
+                self.options_frame=BasemodfreqOptionsFrame(self,params)
+            elif value=="hic":
+                self.options_frame=HicOptionsFrame(self,params)
+            elif value=="sv":
+                self.options_frame=SvOptionsFrame(self,params)
             elif value=="copynumber":
                 self.options_frame=CopynumberOptionsFrame(self,params)
             elif value=="ase":
                 self.options_frame=AseOptionsFrame(self,params)
             else:
-                self.options_frame = None
+                raise Exception("Unknown track type: "+str(value))
             
             # Set height
             if "height" in params: self.height_stringvariable.set(str(params["height"]))
             else:
                 if value in ["chr axis","bigwig","coverage","bed"]: self.height_stringvariable.set("10")
                 elif value in ["genes"]:  self.height_stringvariable.set("12")
-                elif value in ["HiC"]:  self.height_stringvariable.set("50")
+                elif value in ["hic"]:  self.height_stringvariable.set("50")
                 elif value in ["alignments"]:  self.height_stringvariable.set("75")
-                elif value in ["Met freq"]:  self.height_stringvariable.set("20")
+                elif value in ["basemod freq"]:  self.height_stringvariable.set("20")
                 elif value in ["copynumber"]: self.height_stringvariable.set("30")
-                elif value in ["SV"]: self.height_stringvariable.set("15")
+                elif value in ["sv"]: self.height_stringvariable.set("15")
 
             # Set bounding box
             if "bounding_box" in params:
                 if params["bounding_box"]: self.boundingbox_checkbox.select()
                 else: self.boundingbox_checkbox.deselect()
             else:
-                if value in ["alignments","Met freq","SV","copynumber"]: self.boundingbox_checkbox.select()
+                if value in ["alignments","basemod freq","sv","copynumber"]: self.boundingbox_checkbox.select()
                 else: self.boundingbox_checkbox.deselect()
 
             # Add elements to grid
@@ -289,9 +289,10 @@ class TrackFrame(ctk.CTkFrame):
         params["margin_above"] = float(self.margin_stringvariable.get())
         params["bounding_box"] = self.boundingbox_checkbox.get() ==1
         params["fontscale"] = float(self.fontscale_entry.get())
-        params_opt = self.options_frame.get_params()
-        for k in params_opt:
-            params[k] = params_opt[k]
+        if self.options_frame is not None:
+            params_opt = self.options_frame.get_params()
+            for k in params_opt:
+                params[k] = params_opt[k]
         return params
 
     
@@ -300,7 +301,7 @@ class ChrOptionsFrame(ctk.CTkFrame):
         super().__init__(master,fg_color="transparent",border_width=0)
 
         self.label_style=ctk.CTkLabel(self,10,10,text="Style: ",font=font)
-        self.stylemenu = ctk.CTkOptionMenu(self,values=["Default", "Arrow", "Ideogram"],font=font,dropdown_font=font,height=12)
+        self.stylemenu = ctk.CTkOptionMenu(self,values=["default", "arrow", "ideogram"],font=font,dropdown_font=font,height=12)
         if "style" in params: self.stylemenu.set(params["style"])
         
         self.label_style.grid(row=0,column=0,pady=4)
@@ -311,16 +312,16 @@ class ChrOptionsFrame(ctk.CTkFrame):
         if "unit" in params: self.unit_menu.set(params["unit"])
         else: self.unit_menu.set("kb")
         self.unit_menu.grid(row=0,column=3,pady=4,padx=(1,5))
-        ctk.CTkLabel(self,10,10,text="Ticks position: ",font=font).grid(row=0,column=4,pady=4,padx=(5,0))
+        ctk.CTkLabel(self,10,10,text="Tick labels position: ",font=font).grid(row=0,column=4,pady=4,padx=(5,0))
         self.ticks_menu = ctk.CTkOptionMenu(self,values=["below", "above","none"],font=font,dropdown_font=font,height=12,width=80)
-        if "ticks_pos" in params: self.ticks_menu.set(params["ticks_pos"])
+        if "ticklabels_pos" in params: self.ticks_menu.set(params["ticklabels_pos"])
         self.ticks_menu.grid(row=0,column=5,pady=4,padx=(1,5))
 
 
     def get_params(self):
         params =  {"style":self.stylemenu.get()}
         params["unit"] = self.unit_menu.get()
-        params["ticks_pos"] = self.ticks_menu.get()
+        params["ticklabels_pos"] = self.ticks_menu.get()
         return params
     
     
@@ -333,7 +334,7 @@ class GenesOptionsFrame(ctk.CTkFrame):
         # Row1: style and exon color and gene _names
         self.row1=ctk.CTkFrame(self,corner_radius=0,border_width=0,fg_color="transparent")
         self.label_style=ctk.CTkLabel(self.row1,10,10,text="Style:",font=font)
-        self.stylemenu = ctk.CTkOptionMenu(self.row1,values=["Default", "TSS_arrow"],font=font,dropdown_font=font,height=12)
+        self.stylemenu = ctk.CTkOptionMenu(self.row1,values=["default", "TSS_arrow"],font=font,dropdown_font=font,height=12)
         if "style" in params: self.stylemenu.set(params["style"])
         self.label_style.grid(row=0,column=0,pady=4,sticky="w")
         self.stylemenu.grid(row=0,column=1,padx=10,pady=4,sticky="w")
@@ -451,7 +452,7 @@ class BigwigOptionsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.row3,10,10,text="Position: ",font=font).grid(row=0,column=4,padx=5,pady=5)
         self.scalepos_menu = ctk.CTkOptionMenu(self.row3,values=["left","corner","corner all","none"],font=font,dropdown_font=font,height=12,width=80)
         if "scale_pos" in params: self.scalepos_menu.set(params["scale_pos"])
-        else:  self.scalepos_menu.set(params["corner"])
+        else:  self.scalepos_menu.set("corner")
         if self.scale=="auto per region": self.scalepos_menu.configure(values=["corner all"])
         self.scalepos_menu.grid(row=0,column=5,padx=(0,5),pady=5)
 
@@ -547,7 +548,7 @@ class CoverageOptionsFrame(ctk.CTkFrame):
         ctk.CTkLabel(self.row3,10,10,text="Position: ",font=font).grid(row=0,column=4,padx=5,pady=5)
         self.scalepos_menu = ctk.CTkOptionMenu(self.row3,values=["left","corner","corner all","none"],font=font,dropdown_font=font,height=12)
         if "scale_pos" in params: self.scalepos_menu.set(params["scale_pos"])
-        else:  self.scalepos_menu.set(params["corner"])
+        else:  self.scalepos_menu.set("corner")
         if self.scale=="auto per region": self.scalepos_menu.configure(values=["corner all","none"])
         self.scalepos_menu.grid(row=0,column=5,padx=(0,5),pady=5)
 
@@ -856,7 +857,7 @@ class AlignmentsOptionsFrame(ctk.CTkFrame):
 
         return params
 
-class MetfreqOptionsFrame(ctk.CTkFrame):
+class BasemodfreqOptionsFrame(ctk.CTkFrame):
     class BamFrame(ctk.CTkFrame):
         def __init__(self, master,params={},**kwargs):
             super().__init__(master.frame_bams,fg_color=colorB,border_width=1)
@@ -1164,7 +1165,7 @@ class MetfreqOptionsFrame(ctk.CTkFrame):
         return params
 
 
-class HiCOptionsFrame(ctk.CTkFrame):
+class HicOptionsFrame(ctk.CTkFrame):
     def __init__(self, master,params={},**kwargs):
         super().__init__(master,fg_color="transparent",border_width=0)
 
@@ -1256,7 +1257,7 @@ class HiCOptionsFrame(ctk.CTkFrame):
 
         return params
     
-class SVOptionsFrame(ctk.CTkFrame):
+class SvOptionsFrame(ctk.CTkFrame):
     def __init__(self, master,params={},**kwargs):
         super().__init__(master,fg_color="transparent",border_width=0)
 

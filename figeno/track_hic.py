@@ -1,0 +1,241 @@
+import cooler
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.cm as cm 
+import matplotlib
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.collections import PatchCollection
+
+from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
+
+class hic_track:
+    def __init__(self,file,max_dist=700,color_map="Red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,
+                 extend=True,upside_down=False,pixel_border=False,rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
+        self.file = file # must be in cool format
+        self.max_dist = max_dist *1000
+        self.color_map=color_map
+        self.cmap_max_percentile = cmap_max_percentile
+        self.interactions_across_regions=interactions_across_regions
+        self.double_interactions_across_regions=double_interactions_across_regions
+        self.extend=extend
+        self.upside_down=upside_down
+        self.pixel_border=pixel_border
+        self.rasterize=rasterize
+
+        self.label=label
+        self.label_rotate=label_rotate
+        self.fontscale = fontscale
+        self.bounding_box=bounding_box
+        self.height=height
+        self.margin_above=margin_above
+        
+
+    def draw(self, regions, box ,hmargin):
+        self.draw_title(box)
+        boxes = split_box(box,regions,hmargin)
+        if self.bounding_box:
+            if self.interactions_across_regions: draw_bounding_box(box)
+            else:
+                for box1 in boxes:  draw_bounding_box(box1)
+
+        regions= [reg[0] for reg in regions]
+
+
+        c=cooler.Cooler(self.file)
+        resolution = c.binsize
+        total_dist = np.sum([(region.end-region.start) for region in regions])
+        self.max_dist=min(self.max_dist,total_dist)
+        max_bindist=self.max_dist//resolution /2
+        n = len(regions)
+
+        angle = self.find_angle(regions,boxes,max_bindist)
+        
+
+        vmin = 1.001
+        vmax=1.010 #TODO
+        vmin,vmax = self.get_min_max_values(regions,20,self.cmap_max_percentile)
+        norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax)
+        if self.color_map=="Red" or self.color_map=="red":
+             self.color_map = LinearSegmentedColormap.from_list('interaction',
+                    ['#FFFFFF','#FFDFDF','#FF7575','#FF2626','#F70000'])
+        else:
+            self.color_map = cm.RdYlBu_r
+       
+        colormap = cm.ScalarMappable(norm=norm, cmap=self.color_map)
+
+        patches_list = []
+
+        # For each pair of region
+        for a in range(n):
+            for b in range(a,n):
+                if (not self.interactions_across_regions) and a!=b: continue
+                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames)
+                box1,box2 = boxes[a],boxes[b]
+                start1,end1 = region1.start, region1.end
+                start2,end2 = region2.start, region2.end
+                left_offset,right_offset=0,0
+
+                if self.extend: # Extend regions so that we can show a rectangle instead of triangles.
+                    if a==0 or (not self.interactions_across_regions):
+                        if region1.orientation=="+":
+                            new_start = max(0,region1.start-self.max_dist)
+                            left_offset = (region1.start-new_start) // resolution
+                            start1 = region1.start - left_offset *resolution
+                        else:
+                            new_end = min(c.chromsizes[region1.chr],region1.end+self.max_dist)
+                            left_offset = (new_end-region1.end) // resolution
+                            end1 = region1.end + left_offset * resolution
+                    if b==len(regions)-1 or (not self.interactions_across_regions):
+                        if region2.orientation=="+":
+                            new_end = min(c.chromsizes[region2.chr],region2.end+self.max_dist)
+                            right_offset = (new_end-region2.end) // resolution
+                            end2 = region2.end + right_offset * resolution
+                        else:
+                            new_start = max(0,region2.start-self.max_dist)
+                            right_offset = (region2.start-new_start) // resolution
+                            start2 = region2.start - right_offset *resolution
+
+                #start1,end1,left_offset = region1.start, region1.end,0
+                mat = c.matrix(balance=True).fetch(region1.chr+":"+str(start1)+"-"+str(end1),
+                                                region2.chr+":"+str(start2)+"-"+str(end2))
+                if region1.orientation=="-": mat = mat[::-1,:]
+                if region2.orientation=="-": mat = mat[:,::-1]
+
+
+                # Translocations have a copy number 1/2 of intra-chromosomal interactions, so double them.
+                if a!=b and self.double_interactions_across_regions: mat = 1+2*mat
+                else: mat = 1+mat
+
+                # Pixel sizes
+                width1 = (box1["right"]-box1["left"]) / (mat.shape[0]-left_offset)
+                height1 = width1 * angle
+                width2 = (box2["right"]-box2["left"]) / (mat.shape[1]-right_offset)
+                height2 = width2 * angle
+
+                # For each pair of bin from each region
+                for i in range(0,mat.shape[0]):
+                    for j in range(mat.shape[1]):
+                        if a==b and j<i-left_offset: continue
+
+                        x1 = box1["left"] + (i-left_offset)*width1
+                        x2 = box2["left"] + (j)*width2
+                        x=(x1+x2)/2
+                        if box["left"]<box["right"]:
+                            if x+width1/2+width2/2<boxes[0]["left"] or x>boxes[-1]["right"]: continue
+                        else:
+                            if x+width1/2+width2/2>boxes[0]["left"] or x<boxes[-1]["right"]: continue
+                        y = box1["bottom"] + abs(x-x1) * abs(angle) 
+                        if self.upside_down: y = box1["top"] - abs(x-x1) * abs(angle)
+                        if ((not self.upside_down) and y-height2>box1["top"]) or (self.upside_down and (y+height2<box["bottom"])): continue
+
+                        vertices = [(x,y) , (x+width2/2, y+height2/2) , (x+width2/2 +width1/2, y+height2/2-height1/2) , (x+width1/2, y-height1/2)]
+
+                        if box["left"]<box["right"]:
+                            if vertices[2][0]<box1["left"]+1e-6: continue
+                            if vertices[0][0]>box2["right"]-1e-6:continue
+                        else:
+                            if vertices[2][0]>box1["left"]-1e-6: continue
+                            if vertices[0][0]<box2["right"]+1e-6:continue
+                        if vertices[-1][1]>box["top"]-1e-6:continue
+                        if vertices[1][1]<box["bottom"]+1e-6: continue
+                        
+                        if box["left"]<box["right"]:
+                            vertices = [(min(box2["right"],max(box1["left"],z2)),max(box1["bottom"]-0.1,min(box1["top"]+0.1,z))) for (z2,z) in vertices] # TODO -0.05
+                        else:
+                            vertices = [(max(box2["right"],min(box1["left"],z2)),max(box1["bottom"]-0.1,min(box1["top"]+0.1,z))) for (z2,z) in vertices]
+                        
+                        if vertices[0][0]==vertices[1][0] and vertices[2][0]==vertices[3][0]: continue
+                        #if abs(vertices[1][0]-vertices[0][0])<1e-6: vertices = vertices[1:]
+                        
+                        
+                        # Adjust the coordinates for the extremities of the triangle.
+                        if a!=b:
+                            if j==0:
+                                if abs(vertices[0][1]-box["top"])<1e-6 and (not self.upside_down):
+                                    y_left= abs(vertices[-1][1]-vertices[0][1])
+                                    vertices[0]= (max(vertices[0][0],vertices[-1][0]-y_left/angle),vertices[0][1])
+                                if abs(vertices[0][1]-box["bottom"])<1e-6 and  self.upside_down:
+                                    y_left= abs(vertices[1][1]-vertices[0][1])
+                                    vertices[0]= (max(vertices[0][0],vertices[-1][0]-y_left/angle),vertices[0][1])
+                            elif i==mat.shape[0]-1:
+                                if abs(vertices[0][1]-box["top"])<1e-6 and (not self.upside_down):
+                                    y_right= abs(vertices[-1][1]-vertices[2][1])
+                                    vertices[2]= (min(vertices[2][0],vertices[-1][0]+y_right/angle),vertices[2][1])
+                                if abs(vertices[0][1]-box["bottom"])<1e-6 and  self.upside_down:
+                                    y_right= abs(vertices[1][1]-vertices[2][1])
+                                    vertices[2]= (min(vertices[2][0],vertices[-1][0]+y_right/angle),vertices[2][1])
+
+
+                        # Left side: triangle instead
+                        if abs(vertices[1][0]-vertices[0][0])<1e-6: vertices = vertices[1:]
+
+                        if "projection" in box and box["projection"]=="polar":
+                            vertices = interpolate_polar_vertices(vertices)
+                        
+                        
+                        if self.pixel_border:
+                            polygon = patches.Polygon(vertices,lw=0.2,facecolor=colormap.to_rgba(mat[i,j]),edgecolor="black")
+                        else:
+                            polygon = patches.Polygon(vertices,lw=0.2,color=colormap.to_rgba(mat[i,j]))
+                        #box1["ax"].add_patch(polygon)
+                        patches_list.append(polygon)
+        patches_coll = PatchCollection(patches_list,rasterized=self.rasterize,match_original=True)
+        box1["ax"].add_collection(patches_coll)
+
+    def get_min_max_values(self,regions,low_percentile,high_percentile):
+        c=cooler.Cooler(self.file)
+        l=[]
+        for a in range(len(regions)):
+            for b in range(a,len(regions)):
+                if (not self.interactions_across_regions) and a!=b: continue
+                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames)
+                mat = c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end),
+                                                region2.chr+":"+str(region2.start)+"-"+str(region2.end))
+                if a!=b and self.double_interactions_across_regions: mat = 1+2*mat
+                else: mat = 1+mat
+                l.append(mat.flatten())
+        l = np.concatenate(l)
+        return np.percentile(l,low_percentile),np.percentile(l,high_percentile)
+    
+    def find_angle(self,regions,boxes,max_bindist):
+        c=cooler.Cooler(self.file)
+        min_angle=100
+        if boxes[0]["left"]>boxes[0]["right"]: min_angle=-100
+        for a in range(len(regions)):
+            region1 = correct_region_chr(regions[a],c.chromnames)
+            box1 = boxes[a]
+            mat = 1+c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end))
+            width = (box1["right"]-box1["left"]) / mat.shape[0]
+            height = (box1["top"]-box1["bottom"]) / max_bindist
+            angle = height / width
+            if box1["left"]<box1["right"]:
+                min_angle=min(min_angle,angle)
+            else:
+                min_angle=max(min_angle,angle)
+        return min_angle
+    
+    def draw_title(self,box):
+        if len(self.label)>0:
+            self.label = self.label.replace("\\n","\n")
+            rotation = 90 if self.label_rotate else 0
+            box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
+                        self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+        
+
+
+
+
+
+def compute_dist_reg(regions,a,b,x1,x2):
+    if a==b:
+        return abs(x1-x2)
+    else:
+        s=0
+        if regions[a].orientation=="+": s+= abs(regions[a].end-x1)
+        else:s+= abs(regions[a].start-x1)
+        if regions[b].orientation=="+": s+= abs(regions[b].start-x2)
+        else:s+= abs(regions[b].end-x2)
+        for i in range(a+1,b):
+            s+=regions[i].end-regions[i].start
+        return s

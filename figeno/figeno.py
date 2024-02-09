@@ -14,8 +14,8 @@ from figeno.track_bed import bed_track
 from figeno.track_bigwig import bigwig_track
 from figeno.track_coverage import coverage_track
 from figeno.track_alignments import alignments_track
-from figeno.track_metfreq import metfreq_track
-from figeno.track_HiC import hic_track
+from figeno.track_basemodfreq import basemodfreq_track
+from figeno.track_hic import hic_track
 from figeno.track_copynumber import copynumber_track
 from figeno.track_sv import sv_track
 from figeno.track_ase import ase_track
@@ -115,9 +115,9 @@ class tracks_plot:
                         self.tracks_list.append(bigwig_track(**t))
                     elif track_type=="bed":
                         self.tracks_list.append(bed_track(**t))
-                    elif track_type=="Met freq" or track_type=="methylation_freq":
-                        self.tracks_list.append(metfreq_track(**t))
-                    elif track_type=="HiC":
+                    elif track_type=="basemod freq":
+                        self.tracks_list.append(basemodfreq_track(**t))
+                    elif track_type=="hic":
                         self.tracks_list.append(hic_track(**t))
                     elif track_type=="genes":
                         t["reference"] = self.reference
@@ -130,7 +130,7 @@ class tracks_plot:
                         t["genes_file"] = self.genes_file
                         t["chr_lengths"] = self.chr_lengths
                         self.tracks_list.append(copynumber_track(**t))
-                    elif track_type=="SV":
+                    elif track_type=="sv":
                         self.tracks_list.append(sv_track(**t))
                     elif track_type=="ase":
                         t["reference"] = self.reference

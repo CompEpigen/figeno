@@ -6,15 +6,19 @@
 Welcome to figeno's documentation!
 ==================================
 
+Figeno is a tool to create (epi)genomics figures.
+
+Features:
+---------
+
+* Large collection of tracks (bigwig, HiC, alignments, copy number, SV...)
+* Graphical user interface
+* Multi-region figures
+* Highlight regions of interest
+* Output figures in svg, pdf, eps or png
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   
+   content/tracks
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
