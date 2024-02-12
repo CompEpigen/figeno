@@ -1,4 +1,0 @@
-chr axis
-==========
-
-Chromosome axis
