@@ -1,4 +1,6 @@
 import os
+import sys
+import mock
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -7,11 +9,7 @@ import os
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import mock
-
-# MOCK_MODULES = ['numpy', 'numpy.ma', 'scipy', 'pyBigWig']
 MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy', 'scipy','statsmodels','pyyaml','matplotlib','cooler','Flask','importlib-resources']
-
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
