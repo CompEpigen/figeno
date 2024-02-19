@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["figeno", "figeno.data","figeno.GUI","figeno.GUI.data"]
+packages = ["figeno", "figeno.data", "figeno.cli", "figeno.gui"]
 
 
 
 [project]
 name = 'figeno'
-version = "0.0.1"
+version = "0.0.2"
 description = 'Package for generating genomics figures.'
 readme = 'README.md'
 authors = [
@@ -33,13 +33,12 @@ dependencies = [
   "pysam>=0.16.0",
   "pyBigWig>=0.3.18",
   "cooler>=0.9.1",
-  "importlib-resources>=5.0.0"
-
+  "importlib-resources>=5.0.0",
+  "Flask>=2.2.5"
 ]
 
 [project.scripts]
-figeno = "figeno.GUI.gui:main"
-figenomake = "figeno.figenomake:main"
+figeno = "figeno.cli.cli:main"
 
 [project.urls]
 "Homepage" = "https://github.com/CompEpigen/figeno"

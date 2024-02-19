@@ -10,7 +10,7 @@ from matplotlib.collections import PatchCollection
 from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
 
 class hic_track:
-    def __init__(self,file,max_dist=700,color_map="Red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,
+    def __init__(self,file,max_dist=700,color_map="red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,
                  extend=True,upside_down=False,pixel_border=False,rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         self.file = file # must be in cool format
         self.max_dist = max_dist *1000
@@ -56,7 +56,7 @@ class hic_track:
         vmax=1.010 #TODO
         vmin,vmax = self.get_min_max_values(regions,20,self.cmap_max_percentile)
         norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax)
-        if self.color_map=="Red" or self.color_map=="red":
+        if self.color_map=="red" or self.color_map=="Red":
              self.color_map = LinearSegmentedColormap.from_list('interaction',
                     ['#FFFFFF','#FFDFDF','#FF7575','#FF2626','#F70000'])
         else:

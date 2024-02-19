@@ -14,7 +14,7 @@ from figeno.utils import correct_region_chr, split_box,draw_bounding_box
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
-    def __init__(self,bams,modbeds,show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
+    def __init__(self,bams=[],modbeds=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
         self.bams = bams
         self.modbeds = modbeds
 
@@ -62,9 +62,12 @@ class basemodfreq_track:
                 box["ax"].add_patch(rect)
                 box["ax"].text(legend_x+legend_width*1.1,legend_y - hp*legend_height*3.0,"Haplotype "+str(hp+1),horizontalalignment="left",verticalalignment="center")
 
-    def draw_region_bam(self,region,box,bam,base,mod,min_coverage,linewidth,alpha,split,labels,colors):
+    def draw_region_bam(self,region,box,file,base,mod,min_coverage=5,linewidth=3,opacity=1,fix_hardclip=False,split_by_haplotype=False,labels=[""],colors=["#27ae60"]):
+        min_coverage=int(min_coverage)
+        linewidth=float(linewidth)
+        opacity=float(opacity)
         margin_y = (box["top"]-box["bottom"]) * 0.03
-        samfile = pysam.AlignmentFile(bam, "rb")
+        samfile = pysam.AlignmentFile(file, "rb")
         region = correct_region_chr(region,samfile.references)
 
         def transform_coord(pos):
@@ -75,12 +78,12 @@ class basemodfreq_track:
 
         # Read methylation
         reads_HP1,reads_HP2,reads_unphased,reads_all = read_read_groups(samfile,region)
-        if split:
-            df_met1 = smooth_methylation(create_basemod_table(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4),w=4,start=region.start,end=region.end)
-            df_met2 = smooth_methylation(create_basemod_table(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4),w=4,start=region.start,end=region.end)
+        if split_by_haplotype:
+            df_met1 = smooth_methylation(create_basemod_table(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)
+            df_met2 = smooth_methylation(create_basemod_table(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)
             dfs = [df_met1,df_met2]
         else:
-            dfs = [smooth_methylation(create_basemod_table(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4),w=4,start=region.start,end=region.end)]
+            dfs = [smooth_methylation(create_basemod_table(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)]
 
         for j in range(len(dfs)):
             df = dfs[j]
@@ -97,7 +100,7 @@ class basemodfreq_track:
                 a,b = boundaries[i], boundaries[i+1]
                 if b-a>1:
                     zorder = 1 if linewidth>1 else 0
-                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=alpha,zorder=zorder) 
+                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=opacity,zorder=zorder) 
 
 
 
@@ -113,7 +116,7 @@ class basemodfreq_track:
             box["ax"].text(box["left"]-tick_width*1.0,box["top"]-margin_y,"1",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             
             rotation = 90 if self.label_rotate else 0
-            box["ax"].text(box["left"]-tick_width*12*self.fontscale,(box["bottom"]+box["top"])/2,self.label,rotation=rotation,verticalalignment="center",horizontalalignment="right",fontsize=8*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*12*self.fontscale,(box["bottom"]+box["top"])/2,self.label,rotation=rotation,verticalalignment="center",horizontalalignment="right",fontsize=7*self.fontscale)
         else:
             tick_width=-0.005
             margin_y = (box["top"]-box["bottom"]) * 0.03
@@ -197,14 +200,14 @@ def smooth_methylation(df,w=2,start=None,end=None):
     if end is not None: df = df.loc[df["pos"]<=end,:]
     return df
 
-def create_basemod_table(reads,base,mod,chr,start,end,min_coverage=5):
+def create_basemod_table(reads,base,mod,chr,start,end,samfile=None,fix_hardclip=False,min_coverage=5):
     d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
 
     pos2methylated={}
     pos2unmethylated={}
     for x in reads:
         for read in x:
-            methyl = decode_read_basemods(read,[(base,mod,1)])
+            methyl = decode_read_basemods(read,[(base,mod,1)],samfile,fix_hardclip)
             for pos,end2,state in methyl:
                 if base=="C" and (read.flag&16)!=0:
                     pos-=1 # if reverse strand, consider the position of the C in the CpG in the forward orientation.
@@ -225,33 +228,7 @@ def create_basemod_table(reads,base,mod,chr,start,end,min_coverage=5):
     return df
 
 
-def create_methylation_table(reads,chr,start,end,min_coverage=5):
-    #TODO: group by CpG.........
-    d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
 
-    pos2methylated={}
-    pos2unmethylated={}
-    for x in reads:
-        for read in x:
-            methyl = decode_read_basemods(read,[("C","m",1)])
-            for pos,end2,state in methyl:
-                if (read.flag&16)!=0:
-                    pos-=1 # if reverse strand, consider the position of the C in the CpG in the forward orientation.
-                if pos>=start and pos<=end:
-                    if not pos in pos2methylated:
-                        pos2methylated[pos]=0
-                        pos2unmethylated[pos]=0
-                    if state=="methylated": pos2methylated[pos]+=1
-                    else: pos2unmethylated[pos]+=1
-    for pos in sorted(pos2methylated.keys()):
-        total = pos2unmethylated[pos] + pos2methylated[pos]
-        if total>=min_coverage:
-            d["chr"].append(chr)
-            d["pos"].append(pos)
-            d["metPercentage"].append(pos2methylated[pos] / total*100)
-            d["coverage"].append(total)
-    df = pd.DataFrame(d)
-    return df
 
 
 

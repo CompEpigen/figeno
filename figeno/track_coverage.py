@@ -8,9 +8,9 @@ from figeno.utils import correct_region_chr, split_box, draw_bounding_box
 from figeno.vcf import read_phased_vcf
 
 class coverage_track:
-    def __init__(self,bam,n_bins=500,color="gray",scale="auto",scale_max="auto",scale_pos="left",label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max="auto",scale_pos="left",label="",label_rotate=False,fontscale=1,
                            vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=True,height=10,margin_above=1.5):
-        self.samfile = pysam.AlignmentFile(bam, "rb")
+        self.samfile = pysam.AlignmentFile(file, "rb")
         self.n_bins = n_bins
         self.color=color
         self.label=label

@@ -4,27 +4,34 @@ import numpy as np
 import importlib_resources as resources
 import figeno.data
 from figeno.genes import read_transcripts
-from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text
+from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 
 class genes_track:
-    def __init__(self,reference="custom",genes_file="",style="default",gene_names="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5):
+    def __init__(self,reference="custom",genes_file="",style="default",collapsed=True,only_protein_coding=True,genes="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5,
+                 label="",label_rotate=False):
         self.reference=reference
         self.genes_file = genes_file
         self.style=style
-        self.gene_names=gene_names
+        self.collapsed=collapsed
+        self.only_protein_coding=only_protein_coding
+        self.genes=genes
         self.exon_color=exon_color
         self.fontscale=fontscale
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.label=label
+        self.label_rotate=label_rotate
 
     def draw(self, regions, box ,hmargin=0):
         boxes = split_box(box,regions,hmargin)
+        lines_regions = self.read_transcripts_lines_regions(regions)
         for i in range(len(regions)):
-            self.draw_region(regions[i][0],boxes[i])
+            self.draw_region(regions[i][0],boxes[i],lines_regions[i])
+        self.draw_title(box)
 
-    def draw_region(self,region,box,xy_scale=1):
+    def draw_region(self,region,box,lines,xy_scale=1):
         if self.bounding_box: draw_bounding_box(box)
         def transform_coord(pos):
             if region.orientation=="+":
@@ -38,35 +45,6 @@ class genes_track:
                 if transformed_pos >=box["left"]: return box["left"]
                 elif transformed_pos <=box["right"]: return box["right"]
             return transformed_pos
-
-        
-        if self.genes_file is None or self.genes_file=="":
-            if self.reference in ["hg19","hg38"]:
-                with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
-                    transcripts = read_transcripts(infile,region.chr,region.start,region.end,self.gene_names)
-            else:
-                raise Exception("Must provide a gene file.")
-        else:
-            transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.gene_names)
-        
-        # Assign transcripts to lines (to avoid overlap)
-        def add_transcript_pile(transcript,l,margin=20000):
-            i=0
-            while i<len(l):
-                last_transcript = l[i][-1]
-                if last_transcript.end+margin<transcript.start:
-                    l[i].append(transcript)
-                    return
-                i+=1
-            l.append([transcript])
-        lines = []
-        if self.style=="default":
-            for transcript in transcripts:
-                add_transcript_pile(transcript,lines)
-        else:
-            lines.append([])
-            for transcript in transcripts:
-                lines[0].append(transcript)
 
         n_lines = max(1,len(lines))
         height_transcript=(box["top"]-box["bottom"])/n_lines * 0.01
@@ -168,5 +146,85 @@ class genes_track:
                         triangle = plt.Polygon([[left_coord2-rect_width*1.3,(bottom_coord2+top_coord)/2],[left_coord2,bottom_coord2-rect_height*0.8],[left_coord2,top_coord+rect_height*0.8]], color=self.exon_color)
                         box["ax"].add_patch(triangle)
 
+    def draw_title(self,box):
+        if "projection" in box and box["projection"]=="polar": 
+            if len(self.label)>0:
+                self.label = self.label.replace("\\n","\n")
+                rotation = 90 if self.label_rotate else 0
+                x,y= polar2cartesian((box["left"],(box["top"]+box["bottom"])/2))
+                theta,r = cartesian2polar((x-1,y))
+
+                box["ax"].text(theta,r,
+                            self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=10*self.fontscale)
+        else:
+            if len(self.label)>0:
+                self.label = self.label.replace("\\n","\n")
+                rotation = 90 if self.label_rotate else 0
+                box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
+                            self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+                
+    def read_transcripts_lines_regions(self,regions):
+        regions = [reg[0] for reg in regions]
+        lines_regions=[]
+        max_nlines=0
+        for region in regions:
+            if self.genes_file is None or self.genes_file=="":
+                if self.reference in ["hg19","hg38"]:
+                    with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
+                        transcripts = read_transcripts(infile,region.chr,region.start,region.end,self.genes,collapsed=self.collapsed)
+                else:
+                    raise Exception("Must provide a gene file.")
+            else:
+                transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.genes,
+                                               collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
+            
+            
+            lines = []
+            if self.style=="default":
+                for transcript in transcripts:
+                    add_transcript_pile(transcript,lines)
+            else:
+                lines.append([])
+                for transcript in transcripts:
+                    lines[0].append(transcript)
+            lines_regions.append(lines)
+            max_nlines = max(max_nlines,len(lines))
+
+        # Reorder lines to distribute transcripts more evenly
+        new_line_order = reorder_balanced(0,max_nlines)
+
+        for i in range(len(regions)):
+            lines_regions[i]+=[[] for j in range(0,max_nlines-len(lines_regions[i]))]
+            lines_regions[i] = [lines_regions[i][j] for j in new_line_order]
+        return lines_regions
 
 
+
+def add_transcript_pile(transcript,l,margin=10000):
+    # Assign transcripts to lines (to avoid overlap)
+    i=0
+    while i<len(l):
+        last_transcript = l[i][-1]
+        if last_transcript.end+margin<transcript.start:
+            l[i].append(transcript)
+            return
+        i+=1
+    l.append([transcript])
+
+
+def merge_interleave(l1,l2):
+    l=[]
+    for i in range(max(len(l1),len(l2))):
+        if i<len(l1): l.append(l1[i])
+        if i<len(l2): l.append(l2[i])
+    return l
+
+def reorder_balanced(start,end):
+    if start>end: return []
+    if end-start==0: return []
+    if end-start==1: return [start]
+    mid=(end-start)//2
+    if (end-start)%2==1:
+        return [start+mid] + merge_interleave(reorder_balanced(start,start+mid),reorder_balanced(start+mid+1,end))
+    else:
+        return  merge_interleave(reorder_balanced(start,start+mid),reorder_balanced(start+mid,end))

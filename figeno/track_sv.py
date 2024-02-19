@@ -9,10 +9,10 @@ import vcfpy
 from figeno.utils import correct_region_chr, split_box,draw_bounding_box, chr_to_int
 
 class sv_track:
-    def __init__(self,vcf=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
-                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",
+    def __init__(self,file=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
+                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,
                  fontscale=1,bounding_box=True,height=10,margin_above=1.5):
-        self.vcf=vcf
+        self.file=file
         self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a vcf.
         self.sv_across_regions=sv_across_regions
         self.upside_down=upside_down
@@ -23,6 +23,7 @@ class sv_track:
         self.color_h2h=color_h2h
         self.color_t2t=color_t2t
         self.color_trans=color_trans
+        self.lw=lw
 
         self.fontscale=fontscale
         self.bounding_box=bounding_box
@@ -30,10 +31,10 @@ class sv_track:
         self.margin_above=margin_above
 
         if self.df_SVs is None:
-            if self.vcf is None:
+            if self.file is None:
                 raise Exception("SVs or VCF must be provided.")
-            elif self.vcf.endswith(".tsv"):
-                self.df_SVs = pd.read_csv(self.vcf,sep="\t",dtype={"chr1":str,"chr2":str})
+            elif self.file.endswith(".tsv"):
+                self.df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
             else:
                 self.df_SVs = self.read_SVs_vcf()
         if not "color" in self.df_SVs.columns:
@@ -74,7 +75,7 @@ class sv_track:
                     max_dist = max(max_dist,abs(x1-x2))
         for arc in arcs:
             arc["height"] = (box["top"]-box["bottom"]) * 1.8 * np.log(10+abs(arc["x1"]-arc["x2"])) / np.log(10+max_dist)
-            add_arc(**arc)
+            add_arc(**arc,lw=self.lw)
 
         # Show SVs leading to other regions
         for i in range(len(regions)):
@@ -145,7 +146,7 @@ class sv_track:
 
     def read_SVs_vcf(self):
         SVs=[]
-        reader = vcfpy.Reader.from_path(self.vcf)
+        reader = vcfpy.Reader.from_path(self.file)
         for record in reader:
             chr1 = record.CHROM.lstrip("chr")
             pos1 = record.POS
@@ -179,7 +180,7 @@ class sv_track:
                 SVs.append((chr1,pos1,chr2,pos2,color))
             if not (chr2,pos2,chr1,pos1,color) in SVs:
                 SVs.append((chr2,pos2,chr1,pos1,color))
-            df_SVs = pd.DataFrame(SVs,columns=["chr1","pos1","chr2","pos2","color"])
+        df_SVs = pd.DataFrame(SVs,columns=["chr1","pos1","chr2","pos2","color"])
         return df_SVs
     
 
@@ -219,14 +220,14 @@ def select_SVs_otherregions(df_SVs,region1,otherregions):
     df_SVs2 = df_SVs.loc[indices,:].copy(deep=True)
     return df_SVs2
 
-def add_arc(ax,x1,x2,y1,y2,height,color,upside_down=False):
+def add_arc(ax,x1,x2,y1,y2,height,color,lw,upside_down=False):
     if y1==y2:
         if upside_down:
-            arc = patches.Arc(xy=((x1+x2)/2,y1),width=abs(x2-x1),height=height,theta1=180,theta2=360,fill=False,color=color,lw=0.6)
+            arc = patches.Arc(xy=((x1+x2)/2,y1),width=abs(x2-x1),height=height,theta1=180,theta2=360,fill=False,color=color,lw=lw)
         else:
-            arc = patches.Arc(xy=((x1+x2)/2,y1),width=abs(x2-x1),height=height,theta1=0,theta2=180,fill=False,color=color,lw=0.6)
+            arc = patches.Arc(xy=((x1+x2)/2,y1),width=abs(x2-x1),height=height,theta1=0,theta2=180,fill=False,color=color,lw=lw)
         ax.add_patch(arc)
     else:
-        pp1 = patches.PathPatch(mpath.Path([(x1, y1), (x1, (y1+y2)/2), (x2, (y1+y2)/2),(x2,y2)],[Path.MOVETO, Path.CURVE4, Path.CURVE4,Path.CURVE4]),facecolor="none",edgecolor=color,lw=0.5)
+        pp1 = patches.PathPatch(mpath.Path([(x1, y1), (x1, (y1+y2)/2), (x2, (y1+y2)/2),(x2,y2)],[Path.MOVETO, Path.CURVE4, Path.CURVE4,Path.CURVE4]),facecolor="none",edgecolor=color,lw=lw)
         ax.add_patch(pp1)
    

@@ -1,1 +1,1 @@
-from figeno.figeno import make_figeno
+from figeno.figeno import figeno_make

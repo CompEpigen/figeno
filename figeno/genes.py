@@ -175,13 +175,13 @@ def read_transcripts_names(file,gene_names):
 
       
 
-def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True):
+def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True,only_protein_coding=True):
     """Wrapper depending on the file type and whether a region or gene_names are provided"""
     if gene_names =="auto": gene_names = None
     if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath) or file.endswith("txt.gz") or file.endswith(".txt"):
-        return read_genes_refseq(file,chr,start,end,gene_names,collapsed=collapsed)
+        return read_genes_refseq(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding)
     else:
-        return read_genes_gtf(file,chr,start,end,gene_names,collapsed=collapsed) 
+        return read_genes_gtf(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding) 
         
 
 def add_exon(exons,exon):
@@ -207,7 +207,7 @@ def merge_transcripts(transcript1,transcript2):
 
 
 # Consider all exons of all transcripts for a given gene.
-def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapsed=True):
+def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
     transcripts={}
 
     if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath):
@@ -228,6 +228,9 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
         # Filter based on gene name
         gene_name=linesplit[12]
         if (gene_names is not None) and (not gene_name in gene_names):continue
+
+        # Filter based on protein coding
+        if only_protein_coding and linesplit[13] in ["none","unk"]: continue
 
         strand = linesplit[3]
         exons=[]
@@ -251,7 +254,7 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
 
 
 
-def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collapsed=True):
+def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
     transcripts={}
     name2exons={}
 
@@ -277,6 +280,7 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
             if (gene_names is not None) and (not gene_name in gene_names): continue
+            if only_protein_coding and (not "protein_coding" in linesplit[8]): continue
             if collapsed: name = gene_name
             else: name=transcript_name
             transcript = Transcript(gene_name,linesplit[0].lstrip("chr"),transcript_start,transcript_end,transcript_orientation,[])

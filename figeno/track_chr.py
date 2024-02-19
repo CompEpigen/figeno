@@ -6,20 +6,23 @@ import importlib_resources as resources
 import colorsys
 
 import figeno.data
-from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text
+from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",no_margin=False,reference="hg19",cytobands_file="",
-                 fontscale=1,bounding_box=False,height=12,margin_above=1.5):
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="hg19",cytobands_file="",
+                 fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False):
         self.style=style
         self.unit=unit
         self.ticklabels_pos=ticklabels_pos
+        self.ticks_interval = ticks_interval
         self.no_margin=no_margin
         self.reference=reference
         self.fontscale=fontscale
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.label=label
+        self.label_rotate=label_rotate
 
         if self.style=="ideogram":
             if cytobands_file is None or cytobands_file=="":
@@ -35,10 +38,11 @@ class chr_track:
 
     def draw(self, regions, box ,hmargin):
         boxes = split_box(box,regions,hmargin)
-        self.scale=1000
-        for i in range(len(regions)):
-            
-            self.scale = max(self.scale,estimate_scale(boxes[i],regions[i][0]))
+        if self.ticks_interval=="auto":
+            self.scale=1000
+            for i in range(len(regions)):
+                self.scale = max(self.scale,estimate_scale(boxes[i],regions[i][0]))
+        else: self.scale= int(self.ticks_interval)
 
 
         for i in range(len(regions)):
@@ -50,6 +54,7 @@ class chr_track:
                 self.draw_region_ideogram(regions[i][0],boxes[i]) 
             else: # default
                 self.draw_region(regions[i][0],boxes[i]) 
+        self.draw_title(box)
                 
 
     def draw_region(self,region,box):
@@ -305,6 +310,22 @@ class chr_track:
                 return (0,self.height *7/8)
             else:
                 return (-7/8*self.height,0)
+    def draw_title(self,box):
+        if "projection" in box and box["projection"]=="polar": 
+            if len(self.label)>0:
+                self.label = self.label.replace("\\n","\n")
+                rotation = 90 if self.label_rotate else 0
+                x,y= polar2cartesian((box["left"],(box["top"]+box["bottom"])/2))
+                theta,r = cartesian2polar((x-1,y))
+
+                box["ax"].text(theta,r,
+                            self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=10*self.fontscale)
+        else:
+            if len(self.label)>0:
+                self.label = self.label.replace("\\n","\n")
+                rotation = 90 if self.label_rotate else 0
+                box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
+                            self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
                 
 
 

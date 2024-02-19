@@ -1,0 +1,559 @@
+/*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+*/
+
+body{
+  background-color: #dddddd;
+  display: flex;
+  justify-content: center;
+
+}
+/*
+input{
+  background-color: rgba(0,0,0,0.0);
+  border: solid 1px #555555;
+}*/
+
+
+.app .react-colorful {
+  height: 240px;
+  width:90%;
+  position:relative;
+  align-content: center;
+  display:flex;
+  /*margin: 5px;*/
+}
+
+.react-colorful__hue {
+  height: 40px;
+  border-radius: 0 0 4px 4px;
+  border: red;
+}
+
+.ColorButton{
+  height:22px;
+  width:22px;
+  border-radius: 5px;
+  border: none;
+  transition: all .1s ease-in-out;
+  /*position:relative;
+  left:500px*/
+}
+
+.ColorButton:hover {
+  /*filter: brightness(75%);*/
+  /*border: solid 1px black;*/
+  cursor:pointer;
+  transform: scale(1.1);
+  
+}
+.ColorPanel{
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position:fixed;
+  left:30%;
+  right:30%;
+  top:20%;
+  /*left:50px;*/
+
+  border-radius: 9px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 2px 2px 2px black;
+}
+
+.TrackTypePanel{
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position:fixed;
+  left:25%;
+  right:25%;
+  top: 10%;
+  /*left:50px;*/
+
+  border-radius: 9px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 2px 2px 2px black;
+}
+
+.TrackTypeGrid{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:10px;
+}
+
+.TemplatePanel{
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position:fixed;
+  left:25%;
+  right:25%;
+  top: 10%;
+  /*left:50px;*/
+
+  border-radius: 9px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 2px 2px 2px black;
+}
+
+.LoadingScreen{
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position:fixed;
+  left:30%;
+  right:30%;
+  top:20%;
+  /*left:50px;*/
+
+  border-radius: 9px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  align-items: center;
+  align-content: center;
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 2px 2px 2px black;
+}
+
+
+select{
+  font-size: 1.0em;
+  border-radius:4px;
+  padding:2px;
+  margin:2px;
+}
+
+h3{
+  margin:3px;
+}
+
+
+.TrackContainer{
+
+  display: flex;
+  flex-grow: 0;
+  align-items: left;
+  flex-direction: column;
+  width:100%;
+  min-width:400px;
+  /*border: black 1px solid;*/
+  border-radius: 8px;
+  /*padding:10px;*/
+  margin-bottom:10px;
+  box-sizing: border-box;
+  /*height:500px;*/
+  /*background-color: #cccccc;*/
+  
+}
+
+.TrackContainerContent{
+  margin:0px;
+  margin-top:5px;
+}
+
+.subContainer{
+  display: flex;
+  flex-grow: 1;
+  align-items: left;
+  flex-direction: column;
+  width:700px;
+  /*border: black 1px solid;*/
+  border-radius: 4px;
+  padding:5px;
+  margin:3px;
+  box-sizing: border-box;
+  /*height:500px;*/
+  background-color: #ffffff;
+  
+}
+
+.TrackContainerHeader{
+  display: flex;
+  background-color: #555555;
+  color:rgb(243, 153, 17);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-radius: 8px;
+  padding:5px;
+  padding-left: 15px;
+  margin-left:5px;
+  margin-right:5px;
+  align-items: center;
+  gap:3px;
+}
+
+.subTrackContainerHeader{
+  display: flex;
+  background-color: #dddddd;
+  color:black;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-radius: 8px;
+  padding:5px;
+  padding-left: 15px;
+  margin-left:5px;
+  margin-right:5px;
+  align-items: center;
+}
+
+
+.ButtonHeader{
+  align-self: center;
+  display: flex;
+  align-items: center;
+  margin:0px;
+  margin-left:8px;
+  background-color: transparent;
+  color:white;
+  outline: none;
+  border:none;
+  border-radius: 5px;
+  font: inherit;
+}
+.ButtonHeader:hover{
+  background-color: #444444;
+  cursor: pointer;
+}
+
+.subButtonHeader{
+  align-self: center;
+  display: flex;
+  align-items: center;
+  margin:0px;
+  margin-left:8px;
+  background-color: transparent;
+  color: black;
+  outline: none;
+  border:none;
+  border-radius: 5px;
+  font: inherit;
+}
+.subButtonHeader:hover{
+  background-color: #999999;
+  cursor: pointer;
+}
+
+
+.track{
+  z-index:0;
+  position: relative;
+  background-color: #f8f8f8;
+  /*border: 1px solid black;*/
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+  /*width:600px;*/
+  flex-wrap: nowrap;
+  display: flex;
+  justify-content: flex-start;
+  flex-grow: 0;
+  align-items: center;
+  margin-top:10px;
+  box-shadow: #80808071 0px 7px 40px 0px;
+
+  
+  
+  /*height:100px;*/
+}
+.trackOverlay{
+  margin:0px;
+  /*box-shadow: 3px 2px 2px #888888;*/
+}
+
+
+.leftPanel{
+  margin-right: 5px;
+}
+
+.rightPanel{
+  display: flex;
+  flex-direction: row;
+
+  align-self:stretch ;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+}
+.centerPanel{
+  flex-grow: 1;
+  align-items: center;
+  display:flex;
+  gap:8px;
+}
+.trackHeader{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap:8px;
+}
+
+.trackOption{
+ display:flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  padding-top:5px;
+  padding-bottom:5px;
+  
+
+  gap:6px;
+}
+
+.trackHandle{
+  background-color: none;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: grab;
+}
+.trackHandle:active{
+  cursor:grabbing;
+}
+.trackHandle:hover{
+  background-color: #cccccc;
+
+}
+
+
+.deleteButton{
+  background-color: inherit;
+  border: none;
+  border-radius: 3px;
+  padding: 2px;
+  padding-top: 4px;
+  margin-left: 1px;
+}
+.deleteButton:hover {
+  background-color: #bbbbbb;
+}
+
+
+
+.copyButton{
+  background-color: inherit;
+  border: none;
+  border-radius: 3px;
+  padding: 2px;
+  padding-top: 4px;
+}
+.copyButton:hover {
+  background-color: #bbbbbb;
+}
+
+input[type='checkbox'] {
+  height:1.5em;
+  width:1.5em;
+}
+
+.optionGroup{
+  display:flex;
+  /*flex-wrap: wrap;*/
+  flex-direction: column;
+  align-items: flex-start;
+  gap:6px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding:10px;
+  margin:1px;
+}
+
+.trackIcon{
+  align-self:center;
+  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  align-content: center;
+  justify-content: center;
+  background-color: #555555;
+  gap:5px;
+  border-radius: 15px;
+  padding:5px;
+  margin:1px;
+
+  min-width:5px;
+  min-height:5px;
+  transition: all .1s ease-in-out;
+
+  width:100px;
+  height:100px;
+}
+.trackIcon:hover{
+  background-color: #444444;
+  transform: scale(1.08);
+  cursor:pointer;
+}
+
+.TemplateButton{
+  align-self:center;
+  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  align-content: center;
+  justify-content: center;
+  background-color: #555555;
+  color:white;
+  gap:5px;
+  border-radius: 15px;
+  padding:5px;
+  margin:1px;
+
+  min-width:5px;
+  min-height:5px;
+  transition: all .1s ease-in-out;
+
+  width:100px;
+  height:100px;
+}
+.TemplateButton:hover{
+  background-color: #444444;
+  transform: scale(1.08);
+  cursor:pointer;
+}
+
+.formItemGroup{
+  display:flex;
+  align-items: center;
+  gap:6px;
+}
+.formItem{
+  display:flex;
+  align-items: center;
+  gap:1px;
+}
+
+input[type=checkbox] {
+  accent-color: #555555;
+}
+
+input{
+  border: solid 1px black;
+  border-radius: 3px;
+}
+
+.unsetPath{
+  background-color: rgb(248, 208, 133);
+  border: solid 1px rgb(138, 102, 37);
+}
+
+.dropDownOption{
+  font-size: 1em;
+}
+
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1;
+  bottom:20px;
+  left:0px;
+  width:600px;
+  height:10px;
+  color: white;
+  font-size: 12px;
+  background-color: #192733;
+  border-radius: 10px;
+  padding: 10px 15px 10px 15px;
+}
+
+.withTooltip:hover{
+  position:relative;
+}
+
+.withTooltip:hover .tooltip{
+  visibility: visible;
+}
+
+.buttonImage{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  gap:5px;
+  border-radius: 5px;
+  font: inherit;
+  padding:2px;
+  background-color: inherit;
+  border: none;
+  transition: all .1s ease-in-out;
+  
+}
+
+
+.buttonImage:hover{
+  background-color: #cccccc;
+  transform: scale(1.07);
+  cursor: pointer;
+}
+
+
+
+.topBar{
+  display:flex;
+  flex-direction: row;
+  align-items: left;
+  justify-content: center;
+  align-self: left;
+  margin-bottom:10px;
+  margin-top:5px;
+  
+}
+
+.topBar .buttonImage{
+  margin-left:5px;
+  padding: 5px;
+}
+
+.topBar .buttonImage:hover{
+  transform:none;
+}
+
+.blueButton{
+  background-color:#2980b9;
+  color:white;
+}
+.blueButton:hover{
+  background-color: #1a5f8d;
+}
+
+.greenButton{
+  background-color: #088722;
+  color:white;
+}
+.greenButton:hover{
+  background-color: #066819;
+}

@@ -81,13 +81,14 @@ class tracks_plot:
                 for s in config["regions"]:
                     if "chr" in s:
                         chr = s["chr"].lstrip("chr")
+                        if chr=="": raise Exception("Must specify the chromosome of the region.")
                         orientation = s["orientation"] if "orientation" in s else "+"
-                        if "start" in s: start = s["start"]
+                        if "start" in s and s["start"]is not None: start = s["start"]
                         else: start = 0
-                        if "end" in s: end = s["end"]
+                        if "end" in s and s["end"] is not None: end = s["end"]
                         else: 
                             if not chr in self.chr_lengths: 
-                                raise Exception("If the end of a region is not provided, a chrarms_file must be provided (or a non-custom reference).")
+                                raise Exception("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a chrarms_file must be provided (or a non-custom reference).")
                             end = self.chr_lengths[chr]
                         if end < start: 
                             start,end = end,start
@@ -115,7 +116,7 @@ class tracks_plot:
                         self.tracks_list.append(bigwig_track(**t))
                     elif track_type=="bed":
                         self.tracks_list.append(bed_track(**t))
-                    elif track_type=="basemod freq":
+                    elif track_type=="basemod_freq":
                         self.tracks_list.append(basemodfreq_track(**t))
                     elif track_type=="hic":
                         self.tracks_list.append(hic_track(**t))
@@ -123,7 +124,7 @@ class tracks_plot:
                         t["reference"] = self.reference
                         t["genes_file"] = self.genes_file
                         self.tracks_list.append(genes_track(**t))
-                    elif track_type=="chr axis":
+                    elif track_type=="chr_axis":
                         self.tracks_list.append(chr_track(**t))
                     elif track_type=="copynumber":
                         t["reference"] = self.reference
@@ -139,7 +140,7 @@ class tracks_plot:
                     else:
                         pass
 
-            self.figure_layout = config["general"]["figure_layout"]
+            self.figure_layout = config["general"]["layout"]
             self.output = None
             if "output" in config: self.output=config["output"]
 
@@ -202,6 +203,8 @@ class tracks_plot:
     def draw(self,output_config=None):
         if output_config is not None: self.output = output_config
         if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise Exception("Must specify the output file")
+
+        if len(self.regions)==0: raise Exception("Must include at least one region.")
 
         if self.figure_layout=="horizontal": 
             self.draw_horizontal(**self.output)
@@ -386,7 +389,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-def make_figeno(config=None,config_file=None):
-    if config is None and config_file is None: raise Exception("ERROR: a config or a config_file is required for make_figeno.")
+def figeno_make(config=None,config_file=None):
+    if config is None and config_file is None: raise Exception("ERROR: a config or a config_file is required for figeno_make.")
     tp = tracks_plot(config=config,config_file=config_file)
     tp.draw()

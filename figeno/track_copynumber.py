@@ -11,25 +11,31 @@ from figeno.utils import split_box,draw_bounding_box , polar2cartesian, cartesia
 
 class copynumber_track:
     def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
-                 color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes_highlighted=[],reference="hg19",genes_file="",chr_lengths={},
+                 color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes=[],reference="hg19",genes_file="",chr_lengths={},
                  label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5):
         self.freec_ratios = freec_ratios
+        if self.freec_ratios=="": self.freec_ratios=None
         self.freec_CNAs = freec_CNAs
+        if self.freec_CNAs=="": self.freec_CNAs=None
         self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs , instead of providing freec_CNAs
         self.ploidy=ploidy
         self.purple_cn=purple_cn
+        if self.purple_cn=="": self.purple_cn=None
         self.grid=grid # True for showing a grid for the axes
         self.grid_major = grid_major # vertical lines for major ticks
         self.grid_minor=grid_minor # vertical line for minor ticks
         self.grid_cn = grid_cn # horizontal lines for copy numbers
         self.min_cn=min_cn
+        if self.min_cn=="": self.min_cn = None
         self.max_cn = max_cn
+        if self.max_cn=="": self.max_cn = None
         self.round_cn=round_cn
         self.color_normal=color_normal
         self.color_loss=color_loss
         self.color_gain=color_gain
         self.color_cnloh=color_cnloh
-        self.genes_highlighted = genes_highlighted
+        self.genes = genes
+        if "," in self.genes: self.genes = self.genes.split(",")
         self.reference=reference
         self.genes_file=genes_file
         self.chr_lengths=chr_lengths
@@ -116,15 +122,15 @@ class copynumber_track:
         box["ax"].scatter(x_converted,y_converted,c=colors,s=0.7,marker="o",rasterized=True)
 
         # Highlight genes
-        if len(self.genes_highlighted)>0:
+        if len(self.genes)>0:
             if self.genes_file is None or self.genes_file=="":
                 if self.reference in ["hg19","hg38"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
-                        transcripts = read_transcripts(infile,gene_names=self.genes_highlighted)
+                        transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:
                     raise Exception("Must provide a gene file.")
             else:
-                transcripts = read_transcripts(self.genes_file,gene_names=self.genes_highlighted)
+                transcripts = read_transcripts(self.genes_file,gene_names=self.genes)
             for transcript in transcripts:
                 if transcript.chr ==region.chr and transcript.start<=region.end and transcript.end>=region.start:
                     pos = (transcript.start + transcript.end) / 2
@@ -183,15 +189,15 @@ class copynumber_track:
             box['ax'].add_patch(patches.Polygon(vertices,color=color,lw=0))
 
         # Highlight genes
-        if len(self.genes_highlighted)>0:
+        if len(self.genes)>0:
             if self.genes_file=="":
                 if self.reference in ["hg19","hg38"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
-                        transcripts = read_transcripts(infile,gene_names=self.genes_highlighted)
+                        transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:
                     raise Exception("Must provide a gene file.")
             else:
-                transcripts = read_transcripts(self.genes_file,gene_names=self.genes_highlighted)
+                transcripts = read_transcripts(self.genes_file,gene_names=self.genes)
             for transcript in transcripts:
                 if transcript==False: continue
                 if transcript.chr ==region.chr and transcript.start<=region.end and transcript.end>=region.start:
