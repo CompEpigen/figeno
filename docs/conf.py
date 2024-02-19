@@ -9,7 +9,7 @@ import mock
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy', 'scipy','statsmodels','pyyaml','matplotlib','cooler','Flask','importlib-resources']
+MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy','matplotlib','cooler','Flask','importlib-resources']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
