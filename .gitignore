@@ -1,0 +1,9 @@
+
+**/__pycache__
+
+/build
+
+docs/_build
+
+figeno/gui/node_modules
+figeno/gui/build

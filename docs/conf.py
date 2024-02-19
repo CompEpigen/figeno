@@ -7,6 +7,14 @@ import os
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import mock
+
+# MOCK_MODULES = ['numpy', 'numpy.ma', 'scipy', 'pyBigWig']
+MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy', 'scipy','statsmodels','pyyaml','matplotlib','cooler','Flask','importlib-resources']
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
 project = 'figeno'
 copyright = '2024, Etienne Sollier'
 author = 'Etienne Sollier'
