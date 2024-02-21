@@ -33,7 +33,7 @@ Parameters:
   * hic. Will have the following tracks: hic, genes, chr_axis.
   * asm. Will have the following tracks: alignments (with split by haplotype and color by basemod), basemod_freq, genes, chr_axis.
   * wgs_chr. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0.
-  * wgs_circos. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0, layout to circular and set the regions to all chromosomes.
+  * wgs_circos. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0, max_cn to 3.9 and disable the vertical grid for the copynumber track, set layout to circular and set the regions to all chromosomes.
   
 * ``--tracks``: comma-separated list of tracks, eg: bigwig,genes,chr_axis. 
 
@@ -41,14 +41,6 @@ Parameters:
 
 * ``--highlights``: comma-separated list of highlights (same format as regions).
   
-This is a normal text paragraph. The next paragraph is a code sample::
-
-   It is not processed in any way, except
-   that the indentation is removed.
-
-   It can span multiple lines.
-
-This is a normal text paragraph again.
    
 figeno make
 ^^^^^^^^^^^
@@ -71,13 +63,21 @@ Start the graphical user interface.
    
 .. code:: bash
 
-  figeno gui [-p PORT] [--debug]
+  figeno gui [-m MODE] [-p PORT] [--debug]
   
 Parameters:
 
-* ``-p``,``--port``. Port for the local server (default: 5000).
+* ``-m``, ``--mode``. Can be "auto" (default), "browser" or "webview". Browser will start a local server which can be viewed in a web browser (at localhost:5000 by default) while webview will open the gui in a separate window using pywebview. If "auto", will use browser for linux and webview for windows and mac.
+
+* ``-p``, ``--port``. Port for the local server, in case the browser mode is used (default: 5000).
 
 * ``--debug``: if set, will print more information to the terminal.
+
+.. warning::
+  The browser mode for is currently only supported for linux.
+  
+.. warning::
+  The webview mode works for linux, windows and mac, but for linux you will need to install additional dependencies (see https://pywebview.flowrl.com/guide/installation.html#linux).
   
 
   

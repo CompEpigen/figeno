@@ -69,9 +69,7 @@ def get_highlights(args):
     return highlights
 
 def get_tracks(args):
-    print("GETTING TRACKS")
     tracks=[]
-    print(args.template)
     if args.tracks is not None:
         for track_type in args.tracks.split(","):
             tracks.append(get_track(track_type))
@@ -99,6 +97,9 @@ def get_tracks(args):
             sv_track=get_track("sv")
             copynumber_track=get_track("copynumber")
             copynumber_track["margin_above"]=0
+            copynumber_track["max_cn"]=3.9
+            copynumber_track["grid_major"]=False
+            copynumber_track["grid_minor"]=False
             chr_track=get_track("chr_axis")
             chr_track["margin_above"]=0
             tracks+=[sv_track,copynumber_track,chr_track]
@@ -206,8 +207,8 @@ def get_track(type):
 				"#808080"
 			],
 			"haplotype_labels": [
-				"Haplotype 1",
-				"Haplotype 2",
+				"HP1 1",
+				"HP2 2",
 				"Unphased"
 			],
 			"color_by": "none",

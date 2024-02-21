@@ -16,7 +16,7 @@ General
   
   * **symmetric**: Draw the regions in two rows, such that the tracks are symmetric: the bottom row has the tracks in the normal order, but the top row has its tracks in the reverse order. This is mainly intended to show copy numbers and breakpoints, with sv as the topmost track.
   
-  * **stacked**" Draw all regions horizontally, but instead of being next to each other horizontally, the different regions are stacked vertically.
+  * **stacked**: Draw all regions horizontally, but instead of being next to each other horizontally, the different regions are stacked vertically.
 * **reference**: Reference genome used. Files for hg19 and hg38 are provided. You can also choose a custom reference genome, but then you will need to provide the required files.
 
 Output

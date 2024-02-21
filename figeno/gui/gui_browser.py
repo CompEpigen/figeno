@@ -14,11 +14,15 @@ config_dir=last_dir
 
 
 
-
-@app.route('/browse')
+#@app.route('/browse/', defaults={'path': ''})
+@app.route('/browse', methods=["POST"])
 def browse():
     global last_dir
-    t=crossfiledialog.open_file(start_dir=last_dir)
+    data=request.get_json()
+    start_dir = last_dir
+    if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
+        start_dir = os.path.dirname(data["path"])
+    t=crossfiledialog.open_file(start_dir=start_dir)
     if len(t)>0: last_dir= os.path.dirname(t)
     return jsonify({"path":t})
 
@@ -29,10 +33,15 @@ def open_files():
     if len(t)>0 and len(t[0])>0: last_dir= os.path.dirname(t[0])
     return jsonify({"files":t})
 
-@app.route('/save')
+@app.route('/save',methods=["POST"])
 def save():
     global last_dir
-    t=crossfiledialog.save_file(start_dir=last_dir)
+    data=request.get_json()
+    print(data)
+    start_dir = last_dir
+    if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
+        start_dir=os.path.dirname(data["path"])
+    t=crossfiledialog.save_file(start_dir=start_dir)
     if len(t)>0:last_dir= os.path.dirname(t)
     return jsonify({"path":t})
 

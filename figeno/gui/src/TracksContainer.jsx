@@ -87,7 +87,7 @@ export const defaultTrackValues={
         exchange_haplotypes:false,
         show_haplotype_colors:true,
         haplotype_colors:["#27ae60","#e67e22","#808080"],
-        haplotype_labels:["Haplotype 1", "Haplotype 2", "Unphased"],
+        haplotype_labels:["HP 1", "HP 2", "Unphased"],
 
         color_by:"none",
         color_unmodified:"#0f57e5",

@@ -196,7 +196,7 @@ class tracks_plot:
                     self.tracks_list[i].no_margin=True
                 elif i<len(self.tracks_list)-1 and self.tracks_list[i].ticklabels_pos=="above" and self.tracks_list[i+1].margin_above==0:
                     self.tracks_list[i].no_margin=True
-            if isinstance(self.tracks_list[i],sv_track) and isinstance(self.tracks_list[i+1],copynumber_track):
+            if isinstance(self.tracks_list[i],sv_track) and i<len(self.tracks_list)-1 and isinstance(self.tracks_list[i+1],copynumber_track):
                 self.tracks_list[i+1].margin_above=max(self.tracks_list[i+1].margin_above,0.3)
 
 

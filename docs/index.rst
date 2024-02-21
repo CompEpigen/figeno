@@ -15,15 +15,6 @@ Features
 * Highlight regions of interest
 * Output figures in svg, pdf, eps or png
 
-A figure is described by a JSON file, which can either be created directly or generated using figeno's graphical user interface. The figure can then be generated either from the GUI or from the command line with `figenomake config.json`.
-
-
-Creating the config file
-------------------------
-The config file is made out of five sections: General, Output, Regions, Highlights and Tracks.
-
-
-
 
 .. toctree::
    :maxdepth: 2

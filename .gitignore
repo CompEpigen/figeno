@@ -2,8 +2,12 @@
 **/__pycache__
 
 /build
+/dist
 
 docs/_build
 
 figeno/gui/node_modules
 figeno/gui/build
+
+pyinstaller/build
+pyinstaller/dist

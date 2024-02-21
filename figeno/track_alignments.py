@@ -62,7 +62,7 @@ class alignments_track:
     def __init__(self,file,label="",label_rotate=False,read_color="#cccccc",splitread_color="#999999",breakpoints_file=None,
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
-                 link_splitreads=True, min_splitreads_breakpoints=2, hgap_bp=100, vgap_frac=0.3,
+                 link_splitreads=False, min_splitreads_breakpoints=2, hgap_bp=100, vgap_frac=0.3,
                  is_rna=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         print(file)
         self.samfile =pysam.AlignmentFile(file, "rb")

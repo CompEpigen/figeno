@@ -4,6 +4,12 @@ import useClickOutside from "./useClickOutside";
 import "./style.css";
 import { defaultTrackValues } from './TracksContainer';
 
+import bigwig_figure from './images/template_bigwig.png';
+import hic_figure from './images/template_hic.png';
+import asm_figure from './images/template_asm.png';
+import wgs_figure from './images/template_wgs_chr.png';
+import circos_figure from './images/template_wgs_circos.png';
+
 
 export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,setGeneralParams,close}){
     const templates = ["bigwig", "hic", "asm", "wgs_chr", "wgs_circos"];
@@ -71,7 +77,7 @@ export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,se
         setRegionsList(regions);
 
         let svTrack= {id:uuid4(),type:"sv",...defaultTrackValues.sv};
-        let copynumberTrack= {id:uuid4(),type:"copynumber",...defaultTrackValues.copynumber,margin_above:0};
+        let copynumberTrack= {id:uuid4(),type:"copynumber",...defaultTrackValues.copynumber,margin_above:0,max_cn:3.9,grid_major:false,grid_minor:false};
         let chrTrack={id:uuid4(),type:"chr_axis",...defaultTrackValues["chr_axis"],margin_above:0};
         setHighlightsList([]);
         setTracksList([svTrack,copynumberTrack,chrTrack])
@@ -82,21 +88,22 @@ export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,se
     <div className="TemplatePanel" ref={popover}>
         <h2> Select template </h2>
         <div className="TrackTypeGrid">
-            <TemplateButton name="bigwig" onClick={select_bigwig} />
-            <TemplateButton name="hic" onClick={select_hic}/>
-            <TemplateButton name="asm" onClick={select_asm}/>
-            <TemplateButton name="wgs_chr" onClick={select_wgs_chr} />
-            <TemplateButton name="wgs_circos" onClick={select_wgs_circos}/>
+            <TemplateButton name="bigwig" onClick={select_bigwig}><img src={bigwig_figure} width="200" height="40" alt="hic" /></TemplateButton>
+            <TemplateButton name="hic" onClick={select_hic}><img src={hic_figure} width="200" height="100" alt="hic" /></TemplateButton>
+            <TemplateButton name="asm" onClick={select_asm}><img src={asm_figure} width="200" height="100" alt="hic" /></TemplateButton>
+            <TemplateButton name="wgs_chr" onClick={select_wgs_chr} ><img src={wgs_figure} width="200" height="50" alt="hic" /></TemplateButton>
+            <TemplateButton name="wgs_circos" onClick={select_wgs_circos}><img src={circos_figure} width="100" height="100" alt="hic" /></TemplateButton>
         </div>
         <button onClick={close}>Cancel</button>
     </ div>
     )
 }
 
-function TemplateButton({name,onClick}){
+function TemplateButton({children,name,onClick}){
     return(
         <div className="TemplateButton" onClick={onClick}>
             {name}
+            {children}
 
         </div>
     )

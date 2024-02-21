@@ -18,11 +18,15 @@ window = webview.create_window('figeno',app,width=webview.screens[0].width,heigh
 
 
 
-@app.route('/browse')
+@app.route('/browse', methods=["POST"])
 def browse():
     global last_dir
+    data=request.get_json()
+    start_dir = last_dir
+    if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
+        start_dir = os.path.dirname(data["path"])
     result = window.create_file_dialog(
-        webview.OPEN_DIALOG, allow_multiple=False ,directory=last_dir)
+        webview.OPEN_DIALOG, allow_multiple=False ,directory=start_dir)
     
     if result is not None:
         filename = result[0]
@@ -41,10 +45,19 @@ def open_files():
 
     return jsonify({"files":result})
 
-@app.route('/save')
+@app.route('/save',methods=["POST"])
 def save():
     global last_dir
-    t = window.create_file_dialog( webview.SAVE_DIALOG,  save_filename='figure.svg',directory=last_dir)
+    data=request.get_json()
+    start_dir = last_dir
+    save_filename="figure.svg"
+    if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
+        start_dir=os.path.dirname(data["path"])
+    if len(data["path"])>0:
+        filename = os.path.basename(data["path"])
+        if len(filename)>0 and (filename.endswith(".svg") or filename.endswith(".pdf") or filename.endswith(".ps") or filename.endswith(".eps")):
+            save_filename=filename
+    t = window.create_file_dialog( webview.SAVE_DIALOG,  save_filename=save_filename,directory=start_dir)
     if t is not None:
         t=t[0]
         last_dir = os.path.dirname(t)

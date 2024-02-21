@@ -133,7 +133,7 @@ input{
   position:fixed;
   left:30%;
   right:30%;
-  top:20%;
+  top:10%;
   /*left:50px;*/
 
   border-radius: 9px;
@@ -440,8 +440,8 @@ input[type='checkbox'] {
   min-height:5px;
   transition: all .1s ease-in-out;
 
-  width:100px;
-  height:100px;
+  width:250px;
+  height:130px;
 }
 .TemplateButton:hover{
   background-color: #444444;
