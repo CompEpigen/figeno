@@ -191,7 +191,7 @@ function GenesTrack({track,set_value,openColorPanel}){
 
 
 function BedTrack({track,set_value,openColorPanel}){
-    const fileClass= (!track.file.endsWith(".bed"))? "unsetPath":""; 
+    const fileClass= ((!track.file.endsWith(".bed")) && (!track.file.endsWith(".tsv")))? "unsetPath":""; 
     return (
         <>
         <div className="optionGroup">

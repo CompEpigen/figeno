@@ -1,10 +1,17 @@
 import traceback
 import logging
+import os
 from flask import Flask, jsonify, request
 import json
 
 from figeno import figeno_make
 import webview
+
+os.unsetenv("http_proxy")
+os.unsetenv("HTTP_PROXY")
+last_dir=os.path.expanduser("~")
+config_dir=last_dir
+config_file = "config.json"
 
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 window = webview.create_window('figeno',app,width=webview.screens[0].width,height=webview.screens[0].height)
@@ -13,48 +20,71 @@ window = webview.create_window('figeno',app,width=webview.screens[0].width,heigh
 
 @app.route('/browse')
 def browse():
+    global last_dir
     result = window.create_file_dialog(
-        webview.OPEN_DIALOG, allow_multiple=False )
+        webview.OPEN_DIALOG, allow_multiple=False ,directory=last_dir)
+    
     if result is not None:
-        return jsonify({"path":result[0]})
+        filename = result[0]
+        last_dir=os.path.dirname(filename)
+        return jsonify({"path":filename})
     else:
         return jsonify({"path":""})
 
 @app.route('/open_files')
 def open_files():
+    global last_dir
     result = window.create_file_dialog(
-        webview.OPEN_DIALOG, allow_multiple=True )
+        webview.OPEN_DIALOG, allow_multiple=True ,directory=last_dir)
+    if result is not None:
+        last_dir = os.path.dirname(result[0])
 
     return jsonify({"files":result})
 
 @app.route('/save')
 def save():
-    t = window.create_file_dialog( webview.SAVE_DIALOG, directory='/', save_filename='figure.svg')
+    global last_dir
+    t = window.create_file_dialog( webview.SAVE_DIALOG,  save_filename='figure.svg',directory=last_dir)
+    if t is not None:
+        t=t[0]
+        last_dir = os.path.dirname(t)
     return jsonify({"path":t})
 
 @app.route('/save_config', methods = ['POST'])
 def save_config():
+    global config_dir
+    global config_file
     if request.is_json:
         data = request.get_json()
-        filename = window.create_file_dialog( webview.SAVE_DIALOG, directory='/', save_filename='config.json')
-        #filename=tkinter.filedialog.asksaveasfilename(initialfile="config.json")
-        #print(t)
-        with open(filename,"w") as fp:
-            json.dump(data,fp,indent= "\t")
-        return jsonify({"path":filename})
+        filename = window.create_file_dialog( webview.SAVE_DIALOG,  save_filename=config_file,directory=config_dir)
+        if filename is not None:
+            filename = filename[0]
+            config_dir=os.path.dirname(filename)
+            config_file = os.path.basename(filename)
+            with open(filename,"w") as fp:
+                json.dump(data,fp,indent= "\t")
+            return jsonify({"path":filename})
+        else:
+            return jsonify({})
 
 @app.route('/load_config')
 def load_config():
+    global config_dir
+    global config_file
     
     filename = window.create_file_dialog(
-        webview.OPEN_DIALOG, allow_multiple=False )[0]
+        webview.OPEN_DIALOG, allow_multiple=False ,directory=config_dir)
     
-    if len(filename)>0:
+    if filename is not None:
+        filename = filename[0]
+        config_dir=os.path.dirname(filename)
+        config_file=os.path.basename(filename)
+        print(filename)
         with open(filename,"r") as fp:
             config = json.load(fp)
         return jsonify(config)
     else:
-        return {}
+        return jsonify({})
 
 @app.route('/run', methods = ['POST'])
 def run():

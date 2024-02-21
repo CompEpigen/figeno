@@ -9,30 +9,41 @@ from figeno import figeno_make
 
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
+last_dir=os.path.expanduser("~")
+config_dir=last_dir
+
 
 
 
 @app.route('/browse')
 def browse():
-    t=crossfiledialog.open_file()
+    global last_dir
+    t=crossfiledialog.open_file(start_dir=last_dir)
+    if len(t)>0: last_dir= os.path.dirname(t)
     return jsonify({"path":t})
 
 @app.route('/open_files')
 def open_files():
-    t=crossfiledialog.open_multiple()
+    global last_dir
+    t=crossfiledialog.open_multiple(start_dir=last_dir)
+    if len(t)>0 and len(t[0])>0: last_dir= os.path.dirname(t[0])
     return jsonify({"files":t})
 
 @app.route('/save')
 def save():
-    t=crossfiledialog.save_file()
+    global last_dir
+    t=crossfiledialog.save_file(start_dir=last_dir)
+    if len(t)>0:last_dir= os.path.dirname(t)
     return jsonify({"path":t})
 
 @app.route('/save_config', methods = ['POST'])
 def save_config():
+    global config_dir
     if request.is_json:
         data = request.get_json()
-        filename=crossfiledialog.save_file()
+        filename=crossfiledialog.save_file(start_dir=config_dir)
         if len(filename)>0:
+            config_dir=os.path.dirname(filename)
             with open(filename,"w") as fp:
                 json.dump(data,fp,indent= "\t")
             return jsonify({"path":filename})
@@ -40,8 +51,10 @@ def save_config():
 
 @app.route('/load_config')
 def load_config():
-    filename=crossfiledialog.open_file(filter="*.json")
+    global config_dir
+    filename=crossfiledialog.open_file(filter="*.json",start_dir=config_dir)
     if len(filename)>0:
+        config_dir=os.path.dirname(filename)
         with open(filename,"r") as fp:
             config = json.load(fp)
         return jsonify(config)
@@ -71,7 +84,7 @@ def main(args=None):
         logging.getLogger('werkzeug').disabled = True
     port=5000
     if args is not None: port = args.port
-    
+    print("starting local server on http://localhost:"+str(port))
     webbrowser.open_new_tab('http://localhost:'+str(port)+'/')
     app.run(debug=debug,port=port)
 
