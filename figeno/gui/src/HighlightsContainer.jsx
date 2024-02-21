@@ -1,4 +1,5 @@
 import React from 'react';
+import {v4 as uuid4} from 'uuid';
 import "./style.css";
 import {Highlight} from './Highlight'
 import { DndContainer } from './DndContainer';
@@ -21,14 +22,14 @@ export function HighlightsContainer({regionsList,setRegionsList,openColorPanel})
 
 
     function add_region(){
-        setRegionsList([...regionsList,{id:crypto.randomUUID(),chr:"",start:"",end:"",color:"#eba434",opacity:"0.3"}]);
+        setRegionsList([...regionsList,{id:uuid4(),chr:"",start:"",end:"",color:"#eba434",opacity:"0.3"}]);
     }
     function delete_region(id){
         setRegionsList((regions_list) => {return regions_list.filter(region => region.id!==id)})
     }
     function copy_region(id){
         const index = regionsList.findIndex((t)=>t.id==id);
-        const newTrack = {...regionsList[index],id:crypto.randomUUID()};
+        const newTrack = {...regionsList[index],id:uuid4()};
         const newList = [...regionsList]
         newList.splice(index,0,newTrack);
         setRegionsList(newList);

@@ -9,9 +9,9 @@ import mock
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy','matplotlib','cooler','Flask','importlib-resources']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+#MOCK_MODULES = ['pyBigWig', 'pysam', 'numpy', 'pandas', 'vcfpy','matplotlib','cooler','Flask','importlib-resources']
+#for mod_name in MOCK_MODULES:
+#    sys.modules[mod_name] = mock.Mock()
 
 project = 'figeno'
 copyright = '2024, Etienne Sollier'
@@ -20,7 +20,7 @@ author = 'Etienne Sollier'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx_rtd_theme','sphinx.ext.autosectionlabel','sphinxarg.ext']
+extensions = ['sphinx_rtd_theme','sphinx.ext.autosectionlabel']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

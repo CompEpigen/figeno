@@ -31,4 +31,5 @@ The config file is made out of five sections: General, Output, Regions, Highligh
    content/installation
    content/usage
    content/describe_figure
+   content/examples
 

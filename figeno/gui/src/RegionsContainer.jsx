@@ -1,4 +1,5 @@
 import React from 'react';
+import {v4 as uuid4} from 'uuid';
 import "./style.css";
 import {Region} from './Region'
 import { DndContainer } from './DndContainer';
@@ -21,14 +22,14 @@ export function RegionsContainer({regionsList,setRegionsList,openColorPanel,show
 
 
     function add_region(){
-        setRegionsList([...regionsList,{id:crypto.randomUUID(),chr:"",start:"",end:"",color:"#f4a460"}]);
+        setRegionsList([...regionsList,{id:uuid4(),chr:"",start:"",end:"",color:"#f4a460"}]);
     }
     function delete_region(id){
         setRegionsList((regions_list) => {return regions_list.filter(region => region.id!==id)})
     }
     function copy_region(id){
         const index = regionsList.findIndex((t)=>t.id==id);
-        const newTrack = {...regionsList[index],id:crypto.randomUUID()};
+        const newTrack = {...regionsList[index],id:uuid4()};
         const newList = [...regionsList]
         newList.splice(index,0,newTrack);
         setRegionsList(newList);
@@ -41,10 +42,10 @@ export function RegionsContainer({regionsList,setRegionsList,openColorPanel,show
         const colors=["#98671F","#65661B","#969833","#CE151D","#FF1A25","#FF0BC8","#FFCBCC","#FF9931","#FFCC3A","#FCFF44","#C4FF40","#00FF3B",
         "#2F7F1E","#2800C6","#6A96FA","#98CAFC","#00FEFD","#C9FFFE","#9D00C6","#D232FA","#956DB5","#5D5D5D","#989898","#CBCBCB"];
         for (let i = 1; i < 23; i++) {
-            regions.push({id:crypto.randomUUID(),"chr":i.toString(),"start":"","end":"",color:colors[i-1]});
+            regions.push({id:uuid4(),"chr":i.toString(),"start":"","end":"",color:colors[i-1]});
         }
-        regions.push({id:crypto.randomUUID(),"chr":"X","start":"","end":"",color:colors[22]});
-        regions.push({id:crypto.randomUUID(),"chr":"Y","start":"","end":"",color:colors[23]});
+        regions.push({id:uuid4(),"chr":"X","start":"","end":"",color:colors[22]});
+        regions.push({id:uuid4(),"chr":"Y","start":"","end":"",color:colors[23]});
         setRegionsList(regions);
 
 

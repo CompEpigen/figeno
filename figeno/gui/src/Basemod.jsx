@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from 'react';
+import {v4 as uuid4} from 'uuid';
 import { ColorButton } from './ColorButton';
 import "./style.css";
 import { DndItem } from './DndItem';
@@ -92,7 +92,7 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
 export function BasemodfreqTrack({track,set_value,openColorPanel}){
 
     function add_bam(){
-        set_value("bams",[...track.bams,{id:crypto.randomUUID(),file:"",base:"C",mod:"m",min_coverage:6,linewidth:3,opacity:1.0,fix_hardclip:false,split_by_haplotype:false,
+        set_value("bams",[...track.bams,{id:uuid4(),file:"",base:"C",mod:"m",min_coverage:6,linewidth:3,opacity:1.0,fix_hardclip:false,split_by_haplotype:false,
     labels:[""],colors:["#27ae60"]}])
     }
     function delete_bam(id){
@@ -100,7 +100,7 @@ export function BasemodfreqTrack({track,set_value,openColorPanel}){
     }
     function copy_bam(id){
         const index = track.bams.findIndex((t)=>t.id==id);
-        const newBam = {...track.bams[index],id:crypto.randomUUID()};
+        const newBam = {...track.bams[index],id:uuid4()};
         const newList = [...track.bams]
         newList.splice(index,0,newBam);
         set_value("bams",newList);

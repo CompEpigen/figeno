@@ -1,4 +1,5 @@
 import React from 'react';
+import {v4 as uuid4} from 'uuid';
 import "./style.css";
 import { DndContainer } from './DndContainer';
 import {Track} from './Track'
@@ -187,7 +188,7 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
     }
     function copy_track(id){
         const index = tracksList.findIndex((t)=>t.id==id);
-        const newTrack = {...tracksList[index],id:crypto.randomUUID()};
+        const newTrack = {...tracksList[index],id:uuid4()};
         const newList = [...tracksList]
         newList.splice(index,0,newTrack);
         setTracksList(newList);
@@ -214,7 +215,7 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
 
     function add_track(track={}){
         const new_type = track.hasOwnProperty("type") ? track.type : "";
-        setTracksList([create_track({id:crypto.randomUUID(),type:new_type,track:track}),...tracksList]);
+        setTracksList([create_track({id:uuid4(),type:new_type,track:track}),...tracksList]);
     }
     function getTrackById (tracks, id) {
         return tracks.find((track) => track.id === id);
@@ -229,16 +230,16 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
           const tracks=[];
           for (const f of data.files){
             if (f.endsWith(".bed")){
-                tracks.push({id:crypto.randomUUID(),type:"bed",...defaultTrackValues["bed"],file:f})
+                tracks.push({id:uuid4(),type:"bed",...defaultTrackValues["bed"],file:f})
             }
             else if (f.endsWith(".bw") || (f.endsWith(".bigwig") || (f.endsWith("bigWig")))){
-                tracks.push({id:crypto.randomUUID(),type:"bigwig",...defaultTrackValues["bigwig"],file:f})
+                tracks.push({id:uuid4(),type:"bigwig",...defaultTrackValues["bigwig"],file:f})
             }
             else if (f.endsWith(".cool")){
-                tracks.push({id:crypto.randomUUID(),type:"hic",...defaultTrackValues["hic"],file:f})
+                tracks.push({id:uuid4(),type:"hic",...defaultTrackValues["hic"],file:f})
             }
             else if (f.endsWith(".bam")){
-                tracks.push({id:crypto.randomUUID(),type:"alignments",...defaultTrackValues["alignments"],file:f})
+                tracks.push({id:uuid4(),type:"alignments",...defaultTrackValues["alignments"],file:f})
             }
           }
           setTracksList([...tracks,...tracksList]);

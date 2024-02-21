@@ -2,6 +2,8 @@
 
 Describing the figure
 ==================================
+
+The figure is characterized by a config file in json format, which is made up of 5 sections: :ref:`General`, :ref:`Output`, :ref:`Regions`, :ref:`Highlights` and :ref:`Tracks`.
     
 General
 -------
@@ -27,7 +29,11 @@ Output
 Regions
 -------
 
-Regions are defined by chr, start and end. If end<start, the region will be shown in reverse orientation (from right to left). The color attribute will only be used if a chr axis track with style "arrow" is used. At least one region must be provided, but a key feature of figeno is that it allows several regions to be displayed at the same time. Tracks will be displayed independently for each region, except for hic and sv which can show interactions across regions, and bigwig and coverage whose scale can depend on all regions (depending on the chosen scale).
+Regions are defined by chr, start and end. If end<start, the region will be shown in reverse orientation (from right to left). The color attribute will only be used if a chr axis track with style "arrow" is used. At least one region must be provided, but a key feature of figeno is that it allows several regions to be displayed at the same time. Tracks will be displayed independently for each region, except for:
+* hic tracks if show_interactions_across_regions is set to True, in which case interactions will be shown across regions.
+* sv tracks which can show breakpoints across regions.
+* alignments tracks if link_splitreads is True, in which case all all alignments of a read will be linked, if the read has supplementary alignments.
+* for bigwig and coverage tracks, if the scale is set to "auto" (and not "auto per region"), the same scale will be used for all regions.
 
 
 
@@ -70,7 +76,11 @@ genes
   
   * **TSS_arrow**: draw exons as rectangle, and add an arrow above the TSS indicating the orientation. Best suited when only one gene is shown.
   
-* **Exon color**: choose the color of the exons.
+* collapsed: if true (default), all transcripts corresponding to the same gene will be shown together, otherwise there will be one line per transcript.
+
+* only_protein_coding: if true (default), only show protein coding genes. Otherwise, show all genes found in the region.
+  
+* **exon_color**: choose the color of the exons.
 
 * **genes**: "auto" by default, meaning that all genes found in the region will be shown. Alternatively, you can specify a comma-separated list of gene names that you want to show, eg: ETV6,BCL2L14,LRP6
 
@@ -88,9 +98,11 @@ bigwig
 
 * **n_bins**: indicate the number of windows in which the signal will be averaged. A high number will result in narrower peaks with more frequent variation.
 
-* **Label**: Name of the track, written to the left of the track.
+* **label**: Name of the track, written to the left of the track.
 
-* **rotate_label**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+* **label_rotate**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+
+* **color**: color of the track.
 
 * **scale**: how the maximum value for the y-axis is chosen
 
@@ -99,8 +111,10 @@ bigwig
   * **auto per region**: will select as maximum the maximum of each region (so a different scale is used for each region)
   
   * **custom**: manually specify the maximum value. Can either specify a single value, which will then be used for all regions, or a comma-separated list of values (one per region)
+
+* **scale_max**: in case "scale" is "custom", indicate the maximum value for the y-axis.
   
-* **scale_position**: where the scale (min and max value of the y-axis) will be displayed
+* **scale_pos**: where the scale (min and max value of the y-axis) will be displayed
 
   * **left**: on the left of the track
   
@@ -116,9 +130,11 @@ coverage
 
 * **n_bins**: indicate the number of windows in which the signal will be averaged. A high number will result in narrower peaks with more frequent variation.
 
-* **Label**: Name of the track, written to the left of the track.
+* **label**: Name of the track, written to the left of the track.
 
-* **rotate_label**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+* **label_rotate**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+
+* **color**: color of the track.
 
 * **scale**: how the maximum value for the y-axis is chosen
 
@@ -128,7 +144,9 @@ coverage
   
   * **custom**: manually specify the maximum value. Can either specify a single value, which will then be used for all regions, or a comma-separated list of values (one per region)
   
-* **scale_position**: where the scale (min and max value of the y-axis) will be displayed
+* **scale_max**: in case "scale" is "custom", indicate the maximum value for the y-axis.
+  
+* **scale_pos**: where the scale (min and max value of the y-axis) will be displayed
 
   * **left**: on the left of the track
   
@@ -144,9 +162,9 @@ alignments
 
 .. image:: images/figure_alignments.png 
 
-* **Label**: Name of the track, written to the left of the track.
+* **label**: Name of the track, written to the left of the track.
 
-* **rotate_label**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+* **label_rotate**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
 
 * **group_by**: none (default) or haplotype. Grouping by haplotypes requires the reads to be phased (with a HP tag). 
 

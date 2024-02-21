@@ -158,6 +158,9 @@ select{
 
 h3{
   margin:3px;
+  font: inherit;
+  font-size: 1.3em;
+  font-weight: bold;
 }
 
 

@@ -1,7 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {DndContext} from '@dnd-kit/core';
-import { HexColorPicker, HexColorInput } from "react-colorful";
-import { motion, AnimatePresence } from "framer-motion"
+import {v4 as uuid4} from 'uuid';
 
 
 import { GeneralContainer } from './GeneralContainer';
@@ -19,7 +17,7 @@ import "./style.css";
 export default function App() {
   const [generalParams,setGeneralParams] = React.useState({"layout":"horizontal","reference":"hg19"});
   const [outputParams,setOutputParams] = React.useState({file:"",dpi:"400",width:"180"});
-  const [regionsList,setRegionsList] = React.useState([{id:crypto.randomUUID(),chr:"",start:"",end:"",color:"#f4a460"}]);
+  const [regionsList,setRegionsList] = React.useState([{id:uuid4(),chr:"",start:"",end:"",color:"#f4a460"}]);
   const [highlightsList,setHighlightsList] = React.useState([]);
   const [tracksList,setTracksList] = React.useState([]);
 
@@ -122,7 +120,7 @@ export default function App() {
       
       const regions=[];
       for (const r of data.regions){
-        const region={id:crypto.randomUUID(),...r};
+        const region={id:uuid4(),...r};
         regions.push(region);
       }
       setRegionsList(regions);
@@ -130,7 +128,7 @@ export default function App() {
       if (data.hasOwnProperty("highlights")){
         const highlights=[];
         for (const r of data.highlights){
-          const region={id:crypto.randomUUID(),...r};
+          const region={id:uuid4(),...r};
           highlights.push(region);
         }
       setHighlightsList(highlights);
@@ -139,7 +137,7 @@ export default function App() {
       const tracks=[];
       for (const t of data.tracks){
         if (t.hasOwnProperty("type")){
-          const track={id:crypto.randomUUID(),...defaultTrackValues[t.type],...t};
+          const track={id:uuid4(),...defaultTrackValues[t.type],...t};
           tracks.push(track);
         }
       }
