@@ -138,6 +138,14 @@ export default function App() {
       for (const t of data.tracks){
         if (t.hasOwnProperty("type")){
           const track={id:uuid4(),...defaultTrackValues[t.type],...t};
+
+          if (t.type=="basemod_freq"){
+            let bams = [];
+            for (const x of t.bams){
+              bams.push({id:uuid4(),...x})
+            }
+            track.bams = bams;
+          }
           tracks.push(track);
         }
       }
