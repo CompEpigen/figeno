@@ -55,7 +55,7 @@ def save():
         start_dir=os.path.dirname(data["path"])
     if len(data["path"])>0:
         filename = os.path.basename(data["path"])
-        if len(filename)>0 and (filename.endswith(".svg") or filename.endswith(".pdf") or filename.endswith(".ps") or filename.endswith(".eps")):
+        if len(filename)>0 and (filename.endswith(".svg") or filename.endswith(".pdf") or filename.endswith(".ps") or filename.endswith(".eps") or filename.endswith(".png")):
             save_filename=filename
     t = window.create_file_dialog( webview.SAVE_DIALOG,  save_filename=save_filename,directory=start_dir)
     if t is not None:
