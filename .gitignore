@@ -8,6 +8,7 @@ docs/_build
 
 figeno/gui/node_modules
 figeno/gui/build
+figeno/gui/build.zip
 
 pyinstaller/build
 pyinstaller/dist
