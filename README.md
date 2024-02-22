@@ -5,24 +5,23 @@ Tool for making genomics figures.
 ## Features:
 - Large collection of tracks (bigwig, HiC, alignments, copy number, SV…)
 - Graphical user interface
-- Multi-region figures
+- Multi-region figures with interactions across regions
 - Highlight regions of interest
 - Output figures in svg, pdf, eps or png
 
-## Installation
+## Quick start
 ### Linux, MacOS
-Clone and repository and install it as a python package
+In an environment with python>=3.7:
 ```
-git clone https://github.com/CompEpigen/figeno.git
-cd figeno
-pip install .
+pip install figeno
+figeno gui
 ```
-Then run `figeno` to start the graphical user interface.
-If you are using conda and notice that the user interface looks strange, also run `conda install -c conda-forge tk=*=xft_*`
+This will install figeno and run the graphical user interface (GUI). From the GUI, you can configure the figure and generate it, as well as save the JSON config file which fully defines the figure. The GUI is optional and you can instead use the command line interface: use [figeno init](https://figeno.readthedocs.io/en/latest/content/usage.html#figeno-init) to initialize a config file, edit the config file manually, and generate the figure with [figeno make](https://figeno.readthedocs.io/en/latest/content/usage.html#figeno-make).
 
 ### Windows
-Download the figeno_windows.zip from https://github.com/CompEpigen/figeno/releases/tag/0.1, unzip it and launch the graphical user interface by clicking on `figeno.exe`.
+Download figeno_windows.zip from https://github.com/CompEpigen/figeno/releases/latest, unzip it and launch the graphical user interface by executing `figeno.exe`.
 
 ## Documentation
+For more information on how to use figeno, please read the documentation at: 
 https://figeno.readthedocs.io/en/latest/
   
