@@ -138,7 +138,7 @@ class tracks_plot:
                         t["genes_file"] = self.genes_file
                         self.tracks_list.append(ase_track(**t))
                     else:
-                        pass
+                        print("WARNING: unrecognized track type: "+str(t))
 
             self.figure_layout = config["general"]["layout"]
             self.output = None
@@ -256,7 +256,7 @@ class tracks_plot:
             current_height+=t.height+t.margin_above
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
-        plt.tight_layout(pad=0)
+        plt.tight_layout(pad=0.1)
         fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
@@ -292,7 +292,7 @@ class tracks_plot:
             current_height+=t.height+t.margin_above
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
-        plt.tight_layout(pad=0)
+        plt.tight_layout(pad=0.1)
         fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
@@ -337,7 +337,7 @@ class tracks_plot:
 
             current_height+=t.height
         plt.axis('off')
-        plt.tight_layout(pad=0)
+        plt.tight_layout(pad=0.1)
         fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 
@@ -383,7 +383,7 @@ class tracks_plot:
         plt.axis('off')
         ax.set_rmin(0)
         ax.set_rmax(current_r)
-        plt.tight_layout(pad=0)
+        plt.tight_layout(pad=0.1)
         fig.savefig(file,dpi=dpi,transparent=transparent)
         plt.cla() 
         plt.clf() 

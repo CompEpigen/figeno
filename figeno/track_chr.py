@@ -289,10 +289,10 @@ class chr_track:
         # label the region (need to rotate the text)
         rotation_text,halign,valign = compute_rotation_text((box["left"]+box["right"])/2)
 
-        r_text = r_rec+(box["top"]-box["bottom"])*0.1
+        r_text = r_rec+(box["top"]-box["bottom"])*0.4
 
-        box["ax"].text((box["left"]+box["right"])/2,r_text,region.chr,rotation=rotation_text,verticalalignment=valign,horizontalalignment=halign,fontsize=22*self.fontscale)
-
+        #box["ax"].text((box["left"]+box["right"])/2,r_text,region.chr,rotation=rotation_text,verticalalignment=valign,horizontalalignment=halign,fontsize=22*self.fontscale)
+        box["ax"].text((box["left"]+box["right"])/2,r_text,region.chr,rotation=rotation_text,verticalalignment="center",horizontalalignment="center",fontsize=22*self.fontscale)
         #,bbox=dict(facecolor='red', alpha=0.4, edgecolor='black')
 
     def get_highlights_offsets(self):
