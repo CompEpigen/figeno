@@ -207,8 +207,8 @@ def get_track(type):
 				"#808080"
 			],
 			"haplotype_labels": [
-				"HP1 1",
-				"HP2 2",
+				"HP1",
+				"HP2",
 				"Unphased"
 			],
 			"color_by": "none",
