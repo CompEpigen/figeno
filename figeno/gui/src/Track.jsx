@@ -683,8 +683,12 @@ export function TrackIcon({track_type, onClick}){
 
         {(track_type=="bed")?(
             <svg width="15mm" height="15mm" version="1.1" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-            <rect transform="scale(-1,1)" x="-8" y="4.25" width="6" height="1.5" fill="#2980b9" opacity=".97208" strokeLinecap="round" strokeWidth="1.6488"/>
-            </svg>
+            <g fill="#2980b9" strokeLinecap="round">
+             <rect transform="scale(-1,1)" x="-3.1605" y="4.25" width="1.6605" height="1.5" opacity=".97208" strokeWidth="1.3665"/>
+             <rect transform="scale(-1,1)" x="-6.1252" y="4.25" width="1.887" height="1.5" opacity=".97208" strokeWidth="1.4567"/>
+             <rect transform="scale(-1,1)" x="-8.5" y="4.25" width="1.1101" height="1.5" opacity=".97208" strokeWidth="1.1173"/>
+            </g>
+           </svg>
         ):""}
         
         {(track_type=="bigwig")?(
