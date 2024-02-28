@@ -235,7 +235,7 @@ function BigWigTrack({track,set_value,openColorPanel}){
                 {(track.scale=="custom")?(
                     <div className='formItem'>
                     <label htmlFor={"scale_max"+track.id}>Max:</label>
-                    <input id={"scale_max"+track.id} style={{width:"3em"}} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
+                    <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
                 </div>):""
                 }
                 <div className='formItem'>
@@ -280,7 +280,7 @@ function CoverageTrack({track,set_value,openColorPanel}){
                 {(track.scale=="custom")?(
                     <div className='formItem'>
                     <label htmlFor={"scale_max"+track.id}>Max:</label>
-                    <input id={"scale_max"+track.id} style={{width:"3em"}} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
+                    <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
                 </div>):""
                 }
                 <div className='formItem'>
@@ -479,7 +479,8 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
 
 
 function HicTrack({track,set_value}){
-    const fileClass= (!track.file.endsWith("cool"))? "unsetPath":""; 
+    const fileClass= ((!track.file.endsWith(".cool")) && (!track.file.includes(".mcool::resolutions/")))? "unsetPath":""; 
+
     return (
         <>
         <div className="optionGroup">
@@ -491,14 +492,39 @@ function HicTrack({track,set_value}){
                             <option className="dropDownOption" key="heat" value="heat">heat</option>
                 </select>
             </div>
+
             <div className='formItem'>
-                <label htmlFor={"pixel_border"+track.id}>Pixel border:</label>
-                <input type="checkbox" id={"pixel_border"+track.id} checked={track.pixel_border} onChange={() => set_value("pixel_border",!track.pixel_border)} />
+                <label htmlFor={"scale"+track.id}>Scale:</label>
+                <select id={"scale"+track.id} value={track.scale} onChange={(e) =>{set_value("scale",e.target.value)}}> 
+                            <option className="dropDownOption" key="auto" value="auto">auto</option>
+                            <option className="dropDownOption" key="custom"  value="custom">custom</option>
+                </select>
             </div>
+                {(track.scale=="custom")?(
+                    <>
+                    <div className='formItem'>
+                    <label htmlFor={"scale_min"+track.id}>Min:</label>
+                    <input id={"scale_min"+track.id} style={{width:"3em"}} value={track.scale_min} onChange={(e) => set_value("scale_min",e.target.value)} ></input>
+                    </div>
+                    <div className='formItem'>
+                    <label htmlFor={"scale_max"+track.id}>Max:</label>
+                    <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
+                    </div>
+                    </>):(
+                        <div className='formItem'>
+                        <label htmlFor={"scale_max_percentile"+track.id}>Max percentile:</label>
+                        <input id={"scale_max_percentile"+track.id} style={{width:"3em"}} value={track.scale_max_percentile} onChange={(e) => set_value("scale_max_percentile",e.target.value)} ></input>
+                        </div>
+                    )
+                }
             <div className='formItem'>
-                <label htmlFor={"upside_down"+track.id}>Upside down:</label>
-                <input type="checkbox" id={"upside_down"+track.id} checked={track.upside_down} onChange={() => set_value("upside_down",!track.upside_down)} />
+                <label htmlFor={"show_colorbar"+track.id}>Show colorbar:</label>
+                <input type="checkbox" id={"show_colorbar"+track.id} checked={track.show_colorbar} onChange={() => set_value("show_colorbar",!track.show_colorbar)} />
             </div>
+            
+        </div>
+
+        <div className="optionGroup">
 
             <div className='formItem'>
                 <label htmlFor={"max_dist"+track.id}>Max dist (kb):</label>
@@ -509,9 +535,6 @@ function HicTrack({track,set_value}){
                 <label htmlFor={"extend"+track.id}>Extend:</label>
                 <input type="checkbox" id={"extend"+track.id} checked={track.extend} onChange={() => set_value("extend",!track.extend)} />
             </div>
-        </div>
-
-        <div className="optionGroup">
             <div className='formItem'>
                 <label htmlFor={"interactions_across_regions"+track.id}>Interactions across regions:</label>
                 <input type="checkbox" id={"interactions_across_regions"+track.id} checked={track.interactions_across_regions} onChange={() => set_value("interactions_across_regions",!track.interactions_across_regions)} />
@@ -522,6 +545,14 @@ function HicTrack({track,set_value}){
                 <input type="checkbox" id={"double_interactions_across_regions"+track.id} checked={track.double_interactions_across_regions} onChange={() => set_value("double_interactions_across_regions",!track.double_interactions_across_regions)} />
             </div>
             ):""}
+            <div className='formItem'>
+                <label htmlFor={"pixel_border"+track.id}>Pixel border:</label>
+                <input type="checkbox" id={"pixel_border"+track.id} checked={track.pixel_border} onChange={() => set_value("pixel_border",!track.pixel_border)} />
+            </div>
+            <div className='formItem'>
+                <label htmlFor={"upside_down"+track.id}>Upside down:</label>
+                <input type="checkbox" id={"upside_down"+track.id} checked={track.upside_down} onChange={() => set_value("upside_down",!track.upside_down)} />
+            </div>
         </div>
             
         </>

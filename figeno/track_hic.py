@@ -10,17 +10,23 @@ from matplotlib.collections import PatchCollection
 from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
 
 class hic_track:
-    def __init__(self,file,max_dist=700,color_map="red",cmap_max_percentile=90,interactions_across_regions=True,double_interactions_across_regions=True,
-                 extend=True,upside_down=False,pixel_border=False,rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
+    def __init__(self,file,max_dist=700,color_map="red",scale_max_percentile=95,interactions_across_regions=True,double_interactions_across_regions=True,
+                 extend=True,upside_down=False,pixel_border=False,show_colorbar=False,scale="auto",scale_min=1.0,scale_max=1.12,
+                 rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         self.file = file # must be in cool format
         self.max_dist = max_dist *1000
         self.color_map=color_map
-        self.cmap_max_percentile = cmap_max_percentile
+        self.scale_max_percentile = float(scale_max_percentile)
         self.interactions_across_regions=interactions_across_regions
         self.double_interactions_across_regions=double_interactions_across_regions
         self.extend=extend
         self.upside_down=upside_down
         self.pixel_border=pixel_border
+        self.show_colorbar = show_colorbar
+        self.scale=scale
+        self.scale_min=float(scale_min)
+        self.scale_max= float(scale_max)
+        
         self.rasterize=rasterize
 
         self.label=label
@@ -52,9 +58,10 @@ class hic_track:
         angle = self.find_angle(regions,boxes,max_bindist)
         
 
-        vmin = 1.001
-        vmax=1.010 #TODO
-        vmin,vmax = self.get_min_max_values(regions,20,self.cmap_max_percentile)
+        if self.scale=="auto":
+            vmin,vmax = self.get_min_max_values(regions,0,self.scale_max_percentile)
+        else: vmin,vmax = np.exp(self.scale_min),np.exp(self.scale_max)
+        
         norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax)
         if self.color_map=="red" or self.color_map=="Red":
              self.color_map = LinearSegmentedColormap.from_list('interaction',
@@ -63,6 +70,18 @@ class hic_track:
             self.color_map = cm.RdYlBu_r
        
         colormap = cm.ScalarMappable(norm=norm, cmap=self.color_map)
+
+        # Draw colorbar 
+        if self.show_colorbar:
+            colorbar_matrix = np.array([x for x in np.linspace(0,1,100)]).reshape((100,1))
+            colorbar_top = box["top"] -(box["top"]-box["bottom"])*0.05
+            colorbar_bottom=box["top"] -(box["top"]-box["bottom"])*0.35
+            vertices=[(-8,colorbar_top) , (-2,colorbar_top) ,(-2,colorbar_bottom) , (-8,colorbar_bottom) ]
+            polygon = patches.Polygon(vertices,lw=0.6,edgecolor="black",facecolor="none",zorder=3)
+            #box["ax"].add_patch(polygon)
+            box["ax"].text(-8.4,colorbar_top,"{:10.4f}".format(np.log(vmax)),ha="right",va="top",fontsize=6*self.fontscale)
+            box["ax"].text(-8.4,colorbar_bottom,"{:10.4f}".format(np.log(vmin)),ha="right",va="bottom",fontsize=6*self.fontscale)
+            box["ax"].imshow(colorbar_matrix,cmap=self.color_map,extent=(-8,-2,colorbar_top,colorbar_bottom))
 
         patches_list = []
 

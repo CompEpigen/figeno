@@ -93,7 +93,7 @@ class basemodfreq_track:
 
             boundaries=[0]
             for i in range(len(x)-1):
-                if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) / 20:
+                if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) / 10:
                     boundaries.append(i+1)
             boundaries.append(len(x))
             for i in range(len(boundaries)-1):

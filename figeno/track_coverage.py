@@ -18,6 +18,7 @@ class coverage_track:
         self.fontscale=fontscale
         self.scale = scale
         self.scale_max = scale_max
+        if self.scale_max is not None: self.scale_max=float(self.scale_max)
         self.scale_pos = scale_pos
         if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
         self.vcf = vcf

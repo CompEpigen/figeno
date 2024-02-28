@@ -189,9 +189,7 @@ hic
 
 .. image:: images/figure_hic.png 
 
-* **Label**: Name of the track, written to the left of the track.
-
-* **rotate_label**: if false (default), the label is written horizontally. Otherwise, it will be written vertically.
+* **file**: file in cool or mcool format. If a mcool file is provided, you should specify the resolution by setting file to: "path/to/file.mcool::resolutions//xxxxx" 
 
 * **color_map**: how the interaction values are mapped to colors.
 
@@ -211,6 +209,8 @@ hic
 
 * **double_across_regions**: if True (default), the interaction score for two bins from different regions will be doubled. Intra-region interactions typically occur on both copies whereas inter-region interactions only occur on the rearranged copy, so this can be used to counter this effect.
 
+.. warning::
+  Only .cool and .mcool files are supported. If you have .hic files, please convert them to cool using https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html
 
 sv
 ^^^^^^^^

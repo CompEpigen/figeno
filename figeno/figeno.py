@@ -231,7 +231,7 @@ class tracks_plot:
         for _,w in self.regions: total_width+=w
 
         fig,ax = plt.subplots(figsize=(width/25.4,total_height/25.4)) # convert from mm to inches
-        ax.set_xlim((-5,total_width+5))
+        ax.set_xlim((-10,total_width+5))
         ax.set_ylim((-4,total_height+4))
 
         # Highlights
@@ -278,7 +278,7 @@ class tracks_plot:
         for _,w in self.regions: total_width+=w
         #fig,ax = plt.subplots(figsize=(total_width,total_height))
         fig,ax = plt.subplots(figsize=(width/25.4,total_height*len(self.regions)/25.4)) # convert from mm to inches
-        ax.set_xlim((-5,width+5))
+        ax.set_xlim((-10,width+5))
         ax.set_ylim((-4-total_height*(len(self.regions)-1),total_height+4))
         
         # Tracks
@@ -312,7 +312,7 @@ class tracks_plot:
         #for _,w,r in self.regions: total_width+=w
         #fig,ax = plt.subplots(figsize=(total_width,total_height))
         fig,ax = plt.subplots(figsize=(width/25.4,total_height/25.4*2)) # convert from mm to inches
-        ax.set_xlim((-self.total_width*0.03,self.total_width*1.03))
+        ax.set_xlim((-10,self.total_width*1.03))
         ax.set_ylim((-total_height*1.02,total_height*1.02))
 
         # Highlights

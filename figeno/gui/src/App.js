@@ -61,15 +61,14 @@ export default function App() {
   function get_config(){
     const regions_out=[];
     for (const region of regionsList){
-      const reg = {...region,start:parseInt(region.start),end:parseInt(region.end)};
-      delete reg.id;
+      const reg = {chr:region.chr,start:parseInt(region.start),end:parseInt(region.end)};
+      if (show_regions_color){reg.color = region.color;}
       regions_out.push(reg);
     }
 
     const highlights_out=[];
     for (const region of highlightsList){
-      const reg = {...region,start:parseInt(region.start),end:parseInt(region.end),opacity:parseFloat(region.opacity)};
-      delete reg.id;
+      const reg = {chr:region.chr,start:parseInt(region.start),end:parseInt(region.end),color:region.color,opacity:parseFloat(region.opacity)};
       highlights_out.push(reg);
     }
 
@@ -78,6 +77,20 @@ export default function App() {
       const t = {...track,height:parseFloat(track.height),margin_above:parseFloat(track.margin_above),fontscale:parseFloat(track.fontscale)};
       if (t.type=="basemod_freq"){
         t.bams = t.bams.map((b)=>{const newBam={...b};delete newBam.id; return newBam;})
+      }
+      else if (t.type=="bigwig" || t.type=="coverage"){
+        if (t.scale=="auto"){
+          delete t.scale_max;
+        }
+      }
+      else if (t.type=="hic"){
+        if (t.scale=="auto"){
+          delete t.scale_min;
+          delete t.scale_max;
+        }
+        else{
+          delete t.scale_max_percentile;
+        }
       }
       delete t.id;
       tracks_out.push(t);

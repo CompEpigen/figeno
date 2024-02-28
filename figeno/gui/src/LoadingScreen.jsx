@@ -18,10 +18,13 @@ export function LoadingScreen({errorMessage, setErrorMessage,setLoadingscreenAct
         <LoadingIcons.SpinningCircles fill="#2980b9" speed="1.2" width="100px" height="100px" />
         ):""}
 
+
         {(errorMessage!=="")? (
             <>
-            <div>An error has occured:</div>
+            <div >An error has occured:</div>
+            <div style={{overflowY: "scroll", maxHeight:"400px"}}>
             <p>{errorMessage}</p>
+            </div>
             <button onClick={handleButton}>Close</button>
             </>
         ):""}

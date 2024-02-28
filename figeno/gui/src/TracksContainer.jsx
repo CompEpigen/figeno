@@ -52,6 +52,7 @@ export const defaultTrackValues={
         color:"#2980b9",
         n_bins:500,
         scale:"auto",
+        scale_max:"",
         scale_pos:"corner"
     },
     "coverage":{
@@ -65,6 +66,7 @@ export const defaultTrackValues={
         color:"#888888",
         n_bins:500,
         scale:"auto",
+        scale_max:"",
         scale_pos:"corner"
     },
     "alignments":{
@@ -116,6 +118,11 @@ export const defaultTrackValues={
         upside_down:false,
         max_dist:700,
         extend:true,
+        scale:"auto",
+        scale_max_percentile:90,
+        scale_min:"0.0",
+        scale_max:"0.15",
+        show_colorbar: false,
         interactions_across_regions:true,
         double_interactions_across_regions:true
     },

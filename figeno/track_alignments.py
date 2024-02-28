@@ -64,7 +64,6 @@ class alignments_track:
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
                  link_splitreads=False, min_splitreads_breakpoints=2, hgap_bp=100, vgap_frac=0.3,
                  is_rna=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
-        print(file)
         self.samfile =pysam.AlignmentFile(file, "rb")
         self.breakpoints_file=breakpoints_file
         self.label=label
