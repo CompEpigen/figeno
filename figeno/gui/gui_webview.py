@@ -9,7 +9,7 @@ import webview
 
 if "http_proxy" in os.environ: del os.environ["http_proxy"]
 if "HTTP_PROXY" in os.environ: del os.environ["HTTP_PROXY"]
-last_dir=os.path.expanduser("~")
+last_dir=os.getcwd()
 config_dir=last_dir
 config_file = "config.json"
 

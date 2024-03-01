@@ -75,8 +75,8 @@ def add_read_pile_greedy(read,pile,ideal_row,margin=10):
         distance_row+=1
     return -1
 
-def add_read_pile_nopreference(read,pile,margin=10):
-    row = 0
+def add_read_pile_nopreference(read,pile,margin=10,row_offset=0):
+    row = row_offset
     while row<len(pile):
         row_index=0
         # The rows are assumed to be sorted. Try to insert the read in this row.
@@ -248,25 +248,32 @@ def splitreads2breakpoints(splitreads):
 
 
     
-def add_reads_to_piles(samfile,piles_list,regions,splitreads={},margin=10):
+def add_reads_to_piles(samfile,piles_list,regions,splitreads={},margin=10,only_show_splitreads=False,only_one_splitread_per_row=True):
     # First add the split reads
     for queryname in splitreads:
         for group in splitreads[queryname]:
             piles_list = add_splitreads_piles(group,piles_list,margin=margin)
 
-
-    # Then add the other reads
-    for region_index,region in enumerate(regions):
-        for read in samfile.fetch(region.chr,region.start,region.end):
-            if read.query_name in splitreads: continue
-            group_index=0
-            if len(piles_list[region_index])>1:
-                if read.has_tag("HP"):
-                    if read.get_tag("HP")==2: group_index=1
-                else:
-                    group_index=2
-            if group_index < len(piles_list[region_index]):
-                add_read_pile_nopreference(read,piles_list[region_index][group_index],margin=margin)
+    piles_lengths=[]
+    for reg_piles in piles_list:
+        lengths=[]
+        for pile in reg_piles:
+            lengths.append(len(pile))
+        piles_lengths.append(lengths)
+    if not only_show_splitreads:
+        # Then add the other reads
+        for region_index,region in enumerate(regions):
+            for read in samfile.fetch(region.chr,region.start,region.end):
+                if read.query_name in splitreads: continue
+                group_index=0
+                if len(piles_list[region_index])>1:
+                    if read.has_tag("HP"):
+                        if read.get_tag("HP")==2: group_index=1
+                    else:
+                        group_index=2
+                if group_index < len(piles_list[region_index]):
+                    row_offset=piles_lengths[region_index][group_index] if only_one_splitread_per_row else 0
+                    add_read_pile_nopreference(read,piles_list[region_index][group_index],margin=margin,row_offset=row_offset)
     return piles_list
     
     

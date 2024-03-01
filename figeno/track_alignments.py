@@ -62,7 +62,7 @@ class alignments_track:
     def __init__(self,file,label="",label_rotate=False,read_color="#cccccc",splitread_color="#999999",breakpoints_file=None,
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
-                 link_splitreads=False, min_splitreads_breakpoints=2, hgap_bp=100, vgap_frac=0.3,
+                 link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, hgap_bp=100, vgap_frac=0.3,
                  is_rna=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         self.samfile =pysam.AlignmentFile(file, "rb")
         self.breakpoints_file=breakpoints_file
@@ -72,6 +72,8 @@ class alignments_track:
         self.splitread_color=splitread_color
         self.link_splitreads=link_splitreads
         self.min_splitreads_breakpoints = min_splitreads_breakpoints # minimum number of reads supporting a breakpoint for this breakpoint to be shown
+        self.only_show_splitreads=only_show_splitreads
+        self.only_one_splitread_per_row = only_one_splitread_per_row
         self.hgap_bp= int(hgap_bp)
         self.vgap_frac = float(vgap_frac)
         self.group_by = group_by
@@ -345,7 +347,8 @@ class alignments_track:
         if self.link_splitreads:
             self.splitreads, self.query_qpos_breakpoints,self.bp_counts = find_splitreads(self.samfile,regions,keep_unphased,
                                                                                           min_splitreads_breakpoints=self.min_splitreads_breakpoints)
-        self.region_group_piles = add_reads_to_piles(self.samfile,region_group_piles,regions,self.splitreads,margin=self.hgap_bp)
+        self.region_group_piles = add_reads_to_piles(self.samfile,region_group_piles,regions,self.splitreads,margin=self.hgap_bp,
+                                                     only_show_splitreads=self.only_show_splitreads,only_one_splitread_per_row=self.only_one_splitread_per_row)
         
         sizes = [len(x) for x in self.region_group_piles[0]]
         for i in range(len(self.region_group_piles)):
@@ -431,7 +434,7 @@ class alignments_track:
 
                         verts+=[((x1+x2)/2,y1) , ((x1+x2)/2,y2) , (x2,y2)] + verts_right
                         codes+=[path.Path.CURVE4,path.Path.CURVE4,path.Path.CURVE4] + codes_right
-                    patch = patches.PathPatch(path.Path(verts,codes), facecolor='none', edgecolor="#aaaaaa",lw=0.2,ls="--")
+                    patch = patches.PathPatch(path.Path(verts,codes), facecolor='none', edgecolor=self.splitread_color,lw=0.2,ls="--")
                     box["ax"].add_patch(patch)
                         #else:
                         #    box["ax"].plot([l[1][0],l[2][0]],[l[1][1],l[2][1]],color="#333333",lw=0.2)

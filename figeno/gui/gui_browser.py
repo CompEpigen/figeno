@@ -9,7 +9,7 @@ from figeno import figeno_make
 
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
-last_dir=os.path.expanduser("~")
+last_dir=os.getcwd()
 config_dir=last_dir
 
 

@@ -150,7 +150,7 @@ export default function App() {
       const tracks=[];
       for (const t of data.tracks){
         if (t.hasOwnProperty("type")){
-          const track={id:uuid4(),...defaultTrackValues[t.type],...t};
+          const track={id:uuid4(),type:t.type,...defaultTrackValues[t.type],...t};
 
           if (t.type=="basemod_freq"){
             let bams = [];

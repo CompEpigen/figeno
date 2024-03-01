@@ -363,6 +363,12 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
                 <label htmlFor={"link_splitreads"+track.id}>Link splitreads:</label>
                 <input type="checkbox" id={"link_splitreads"+track.id} checked={track.link_splitreads} onChange={() => set_value("link_splitreads",!track.link_splitreads)} ></input>
             </div>
+            {track.link_splitreads ? (
+                 <div className='formItem'>
+                    <label htmlFor={"only_show_splitreads"+track.id}>Only show SR:</label>
+                    <input type="checkbox" id={"lonly_show_splitreads"+track.id} checked={track.only_show_splitreads} onChange={() => set_value("only_show_splitreads",!track.only_show_splitreads)} ></input>
+                </div>
+            ):""}
 
             <div className='formItem' >
                 <label htmlFor={"splitread_color"+track.id}>Splitread color:</label>
@@ -618,6 +624,11 @@ function CopynumberTrack({track,set_value,openColorPanel}){
             </div>
 
             <div className='formItem'>
+                <label htmlFor={"ploidy"+track.id}>Ploidy:</label>
+                <input id={"ploidy"+track.id} style={{width:"2em"}} value={track.ploidy}  onChange={(e) => set_value("ploidy",e.target.value)}/>
+            </div>
+
+            <div className='formItem'>
                 <label htmlFor={"min_cn"+track.id}>Min CN:</label>
                 <input id={"min_cn"+track.id} style={{width:"2em"}} value={track.min_cn}  onChange={(e) => set_value("min_cn",e.target.value)}/>
             </div>
@@ -629,6 +640,10 @@ function CopynumberTrack({track,set_value,openColorPanel}){
         </div>
 
         <div className="optionGroup">
+            <div className='formItem'>
+                <label htmlFor={"marker_size"+track.id}>Marker size:</label>
+                <input id={"marker_size"+track.id} style={{width:"2em"}} value={track.marker_size}  onChange={(e) => set_value("marker_size",e.target.value)}/>
+            </div>
             {/* Colors */}
             <div className='formItem'>
                 <label htmlFor={"color_normal"+track.id}>Normal:</label>
