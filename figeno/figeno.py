@@ -357,7 +357,7 @@ class tracks_plot:
         total_width=0
         for _,w in self.regions: total_width+=w
         #fig,ax = plt.subplots(figsize=(total_width,total_height))
-        fig,ax = plt.subplots(figsize=(10,10),subplot_kw={'projection': 'polar'}) # convert from mm to inches
+        fig,ax = plt.subplots(figsize=(width/25.4,width/25.4),subplot_kw={'projection': 'polar'}) # convert from mm to inches
 
         current_r=0
         for t in self.tracks_list: current_r+=t.height+t.margin_above

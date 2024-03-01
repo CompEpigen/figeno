@@ -11,7 +11,7 @@ class coverage_track:
     def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max="auto",scale_pos="left",label="",label_rotate=False,fontscale=1,
                            vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=True,height=10,margin_above=1.5):
         self.samfile = pysam.AlignmentFile(file, "rb")
-        self.n_bins = n_bins
+        self.n_bins = int(n_bins)
         self.color=color
         self.label=label
         self.label_rotate=label_rotate

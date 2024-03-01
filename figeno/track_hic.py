@@ -14,7 +14,7 @@ class hic_track:
                  extend=True,upside_down=False,pixel_border=False,show_colorbar=False,scale="auto",scale_min=1.0,scale_max=1.12,
                  rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
         self.file = file # must be in cool format
-        self.max_dist = max_dist *1000
+        self.max_dist = int(float(max_dist) *1000)
         self.color_map=color_map
         self.scale_max_percentile = float(scale_max_percentile)
         self.interactions_across_regions=interactions_across_regions

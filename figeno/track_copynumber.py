@@ -11,14 +11,14 @@ from figeno.utils import split_box,draw_bounding_box , polar2cartesian, cartesia
 
 class copynumber_track:
     def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
-                 color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes=[],reference="hg19",genes_file="",chr_lengths={},
+                 marker_size=0.7,color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes=[],reference="hg19",genes_file="",chr_lengths={},
                  label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5):
         self.freec_ratios = freec_ratios
         if self.freec_ratios=="": self.freec_ratios=None
         self.freec_CNAs = freec_CNAs
         if self.freec_CNAs=="": self.freec_CNAs=None
         self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs , instead of providing freec_CNAs
-        self.ploidy=ploidy
+        self.ploidy= float(ploidy)
         self.purple_cn=purple_cn
         if self.purple_cn=="": self.purple_cn=None
         self.grid=grid # True for showing a grid for the axes
@@ -30,6 +30,7 @@ class copynumber_track:
         self.max_cn = max_cn
         if self.max_cn=="": self.max_cn = None
         self.round_cn=round_cn
+        self.marker_size=float(marker_size)
         self.color_normal=color_normal
         self.color_loss=color_loss
         self.color_gain=color_gain
@@ -119,7 +120,7 @@ class copynumber_track:
             x_converted = [min(box["right"]-0.2,max(box["left"]+0.2,x)) for x in x_converted]
         else:
             x_converted = [min(box["left"],max(box["right"],x)) for x in x_converted]
-        box["ax"].scatter(x_converted,y_converted,c=colors,s=0.7,marker="o",rasterized=True)
+        box["ax"].scatter(x_converted,y_converted,c=colors,s=self.marker_size,marker="o",rasterized=True)
 
         # Highlight genes
         if len(self.genes)>0:

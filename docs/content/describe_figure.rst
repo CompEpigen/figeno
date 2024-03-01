@@ -30,6 +30,7 @@ Regions
 -------
 
 Regions are defined by chr, start and end. If end<start, the region will be shown in reverse orientation (from right to left). The color attribute will only be used if a chr axis track with style "arrow" is used. At least one region must be provided, but a key feature of figeno is that it allows several regions to be displayed at the same time. Tracks will be displayed independently for each region, except for:
+
 * hic tracks if show_interactions_across_regions is set to True, in which case interactions will be shown across regions.
 * sv tracks which can show breakpoints across regions.
 * alignments tracks if link_splitreads is True, in which case all all alignments of a read will be linked, if the read has supplementary alignments.
