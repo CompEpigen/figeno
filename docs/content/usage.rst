@@ -80,6 +80,26 @@ Parameters:
   The webview mode works for linux, windows and mac, but for linux you will need to install additional dependencies (see https://pywebview.flowrl.com/guide/installation.html#linux).
   
 
+Graphical user interface (GUI)
+------------------------------
+
+The GUI can be started with ``figeno gui`` from the command line, or by launching the executable for windows. It can be used to easily edit a config file. Once you have finished describing the figure, you can click on "Generate figure" to generate it. You can also save the config file to a json file by clicking on "Save config" if you want to edit it later, in which case you can then load it again with "Load config". You can also combine the CLI and the GUI, for example by creating a config file with the GUI, saving it, and then using ``figeno make`` to generate the figure.
+
+Python API
+-----------
+
+You can also import figeno as a python module, and give ``figeno_make`` the config file as a python dictionary.
+
+
+.. code:: python
+
+  import figeno_make from figeno
+  
+  config={"general":{"reference":"hg19","layout":"horizontal"}}
+  config["output"] = {"file":"figure.svg"),"dpi":200,"width":180}
+  config["regions"] = [{"chr":"17","start":7000000,"end":7500000}]
+  config["tracks"] = [{"type":"genes"}, {"type":"chr_axis"}]
+  figeno_make(config)
   
 
    
