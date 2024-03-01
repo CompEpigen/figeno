@@ -34,7 +34,7 @@ class sv_track:
             if self.file is None:
                 raise Exception("SVs or VCF must be provided.")
             elif self.file.endswith(".tsv"):
-                self.df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
+                self.df_SVs = self.read_SVs_tsv()
             else:
                 self.df_SVs = self.read_SVs_vcf()
         if not "color" in self.df_SVs.columns:
@@ -142,6 +142,28 @@ class sv_track:
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"] - 3.0,(box["top"]+box["bottom"])/2,
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+    def read_SVs_tsv(self):
+        df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
+        if not "color" in df_SVs.columns:
+            if "strand1" in df_SVs.columns and "strand2" in df_SVs.columns:
+                colors=[]
+                for i in df_SVs.index:
+                    chr1,chr2= df_SVs.loc[i,"chr1"],df_SVs.loc[i,"chr2"]
+                    if chr1!=chr2: 
+                        colors.append(self.color_trans)
+                    else:
+                        pos1,pos2=df_SVs.loc[i,"pos1"],df_SVs.loc[i,"pos2"]
+                        strand1,strand2=df_SVs.loc[i,"strand1"],df_SVs.loc[i,"strand2"]
+                        if pos2<pos1: strand1,strand2=strand2,strand1
+                        if strand1=="-" and strand2=="+": colors.append(self.color_del)
+                        elif strand1=="+" and strand2=="-": colors.append(self.color_dup)
+                        elif strand1=="+" and strand2=="-": colors.append(self.color_h2h)
+                        else: colors.append(self.color_t2t)
+                df_SVs["color"] = colors
+            else:
+                df_SVs["color"]=["black" for i in df_SVs.index]
+
+        return df_SVs
 
 
     def read_SVs_vcf(self):
