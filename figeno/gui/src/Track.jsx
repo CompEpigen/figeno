@@ -363,14 +363,12 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
                 <label htmlFor={"link_splitreads"+track.id}>Link splitreads:</label>
                 <input type="checkbox" id={"link_splitreads"+track.id} checked={track.link_splitreads} onChange={() => set_value("link_splitreads",!track.link_splitreads)} ></input>
             </div>
-            {track.link_splitreads ? (
+            {track.link_splitreads ? (<>
                  <div className='formItem'>
                     <label htmlFor={"only_show_splitreads"+track.id}>Only show SR:</label>
                     <input type="checkbox" id={"lonly_show_splitreads"+track.id} checked={track.only_show_splitreads} onChange={() => set_value("only_show_splitreads",!track.only_show_splitreads)} ></input>
                 </div>
-            ):""}
-
-            <div className='formItem' >
+                <div className='formItem' >
                 <label htmlFor={"splitread_color"+track.id}>Splitread color:</label>
                 <ColorButton id={"splitread_color"+track.id} color={track.splitread_color} setColor={(c)=>set_value("splitread_color",c)} openColorPanel={openColorPanel}/>
             </div>
@@ -379,6 +377,9 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
                 <label className="withTooltip" htmlFor={"min_splitreads_breakpoints"+track.id}>Min SR: <span className="tooltip">Minimum number of split reads spanning a breakpoint for this breakpoint to be shown.</span></label>
                 <input id={"min_splitreads_breakpoints"+track.id} style={{width:"1em"}} value={track.min_splitreads_breakpoints}  onChange={(e)=>set_value("min_splitreads_breakpoints",e.target.value)} />
             </div>
+            </>):""}
+
+            
         </div>
             
         {/* Group by*/}

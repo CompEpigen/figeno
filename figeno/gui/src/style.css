@@ -56,21 +56,29 @@ input{
   flex-direction: column;
   justify-content: center;
   position:fixed;
-  left:30%;
-  right:30%;
-  top:20%;
+  /*left:30%;
+  right:30%;*/
+  left:50%;
+  width:700px;
+  margin-left: -350px;
+  top:10%;
   /*left:50px;*/
 
-  border-radius: 9px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   text-align: center;
   align-items: center;
   align-content: center;
-  padding: 15px;
+  padding: 80px;
   border: 1px solid black;
-  border-radius: 5px;
+  border-radius: 10px;
   background-color: white;
   box-shadow: 2px 2px 2px black;
+}
+
+.PredefinedColorsBlock{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 5px;
 }
 
 .TrackTypePanel{
@@ -108,8 +116,9 @@ input{
   flex-direction: column;
   justify-content: center;
   position:fixed;
-  left:25%;
-  right:25%;
+  left:50%;
+  width:900px;
+  margin-left: -450px;
   top: 10%;
   /*left:50px;*/
 
@@ -162,6 +171,15 @@ h3{
   font-size: 1.3em;
   font-weight: bold;
 }
+
+h2{
+  margin:6px;
+  font: inherit;
+  font-size: 1.7em;
+  font-weight: bold;
+}
+
+
 
 
 .TrackContainer{
