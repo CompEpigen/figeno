@@ -222,6 +222,10 @@ h2{
   
 }
 
+.subContainerNarrow{
+  width:550px;
+}
+
 .TrackContainerHeader{
   display: flex;
   background-color: #555555;
@@ -304,15 +308,17 @@ h2{
   flex-grow: 0;
   align-items: center;
   margin-top:10px;
-  box-shadow: #80808071 0px 7px 40px 0px;
+  box-shadow: #50505071 0px 7px 40px 0px;
 
-  
-  
   /*height:100px;*/
 }
 .trackOverlay{
   margin:0px;
   /*box-shadow: 3px 2px 2px #888888;*/
+}
+
+.noShadow{
+  box-shadow: none;
 }
 
 

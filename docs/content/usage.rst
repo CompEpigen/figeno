@@ -83,7 +83,7 @@ Parameters:
 Graphical user interface (GUI)
 ------------------------------
 
-The GUI can be started with ``figeno gui`` from the command line, or by launching the executable for windows. It can be used to easily edit a config file. Once you have finished describing the figure, you can click on "Generate figure" to generate it. You can also save the config file to a json file by clicking on "Save config" if you want to edit it later, in which case you can then load it again with "Load config". You can also combine the CLI and the GUI, for example by creating a config file with the GUI, saving it, and then using ``figeno make`` to generate the figure.
+The GUI can be started with ``figeno gui`` from the command line, or by launching the executable for windows. It can be used to easily edit a config file. Required parameters which have not been filled in yet are highlighted in orange. Once you have finished describing the figure, you can click on "Generate figure" to generate it. You can also save the config file to a json file by clicking on "Save config" if you want to edit it later, in which case you can then load it again with "Load config". You can also combine the CLI and the GUI, for example by creating a config file with the GUI, saving it, and then using ``figeno make`` to generate the figure.
 
 Python API
 -----------

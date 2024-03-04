@@ -77,6 +77,7 @@ export default function App() {
       const t = {...track,height:parseFloat(track.height),margin_above:parseFloat(track.margin_above),fontscale:parseFloat(track.fontscale)};
       if (t.type=="basemod_freq"){
         t.bams = t.bams.map((b)=>{const newBam={...b};delete newBam.id; return newBam;})
+        t.bedmethyls = t.bedmethyls.map((b)=>{const newBed={...b};delete newBed.id; return newBed;})
       }
       else if (t.type=="bigwig" || t.type=="coverage"){
         if (t.scale=="auto"){
