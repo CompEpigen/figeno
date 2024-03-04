@@ -140,8 +140,9 @@ input{
   flex-direction: column;
   justify-content: center;
   position:fixed;
-  left:30%;
-  right:30%;
+  left:50%;
+  width:900px;
+  margin-left: -450px;
   top:10%;
   /*left:50px;*/
 

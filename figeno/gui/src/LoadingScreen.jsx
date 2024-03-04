@@ -23,7 +23,7 @@ export function LoadingScreen({errorMessage, setErrorMessage,setLoadingscreenAct
             <>
             <div >An error has occured:</div>
             <div style={{overflowY: "scroll", maxHeight:"400px"}}>
-            <p style={{textAlign:"left",whiteSpace:"pre-wrap"}}>{errorMessage}</p>
+            <p style={{textAlign:"left",whiteSpace:"pre-wrap",backgroundColor:"white"}}>{errorMessage}</p>
             </div>
             <button onClick={handleButton}>Close</button>
             </>

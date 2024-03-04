@@ -27,8 +27,10 @@ class copynumber_track:
         self.grid_cn = grid_cn # horizontal lines for copy numbers
         self.min_cn=min_cn
         if self.min_cn=="": self.min_cn = None
+        if self.min_cn is not None: self.min_cn=float(self.min_cn)
         self.max_cn = max_cn
         if self.max_cn=="": self.max_cn = None
+        if self.max_cn is not None: self.max_cn=float(self.max_cn)
         self.round_cn=round_cn
         self.marker_size=float(marker_size)
         self.color_normal=color_normal
