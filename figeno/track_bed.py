@@ -29,7 +29,7 @@ class bed_track:
         rect_height = (box["top"]-box["bottom"]) * 0.7
         rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.15
 
-        with open(self.bed,"r") as infile:
+        with open(self.file,"r") as infile:
             for line in infile:
                 linesplit = line.rstrip("\n").split("\t")
                 if linesplit[0].lstrip("chr")==region.chr.lstrip("chr"):
