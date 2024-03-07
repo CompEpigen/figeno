@@ -6,6 +6,8 @@ Installation
 Linux, MacOS
 ^^^^^^^^^^^^
 
+In an environment with python>=3.7:
+
 .. code:: bash
 	
 	pip install figeno
