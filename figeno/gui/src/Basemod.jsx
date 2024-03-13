@@ -90,7 +90,7 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
 }
 
 function Bedmethyl({trackID, bed, copy_bed,delete_bed, set_value,className,openColorPanel}){
-    const fileClass=(bed.file.endsWith(".bed.gz"))?"":"unsetPath";
+    const fileClass=(bed.file.endsWith(".bed.gz") || bed.file.endsWith(".bedmethyl.gz") )?"":"unsetPath";
     return(
         <DndItem id={bed.id} copy_item={copy_bed} delete_item={delete_bed} className={className}> 
             <div className="trackOption" style={{display:"flex",alignItems:"center"}}>
