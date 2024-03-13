@@ -63,19 +63,16 @@ Start the graphical user interface.
    
 .. code:: bash
 
-  figeno gui [-m MODE] [-p PORT] [--debug]
+  figeno gui [--webview] [-p PORT] [--debug]
   
 Parameters:
 
-* ``-m``, ``--mode``. Can be "auto" (default), "browser" or "webview". Browser will start a local server which can be viewed in a web browser (at localhost:5000 by default) while webview will open the gui in a separate window using pywebview. If "auto", will use browser for linux and webview for windows and mac.
+* ``-w``, ``--webview``. If set, will use pywebview to render the GUI. Otherwise, the GUI can be viewed in the browser (at localhost:5000 by default).
 
 * ``-p``, ``--port``. Port for the local server, in case the browser mode is used (default: 5000).
 
-* ``--debug``: if set, will print more information to the terminal.
+* ``--debug``: If set, will print more information to the terminal.
 
-.. warning::
-  The browser mode for is currently only supported for linux.
-  
 .. warning::
   The webview mode works for linux, windows and mac, but for linux you will need to install additional dependencies (see https://pywebview.flowrl.com/guide/installation.html#linux).
   
@@ -96,7 +93,7 @@ You can also import figeno as a python module, and give ``figeno_make`` the conf
   import figeno_make from figeno
   
   config={"general":{"reference":"hg19","layout":"horizontal"}}
-  config["output"] = {"file":"figure.svg"),"dpi":200,"width":180}
+  config["output"] = {"file":"figure.svg","dpi":200,"width":180}
   config["regions"] = [{"chr":"17","start":7000000,"end":7500000}]
   config["tracks"] = [{"type":"genes"}, {"type":"chr_axis"}]
   figeno_make(config)
