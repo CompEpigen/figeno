@@ -135,6 +135,7 @@ export default function App() {
       const regions=[];
       for (const r of data.regions){
         const region={id:uuid4(),...r};
+        if (!region.hasOwnProperty("color")) {region.color="#f4a460"}
         regions.push(region);
       }
       setRegionsList(regions);
