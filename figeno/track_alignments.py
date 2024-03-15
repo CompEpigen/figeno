@@ -15,49 +15,6 @@ Breakpoint = namedtuple('Breakpoint', 'chr1 pos1 orientation1 chr2 pos2 orientat
 # Orientation is + or -. Deletion is - +
 
 
-def read_overlaps_breakpoint(read,breakpoint):
-    if not read.has_tag("SA"): return False
-    SAs = read.get_tag("SA").split(";")
-    breakpoint2 = Breakpoint(breakpoint.chr2,breakpoint.pos2,breakpoint.orientation2,breakpoint.chr1,breakpoint.pos1,breakpoint.orientation1,"black")
-    for bp in [breakpoint,breakpoint2]:
-        for SA in SAs:
-            SA = SA.split(",")
-            if read.reference_name==bp.chr1 and SA[0]==bp.chr2:
-                if bp.orientation1=="-" and abs(read.reference_start-bp.pos1)<10:
-                    if bp.orientation2=="-":
-                        if abs(int(SA[1])-bp.pos2)<10:
-                            return "left"
-                    else:
-                        if abs(int(SA[1])+cigar2reference_span_length(SA[3])-bp.pos2)<10:
-                            return "left"
-                elif bp.orientation1=="+" and abs(read.reference_end-bp.pos1)<10:
-                    if bp.orientation2=="-":
-                        if abs(int(SA[1])-bp.pos2)<10:
-                            return "right"
-                    else:
-                        if abs(int(SA[1])+cigar2reference_span_length(SA[3])-bp.pos2)<10:
-                            return "right"
-    return False
-
-
-def cigar2reference_span_length(cigar):
-    length=0
-    current_start=0
-    current_pos=1
-    while current_pos<len(cigar):
-        while cigar[current_pos].isdigit(): current_pos+=1
-        if not cigar[current_pos] in ["S","H","I","P"]:
-            length+=int(cigar[current_start:current_pos])
-        current_start = current_pos+1
-        current_pos = current_start+1
-    return length
-
-            
-        
-       
-
-
-
 class alignments_track:
     def __init__(self,file,label="",label_rotate=False,read_color="#cccccc",splitread_color="#999999",breakpoints_file=None,
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
@@ -520,3 +477,41 @@ def merge_methylation_rectangles(methyl_list,width):
             l[i+1] = (l[i+1][0]-width/2,l[i+1][1],l[i+1][2])
         i+=1
     return l
+
+
+def read_overlaps_breakpoint(read,breakpoint):
+    if not read.has_tag("SA"): return False
+    SAs = read.get_tag("SA").split(";")
+    breakpoint2 = Breakpoint(breakpoint.chr2,breakpoint.pos2,breakpoint.orientation2,breakpoint.chr1,breakpoint.pos1,breakpoint.orientation1,"black")
+    for bp in [breakpoint,breakpoint2]:
+        for SA in SAs:
+            SA = SA.split(",")
+            if read.reference_name==bp.chr1 and SA[0]==bp.chr2:
+                if bp.orientation1=="-" and abs(read.reference_start-bp.pos1)<10:
+                    if bp.orientation2=="-":
+                        if abs(int(SA[1])-bp.pos2)<10:
+                            return "left"
+                    else:
+                        if abs(int(SA[1])+cigar2reference_span_length(SA[3])-bp.pos2)<10:
+                            return "left"
+                elif bp.orientation1=="+" and abs(read.reference_end-bp.pos1)<10:
+                    if bp.orientation2=="-":
+                        if abs(int(SA[1])-bp.pos2)<10:
+                            return "right"
+                    else:
+                        if abs(int(SA[1])+cigar2reference_span_length(SA[3])-bp.pos2)<10:
+                            return "right"
+    return False
+
+
+def cigar2reference_span_length(cigar):
+    length=0
+    current_start=0
+    current_pos=1
+    while current_pos<len(cigar):
+        while cigar[current_pos].isdigit(): current_pos+=1
+        if not cigar[current_pos] in ["S","H","I","P"]:
+            length+=int(cigar[current_start:current_pos])
+        current_start = current_pos+1
+        current_pos = current_start+1
+    return length
