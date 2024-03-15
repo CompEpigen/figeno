@@ -17,6 +17,11 @@ input{
   border: solid 1px #555555;
 }*/
 
+.app{
+  width:97vw;
+  max-width: 1750px;
+}
+
 
 .app .react-colorful {
   height: 240px;

@@ -14,7 +14,6 @@ config_dir=last_dir
 config_file="config.json"
 
 
-
 #@app.route('/browse/', defaults={'path': ''})
 @app.route('/browse', methods=["POST"])
 def browse():

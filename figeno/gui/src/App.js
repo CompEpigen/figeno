@@ -200,12 +200,12 @@ export default function App() {
     {trackTypePanelActive ? (<TrackTypePanel setTrackType={setTrackType} close={()=>setTrackTypePanelActive(false)}/>):""}
     {loadingscreenActive ? (<LoadingScreen errorMessage={errorMessage} setErrorMessage={setErrorMessage} setLoadingscreenActive={setLoadingscreenActive} />):""}
     {templatePanelActive && (<TemplatePanel setTracksList={setTracksList} setRegionsList={setRegionsList} setHighlightsList={setHighlightsList} setGeneralParams={setGeneralParams} close={()=>setTemplatePanelActive(false)}/>)}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"96vw", gap:"10px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
       <GeneralContainer generalParams={generalParams} setGeneralParams={setGeneralParams}/>
       <OutputContainer outputParams={outputParams} setOutputParams={setOutputParams}/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"96vw", gap:"10px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
       <RegionsContainer key="regions" regionsList={regionsList} setRegionsList={setRegionsList} openColorPanel={openColorPanel} show_regions_color={show_regions_color}/>
       <HighlightsContainer key="highlights" regionsList={highlightsList} setRegionsList={setHighlightsList} openColorPanel={openColorPanel}/>
       </div>
