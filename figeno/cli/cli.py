@@ -2,10 +2,10 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from figeno.cli import gui, init,make
 
-__version__ = "0.0.2"
+__version__ = "0.3.1"
 
 def main():
-    parser = ArgumentParser("figenocli",formatter_class=ArgumentDefaultsHelpFormatter)
+    parser = ArgumentParser("figeno",formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v','--version',action='version',version='%(prog)s {}'.format(__version__))
 
     subparsers = parser.add_subparsers(title="subcommands",description="valid commands",help="additional help",dest="command")
