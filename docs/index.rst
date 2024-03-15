@@ -4,7 +4,7 @@ Welcome to figeno's documentation!
 
 
 
-Figeno is a tool to generate (epi)genomics figures.
+Figeno is a tool for generating **FI**\ gures for **GENO**\ mics.
 
 .. image:: content/images/figeno.png 
 
@@ -16,6 +16,9 @@ Features
 * Multi-region figures
 * Highlight regions of interest
 * Output figures in svg, pdf, eps or png
+
+Table of contents
+-----------------
 
 
 .. toctree::
