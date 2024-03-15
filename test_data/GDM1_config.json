@@ -1,0 +1,113 @@
+{
+	"general": {
+		"layout": "horizontal",
+		"reference": "hg19"
+	},
+	"output": {
+		"file": "GDM1_figure.svg",
+		"dpi": 800,
+		"width": 85
+	},
+	"regions": [
+		{
+			"chr": "7",
+			"start": 156795000,
+			"end": 156807000
+		}
+	],
+	"highlights": [],
+	"tracks": [
+		{
+			"type": "alignments",
+			"height": 35,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 0.9,
+			"file": "GDM1_subset.bam",
+			"label": "",
+			"label_rotate": false,
+			"hgap_bp": 30,
+			"vgap_frac": 0.3,
+			"read_color": "#cccccc",
+			"splitread_color": "#999999",
+			"link_splitreads": false,
+			"min_splitreads_breakpoints": 2,
+			"group_by": "haplotype",
+			"show_unphased": false,
+			"exchange_haplotypes": false,
+			"show_haplotype_colors": true,
+			"haplotype_colors": [
+				"#27ae60",
+				"#e67e22",
+				"#808080"
+			],
+			"haplotype_labels": [
+				"WT",
+				"Rearramged",
+				"Unphased"
+			],
+			"color_by": "basemod",
+			"color_unmodified": "#0f57e5",
+			"basemods": [
+				[
+					"C",
+					"m",
+					"#f40202"
+				]
+			],
+			"fix_hardclip_basemod": true
+		},
+		{
+			"type": "basemod_freq",
+			"height": 15,
+			"margin_above": 1.5,
+			"bounding_box": true,
+			"fontscale": 0.9,
+			"label": "Methylation freq",
+			"label_rotate": true,
+			"bams": [
+				{
+					"file": "GDM1_subset.bam",
+					"base": "C",
+					"mod": "m",
+					"min_coverage": 6,
+					"linewidth": "2",
+					"opacity": 1,
+					"fix_hardclip": false,
+					"split_by_haplotype": true,
+					"colors": [
+						"#27ae60",
+						"#e67e22"
+					]
+				}
+			]
+		},
+		{
+			"type": "genes",
+			"height": 7,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"style": "default",
+			"collapsed": true,
+			"only_protein_coding": true,
+			"exon_color": "#2980b9",
+			"genes": "auto"
+		},
+		{
+			"type": "chr_axis",
+			"height": 8,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"style": "default",
+			"unit": "kb",
+			"ticklabels_pos": "below",
+			"ticks_interval": "auto"
+		}
+	]
+}

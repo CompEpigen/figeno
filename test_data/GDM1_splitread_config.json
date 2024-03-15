@@ -1,0 +1,96 @@
+{
+	"general": {
+		"layout": "horizontal",
+		"reference": "hg19"
+	},
+	"output": {
+		"dpi": 1400,
+		"file": "GDM1_splitread_figure.svg",
+		"width": 120
+	},
+	"regions": [
+		{
+			"chr": "7",
+			"start": 156799000,
+			"end": 156813000,
+			"color": "#f4a460"
+		},
+		{
+			"chr": "6",
+			"start": 135502000,
+			"end": 135508000,
+			"color": "#95CDCD"
+		}
+	],
+	"highlights": [],
+	"tracks": [
+		{
+			"type": "alignments",
+			"height": 60,
+			"margin_above": 1.5,
+			"bounding_box": true,
+			"fontscale": 0.9,
+			"file": "GDM1_subset.bam",
+			"label": "",
+			"label_rotate": false,
+			"hgap_bp": 30,
+			"vgap_frac": "0.5",
+			"read_color": "#cccccc",
+			"splitread_color": "#999999",
+			"link_splitreads": true,
+			"only_show_splitreads": false,
+			"min_splitreads_breakpoints": 2,
+			"group_by": "none",
+			"show_unphased": false,
+			"exchange_haplotypes": false,
+			"show_haplotype_colors": true,
+			"haplotype_colors": [
+				"#27ae60",
+				"#e67e22",
+				"#808080"
+			],
+			"haplotype_labels": [
+				"WT",
+				"Rearramged",
+				"Unphased"
+			],
+			"color_by": "basemod",
+			"color_unmodified": "#0f57e5",
+			"basemods": [
+				[
+					"C",
+					"m",
+					"#f40202"
+				]
+			],
+			"fix_hardclip_basemod": true
+		},
+		{
+			"type": "genes",
+			"height": 7,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 0.8,
+			"label": "",
+			"label_rotate": false,
+			"style": "default",
+			"collapsed": true,
+			"only_protein_coding": true,
+			"exon_color": "#2980b9",
+			"genes": "auto"
+		},
+		{
+			"type": "chr_axis",
+			"height": 8,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 0.7,
+			"label": "",
+			"label_rotate": false,
+			"style": "arrow",
+			"unit": "kb",
+			"ticklabels_pos": "below",
+			"ticks_interval": "auto"
+		}
+	]
+}

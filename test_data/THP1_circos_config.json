@@ -1,0 +1,214 @@
+{
+	"general": {
+		"layout": "circular",
+		"reference": "hg19"
+	},
+	"output": {
+		"dpi": 400,
+		"file": "THP1_figure_circos.svg",
+		"width": 180
+	},
+	"regions": [
+		{
+			"chr": "1",
+			"start": null,
+			"end": null,
+			"color": "#98671F"
+		},
+		{
+			"chr": "2",
+			"start": null,
+			"end": null,
+			"color": "#65661B"
+		},
+		{
+			"chr": "3",
+			"start": null,
+			"end": null,
+			"color": "#969833"
+		},
+		{
+			"chr": "4",
+			"start": null,
+			"end": null,
+			"color": "#CE151D"
+		},
+		{
+			"chr": "5",
+			"start": null,
+			"end": null,
+			"color": "#FF1A25"
+		},
+		{
+			"chr": "6",
+			"start": null,
+			"end": null,
+			"color": "#FF0BC8"
+		},
+		{
+			"chr": "7",
+			"start": null,
+			"end": null,
+			"color": "#FFCBCC"
+		},
+		{
+			"chr": "8",
+			"start": null,
+			"end": null,
+			"color": "#FF9931"
+		},
+		{
+			"chr": "9",
+			"start": null,
+			"end": null,
+			"color": "#FFCC3A"
+		},
+		{
+			"chr": "10",
+			"start": null,
+			"end": null,
+			"color": "#FCFF44"
+		},
+		{
+			"chr": "11",
+			"start": null,
+			"end": null,
+			"color": "#C4FF40"
+		},
+		{
+			"chr": "12",
+			"start": null,
+			"end": null,
+			"color": "#00FF3B"
+		},
+		{
+			"chr": "13",
+			"start": null,
+			"end": null,
+			"color": "#2F7F1E"
+		},
+		{
+			"chr": "14",
+			"start": null,
+			"end": null,
+			"color": "#2800C6"
+		},
+		{
+			"chr": "15",
+			"start": null,
+			"end": null,
+			"color": "#6A96FA"
+		},
+		{
+			"chr": "16",
+			"start": null,
+			"end": null,
+			"color": "#98CAFC"
+		},
+		{
+			"chr": "17",
+			"start": null,
+			"end": null,
+			"color": "#00FEFD"
+		},
+		{
+			"chr": "18",
+			"start": null,
+			"end": null,
+			"color": "#C9FFFE"
+		},
+		{
+			"chr": "19",
+			"start": null,
+			"end": null,
+			"color": "#9D00C6"
+		},
+		{
+			"chr": "20",
+			"start": null,
+			"end": null,
+			"color": "#D232FA"
+		},
+		{
+			"chr": "21",
+			"start": null,
+			"end": null,
+			"color": "#956DB5"
+		},
+		{
+			"chr": "22",
+			"start": null,
+			"end": null,
+			"color": "#5D5D5D"
+		},
+		{
+			"chr": "X",
+			"start": null,
+			"end": null,
+			"color": "#989898"
+		},
+		{
+			"chr": "Y",
+			"start": null,
+			"end": null,
+			"color": "#CBCBCB"
+		}
+	],
+	"highlights": [],
+	"tracks": [
+		{
+			"type": "sv",
+			"height": 15,
+			"margin_above": 1.5,
+			"bounding_box": true,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"file": "THP1_SV.vcf",
+			"lw": "0.5",
+			"color_del": "#4a69bd",
+			"color_dup": "#e55039",
+			"color_t2t": "#8e44ad",
+			"color_h2h": "#8e44ad",
+			"color_trans": "#27ae60"
+		},
+		{
+			"type": "copynumber",
+			"height": 30,
+			"margin_above": 0,
+			"bounding_box": true,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"freec_ratios": "THP1_ratio.txt",
+			"freec_CNAs": "THP1_CNVs",
+			"purple_cn": "",
+			"genes": "",
+			"ploidy": "2",
+			"min_cn": "",
+			"max_cn": "3.9",
+			"grid": true,
+			"grid_major": false,
+			"grid_minor": false,
+			"grid_cn": true,
+			"marker_size": "0.7",
+			"color_normal": "#000000",
+			"color_loss": "#4a69bd",
+			"color_gain": "#e55039",
+			"color_cnloh": "#f6b93b"
+		},
+		{
+			"type": "chr_axis",
+			"height": 10,
+			"margin_above": 0,
+			"bounding_box": false,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"style": "default",
+			"unit": "kb",
+			"ticklabels_pos": "below",
+			"ticks_interval": "auto"
+		}
+	]
+}

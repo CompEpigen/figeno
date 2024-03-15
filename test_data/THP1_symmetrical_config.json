@@ -1,0 +1,95 @@
+{
+	"general": {
+		"layout": "symmetrical",
+		"reference": "hg19"
+	},
+	"output": {
+		"dpi": 400,
+		"file": "THP1_symmetrical_figure.png",
+		"width": 180
+	},
+	"regions": [
+		{
+			"chr": "9",
+			"start": null,
+			"end": null
+		},
+		{
+			"chr": "6",
+			"start": null,
+			"end": null
+		},
+		{
+			"chr": "11",
+			"start": null,
+			"end": null
+		},
+		{
+			"chr": "13",
+			"start": null,
+			"end": null
+		},
+		{
+			"chr": "20",
+			"start": null,
+			"end": null
+		}
+	],
+	"highlights": [],
+	"tracks": [
+		{
+			"type": "sv",
+			"height": 6,
+			"margin_above": 1.5,
+			"bounding_box": false,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"file": "THP1_SV.vcf",
+			"lw": "0.5",
+			"color_del": "#4a69bd",
+			"color_dup": "#e55039",
+			"color_t2t": "#8e44ad",
+			"color_h2h": "#8e44ad",
+			"color_trans": "#27ae60"
+		},
+		{
+			"type": "copynumber",
+			"height": 25,
+			"margin_above": 0,
+			"bounding_box": true,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"freec_ratios": "THP1_ratio.txt",
+			"freec_CNAs": "THP1_CNVs",
+			"purple_cn": "",
+			"genes": "",
+			"ploidy": "2",
+			"min_cn": "",
+			"max_cn": "4.5",
+			"grid": true,
+			"grid_major": true,
+			"grid_minor": true,
+			"grid_cn": true,
+			"marker_size": "0.7",
+			"color_normal": "#000000",
+			"color_loss": "#4a69bd",
+			"color_gain": "#e55039",
+			"color_cnloh": "#f6b93b"
+		},
+		{
+			"type": "chr_axis",
+			"height": 8,
+			"margin_above": 0,
+			"bounding_box": false,
+			"fontscale": 1,
+			"label": "",
+			"label_rotate": false,
+			"style": "default",
+			"unit": "Mb",
+			"ticklabels_pos": "below",
+			"ticks_interval": "20000000"
+		}
+	]
+}
