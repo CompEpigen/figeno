@@ -2,6 +2,8 @@
 
 Tool for making genomics figures.
 
+![figeno](docs/content/images/figeno.png)
+
 ## Features:
 - Large collection of tracks (bigwig, HiC, alignments, copy number, SV…)
 - Graphical user interface
@@ -24,4 +26,10 @@ Download figeno_windows.zip from https://github.com/CompEpigen/figeno/releases/l
 ## Documentation
 For more information on how to use figeno, please read the documentation at: 
 https://figeno.readthedocs.io/en/latest/
+
+## Test data
+Example input files to test figeno are provided in [test_data](https://github.com/CompEpigen/figeno/tree/main/test_data).
+
+## Bugs and improvements
+If you encounter a bug or would like to have a new feature added, please do not hesitate to [raise an issue](https://github.com/CompEpigen/figeno/issues/new) or to [contact me directly](https://www.dkfz.de/en/CanEpi/staff/kontakt/Sollier_Etienne.php).
   
