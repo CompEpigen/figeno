@@ -49,11 +49,11 @@ Generate a figure described by a config file.
 
 .. code:: bash
 
-  figeno make -c config.json
+  figeno make config.json
   
 Parameters:
 
-* ``-c``, ``--config``: config file.
+* config file in json format.
 
 
 figeno gui

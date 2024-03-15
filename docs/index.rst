@@ -6,6 +6,8 @@ Welcome to figeno's documentation!
 
 Figeno is a tool to generate (epi)genomics figures.
 
+.. image:: content/images/figeno.png 
+
 Features
 ---------
 

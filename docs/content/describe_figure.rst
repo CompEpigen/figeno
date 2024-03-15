@@ -329,7 +329,7 @@ Eiher freec_ratios and freec_CNAs, or purple_cn must be provided.
 
 Parameters:
 
-* ``freec_ratios``: tsv file containg at least the three columns: "Chromosome", "Start", "Ratio". Chromosome and start indicate the genomic position of the bin, and the copy number is ratio multiplied by ploidy. 
+* ``freec_ratios``: tsv file containg at least the three columns: "Chromosome", "Start", "Ratio" (other columns will be ignored). Chromosome and start indicate the genomic position of the bin, and the copy number is ratio multiplied by ploidy. Rows with a ratio <0 will be ignored.
 
 * ``freec_CNAs``: tsv file containing 5 columns without header. Each row indicates a copy number variant, where the columns indicate: chromosome, start, end, copy number, and the type of CNV ("gain" or "loss"). This will be used to color the dots from freec_ratios, or if freec_ratios is not provided, this will be used to plot copy number segments.
 
