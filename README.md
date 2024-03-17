@@ -4,7 +4,7 @@ Tool for making genomics figures.
 
 ![figeno](docs/content/images/figeno.png)
 
-## Features:
+## Features
 - Large collection of tracks (bigwig, HiC, alignments, copy number, SV…)
 - Graphical user interface
 - Multi-region figures with interactions across regions
