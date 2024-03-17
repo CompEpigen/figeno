@@ -25,6 +25,7 @@ Building from source
 It is easier to install figeno from pip or with the windows binaries. If you want to build figeno from the source code and want to use the GUI, you will first need to build the react app, which requires `nodejs <https://nodejs.org/en>`_ to be installed (giving you access to the npm command), and then install the python package.
 
 .. code:: bash
+
 	cd figeno/gui
 	npm install
 	npm run build
