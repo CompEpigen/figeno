@@ -22,11 +22,11 @@ Initialize a config file, which will then have to be completed manually. Predefi
 
 .. code:: bash
 
-  figeno init -o config.json [--template TEMPLATE] [--tracks TRACKS] [--regions REGIONS] [--highlights HIGHLIGHTS]
+  figeno init [-o config.json] [--template TEMPLATE] [--tracks TRACKS] [--regions REGIONS] [--highlights HIGHLIGHTS]
   
 Parameters:
 
-* ``-o``, ``--output``: Path where the configuration file will be stored.
+* ``-o``, ``--output``: Path where the configuration file will be stored (default: config.json)
 * ``--template``: Used to initialize the track with preset tracks and some options (see :ref:`Templates`). Possible values:
 
   * bigwig. Will have the following tracks: bigwig, genes, chr_axis.
@@ -85,17 +85,22 @@ The GUI can be started with ``figeno gui`` from the command line, or by launchin
 Python API
 -----------
 
-You can also import figeno as a python module, and give ``figeno_make`` the config file as a python dictionary.
+You can also import figeno as a python module, and give ``figeno_make`` the config file as a python dictionary. See an example below with four tracks (the full paths to the bigwig and bed files need to be provided). You can add or remove tracks and regions, and use any option listed in :ref:`Describing the figure`.
 
 
 .. code:: python
 
-  import figeno_make from figeno
-  
+  from figeno import figeno_make
+
   config={"general":{"reference":"hg19","layout":"horizontal"}}
   config["output"] = {"file":"figure.svg","dpi":200,"width":180}
-  config["regions"] = [{"chr":"17","start":7000000,"end":7500000}]
-  config["tracks"] = [{"type":"genes"}, {"type":"chr_axis"}]
+  config["regions"] = [{"chr":"17","start":7534342,"end":7628246}]
+  config["tracks"] = [
+      {"type":"bigwig","file":"/path/to/H3K27ac.bigWig","color":"#e74c3c","label":"H3K27ac"},
+      {"type":"bed","file":"/path/to/CGI.bed","color":"#34495e","label":"CpG islands"},
+      {"type":"genes"}, 
+      {"type":"chr_axis"}
+    ]
   figeno_make(config)
   
 

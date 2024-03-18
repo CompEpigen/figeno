@@ -36,13 +36,13 @@ bigwig
 		"tracks": [
 			{
 				"type": "bigwig",
+				"file": "/path/to/xxx.bigWig",
 				"height": 10,
 				"margin_above": 1.5,
 				"bounding_box": false,
 				"fontscale": 1,
 				"label": "",
 				"label_rotate": false,
-				"file": "xxx.bigWig",
 				"color": "#2980b9",
 				"n_bins": 500,
 				"scale": "auto",
@@ -107,13 +107,13 @@ hic
 		"tracks": [
 			{
 				"type": "hic",
+				"file": "/path/to/xxx.cool",
 				"height": 50,
 				"margin_above": 1.5,
 				"bounding_box": true,
 				"fontscale": 1,
 				"label": "",
 				"label_rotate": false,
-				"file": "xxx.cool",
 				"color_map": "red",
 				"pixel_border": false,
 				"upside_down": false,
@@ -181,11 +181,11 @@ asm
 		"tracks": [
 			{
 				"type": "alignments",
+				"file": "/path/to/xxx.bam",
 				"height": 50,
 				"margin_above": 1.5,
 				"bounding_box": false,
 				"fontscale": 1,
-				"file": "xxx.bam",
 				"label": "",
 				"label_rotate": false,
 				"hgap_bp": 30,
@@ -229,7 +229,7 @@ asm
 				"label_rotate": true,
 				"bams": [
 					{
-						"file": "xxx.bam",
+						"file": "/path/to/xxx.bam",
 						"base": "C",
 						"mod": "m",
 						"min_coverage": 6,
@@ -303,13 +303,13 @@ wgs_chr
 		"tracks": [
 			{
 				"type": "sv",
+				"file": "/path/to/xxx_SV.vcf",
 				"height": 15,
 				"margin_above": 1.5,
 				"bounding_box": true,
 				"fontscale": 1,
 				"label": "",
 				"label_rotate": false,
-				"file": "xxx_SVfiltered.vcf",
 				"lw": "0.5",
 				"color_del": "#4a69bd",
 				"color_dup": "#e55039",
@@ -404,13 +404,13 @@ wgs_circos
 		"tracks": [
 			{
 				"type": "sv",
+				"file": "/path/to/xxx_SV.vcf",
 				"height": 15,
 				"margin_above": 1.5,
 				"bounding_box": true,
 				"fontscale": 1,
 				"label": "",
 				"label_rotate": false,
-				"file": "xxx_SVfiltered.vcf",
 				"lw": "0.5",
 				"color_del": "#4a69bd",
 				"color_dup": "#e55039",

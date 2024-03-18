@@ -12,7 +12,11 @@ In an environment with python>=3.7:
 	
 	pip install figeno
 
+.. warning::
 
+  If pip fails to install pysam, try installing it through conda: ``conda install pysam -c bioconda``
+  
+  
 Windows
 ^^^^^^^
 
