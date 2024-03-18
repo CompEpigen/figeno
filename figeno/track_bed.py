@@ -6,7 +6,7 @@ from figeno.utils import split_box, draw_bounding_box
 
 
 class bed_track:
-    def __init__(self,file,color="#051650",label="",label_rotate=False,show_names=False,fontscale=1,bounding_box=True,height=6,margin_above=1.5):
+    def __init__(self,file,color="#051650",label="",label_rotate=False,show_names=False,fontscale=1,bounding_box=False,height=6,margin_above=1.5):
         self.file = file
         self.color=color
         self.label=label

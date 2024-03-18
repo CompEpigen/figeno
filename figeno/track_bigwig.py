@@ -6,8 +6,8 @@ import pandas as pd
 from figeno.utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
-    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="left",color="gray",label="",label_rotate=False,fontscale=1,
-                 bounding_box=True,height=10,margin_above=1.5):
+    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",label="",label_rotate=False,fontscale=1,
+                 bounding_box=False,height=10,margin_above=1.5):
         self.bw = pyBigWig.open(file)
         self.n_bins = int(n_bins)
         self.color=color

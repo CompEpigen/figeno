@@ -20,7 +20,7 @@ class alignments_track:
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
                  link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, hgap_bp=100, vgap_frac=0.3,
-                 is_rna=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
+                 is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5):
         self.samfile =pysam.AlignmentFile(file, "rb")
         self.breakpoints_file=breakpoints_file
         self.label=label
