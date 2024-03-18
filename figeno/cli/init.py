@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import json
+import os
 
 def main(args):
     config={"general":get_general(args),
@@ -10,6 +11,13 @@ def main(args):
     
     with open(args.output,"w") as fp:
         json.dump(config,fp,indent= "\t")
+    
+    if os.path.dirname(args.output)=="":
+        config_path=os.path.join(os.getcwd(),args.output)
+    else:
+        config_path=args.output
+    
+    print("A config file was initialized at: "+config_path+". This config file still needs to be manually edited (in particular add the paths to the data files and to the output file), before running figeno make "+config_path)
     
 
 def get_general(args):
@@ -109,7 +117,6 @@ def get_tracks(args):
 
 
 def get_track(type):
-    print(type)
     if type=="chr_axis":
         return {
 			"type": "chr_axis",
@@ -142,53 +149,53 @@ def get_track(type):
     if type=="bed":
         return {
 			"type": "bed",
+            "file": "",
+			"color": "#444444",
+			"label": "",
+			"label_rotate": False,
 			"height": 10,
 			"margin_above": 1.5,
 			"bounding_box": False,
-			"fontscale": 1,
-			"file": "",
-			"color": "#444444",
-			"label": "",
-			"label_rotate": False
+			"fontscale": 1
 		}
     if type=="bigwig":
         return {
 			"type": "bigwig",
+            "file": "",
+			"color": "#2980b9",
+			"n_bins": 500,
+			"scale": "auto",
+			"scale_pos": "corner",
 			"height": 10,
 			"margin_above": 1.5,
 			"bounding_box": False,
 			"fontscale": 1,
 			"label": "",
-			"label_rotate": False,
-			"file": "",
-			"color": "#2980b9",
-			"n_bins": 500,
-			"scale": "auto",
-			"scale_pos": "corner"
+			"label_rotate": False
 		}
     if type=="coverage":
         return {
 			"type": "coverage",
+            "file": "",
+			"color": "#888888",
+			"n_bins": 500,
+			"scale": "auto",
+			"scale_pos": "corner",
 			"height": 10,
 			"margin_above": 1.5,
 			"bounding_box": False,
 			"fontscale": 1,
 			"label": "",
-			"label_rotate": False,
-			"file": "",
-			"color": "#888888",
-			"n_bins": 500,
-			"scale": "auto",
-			"scale_pos": "corner"
+			"label_rotate": False
 		}
     if type=="alignments":
         return {
 			"type": "alignments",
+            "file": "",
 			"height": 50,
 			"margin_above": 1.5,
 			"bounding_box": False,
 			"fontscale": 1,
-			"file": "",
 			"label": "",
 			"label_rotate": False,
 			"hgap_bp": 30,
@@ -225,24 +232,25 @@ def get_track(type):
     if type=="basemod_freq":
         return {
 			"type": "basemod freq",
+            "bams":[],
+            "bedmethyls":[],
 			"height": 20,
 			"margin_above": 1.5,
 			"bounding_box": True,
 			"fontscale": 1,
 			"label": "Methylation freq",
-			"label_rotate": True,
-			"bams": []
+			"label_rotate": True
 		}
     if type=="hic":
         return {
 			"type": "hic",
+            "file": "",
 			"height": 50,
 			"margin_above": 1.5,
 			"bounding_box": True,
 			"fontscale": 1,
 			"label": "",
 			"label_rotate": False,
-			"file": "",
 			"color_map": "red",
 			"pixel_border": False,
 			"upside_down": False,
@@ -254,13 +262,13 @@ def get_track(type):
     if type=="sv":
         return {
 			"type": "sv",
+            "file": "",
 			"height": 15,
 			"margin_above": 1.5,
 			"bounding_box": True,
 			"fontscale": 1,
 			"label": "",
 			"label_rotate": False,
-			"file": "",
 			"lw": "0.5",
 			"color_del": "#4a69bd",
 			"color_dup": "#e55039",
@@ -271,15 +279,15 @@ def get_track(type):
     if type=="copynumber":
         return {
 			"type": "copynumber",
+            "freec_ratios": "",
+			"freec_CNAs": "",
+			"purple_cn": "",
 			"height": 30,
 			"margin_above": 1.5,
 			"bounding_box": True,
 			"fontscale": 1,
 			"label": "",
 			"label_rotate": False,
-			"freec_ratios": "",
-			"freec_CNAs": "",
-			"purple_cn": "",
 			"genes": "",
 			"min_cn": "",
 			"max_cn": "",
@@ -305,5 +313,5 @@ def argparser():
     parser.add_argument("--tracks",type=str, help="Comma-separated list of tracks, eg: chr_axis,genes,bigwig .")
     parser.add_argument("--regions",type=str, help="Comma-separated list of regions, eg: 3:128000000-129000000,7:142000000-142500000 .")
     parser.add_argument("--highlights",type=str, help="Comma-separated list of highlighted regions, eg: 3:128000000-129000000,7:142000000-142500000 .")
-    parser.add_argument("-o","--output",type=str,help="Name of the config file that will be generated.",required=True)
+    parser.add_argument("-o","--output",type=str,default="config.json",help="Name of the config file that will be generated.")
     return parser

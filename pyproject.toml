@@ -9,7 +9,7 @@ packages = ["figeno", "figeno.data", "figeno.cli", "figeno.gui"]
 
 [project]
 name = 'figeno'
-version = "0.3.1"
+version = "0.3.2"
 description = 'Package for generating genomics figures.'
 readme = 'README.md'
 authors = [
@@ -30,7 +30,7 @@ dependencies = [
   "vcfpy>=0.13.5",
   "cooler>=0.9.1",
   "Flask>=2.2.5",
-  "filedialpy>=1.1.0",
+  "filedialpy>=1.2.0",
   "pywebview>=4.4.1"
 ]
 
