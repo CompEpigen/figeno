@@ -101,7 +101,7 @@ class tracks_plot:
                 for hl in config["highlights"]:
                     start,end = hl["start"],hl["end"]
                     if start>end: start,end = end,start
-                    self.highlights.append(Highlight(hl["chr"],start,end,hl["color"],hl["alpha"]))
+                    self.highlights.append(Highlight(hl["chr"],start,end,hl["color"],hl["opacity"]))
 
             # Tracks
             if "tracks" in config:
