@@ -155,6 +155,8 @@ hic
 asm
 ^^^
 
+Allele-specific methylation: show the alignments colored by methylation and split by haplotype, as well as the methylation frequency split by haplotype.
+
 .. image:: images/template_asm.png 
 
 .. code:: json
