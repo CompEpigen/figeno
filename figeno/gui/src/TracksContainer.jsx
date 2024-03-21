@@ -175,7 +175,7 @@ export const defaultTrackValues={
     }
 }
 
-export function TracksContainer({tracksList,setTracksList,openColorPanel, openTrackTypePanel}) {
+export function TracksContainer({tracksList,setTracksList,openColorPanel, openTrackTypePanel, setFileDialogData,setFileDialogActive}) {
 
     
 
@@ -235,11 +235,9 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
         setTracksList((tracks_list) => {return tracks_list.filter(track => track.id!==id)})
     }
 
-    function open_files(){
-        fetch('/open_files').then(res => res.json()).then(data => {   
-        if (!data.hasOwnProperty("files")){return }
-          const tracks=[];
-          for (const f of data.files){
+    function add_tracks_files(files){
+        const tracks=[];
+        for (const f of files){
             if (f.endsWith(".bed")){
                 tracks.push({id:uuid4(),type:"bed",...defaultTrackValues["bed"],file:f})
             }
@@ -252,8 +250,19 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
             else if (f.endsWith(".bam")){
                 tracks.push({id:uuid4(),type:"alignments",...defaultTrackValues["alignments"],file:f})
             }
-          }
-          setTracksList([...tracks,...tracksList]);
+        }
+        setTracksList([...tracks,...tracksList]);
+    }
+
+    function open_files(){
+        fetch('/browse',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:"",dialog_type:"open_files"}),
+    method:"POST"}).then(res => res.json()).then(data => {  
+            let files=[];
+            if (data.hasOwnProperty("current_dir")){
+                setFileDialogData({current_dir:data.current_dir,dirs:data.dirs,files:data.files,dialog_type:"open_files",update:function(f){add_tracks_files([f])}})
+                setFileDialogActive(true);
+            }
+            else if (data.hasOwnProperty("files")) add_tracks_files(data.files);
         });
       }
 
@@ -280,7 +289,7 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
         <>
         <DndContainer header={header} items={tracksList} setItems={setTracksList} show_active_item={show_active_item}>
         {tracksList.map((track)=>{
-                    return <Track key={track.id} track={track} set_value={(attribute,value)=>set_value(track.id,attribute,value)}  className={"track"} copy_track={copy_track} delete_track={delete_track} openColorPanel={openColorPanel} openTrackTypePanel={openTrackTypePanel} />
+                    return <Track key={track.id} track={track} set_value={(attribute,value)=>set_value(track.id,attribute,value)}  className={"track"} copy_track={copy_track} delete_track={delete_track} openColorPanel={openColorPanel} openTrackTypePanel={openTrackTypePanel} setFileDialogActive={setFileDialogActive} setFileDialogData={setFileDialogData} />
                 })}
         </DndContainer>
         </>

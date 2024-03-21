@@ -11,7 +11,7 @@ const track_types=["","chr_axis", "genes","bed","bigwig","coverage","alignments"
 
 
 
-export function Track({track, set_value, change_track_type, copy_track, delete_track, className, openColorPanel, openTrackTypePanel}) {
+export function Track({track, set_value, change_track_type, copy_track, delete_track, className, openColorPanel, openTrackTypePanel, setFileDialogData, setFileDialogActive}) {
 
     function handleTypeChange(e){
         if (e.target.value!=track.type){
@@ -26,28 +26,28 @@ export function Track({track, set_value, change_track_type, copy_track, delete_t
             return GenesTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
         }
         if (track.type=="bed"){
-            return BedTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return BedTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="bigwig"){
-            return BigWigTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return BigWigTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="coverage"){
-            return CoverageTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return CoverageTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="alignments"){
-            return AlignmentsTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return AlignmentsTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="basemod_freq"){
-            return BasemodfreqTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return BasemodfreqTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="hic"){
-            return HicTrack({"track":track,"set_value":set_value});
+            return HicTrack({"track":track,"set_value":set_value,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="sv"){
-            return SvTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return SvTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
         if (track.type=="copynumber"){
-            return CopynumberTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel});
+            return CopynumberTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
     }
     function handleTrackIcon(){
@@ -190,12 +190,12 @@ function GenesTrack({track,set_value,openColorPanel}){
 }
 
 
-function BedTrack({track,set_value,openColorPanel}){
+function BedTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= ((!track.file.endsWith(".bed")) && (!track.file.endsWith(".tsv")))? "unsetPath":""; 
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}/>
+            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
             <div className='formItem' >
                 <label htmlFor={"color"+track.id} >Color:</label>
                 <ColorButton id={"color"+track.id} color={track.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}></ColorButton>
@@ -207,13 +207,13 @@ function BedTrack({track,set_value,openColorPanel}){
 }
 
 
-function BigWigTrack({track,set_value,openColorPanel}){
+function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= (track.file.endsWith(".bw") || track.file.endsWith(".bigwig") || track.file.endsWith(".bigWig"))? "":"unsetPath"; 
     return (
         <>
         
             <div className="optionGroup">
-                <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} />
+                <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
                 <div className='formItem' >
                     <label htmlFor={"color"+track.id}>Color:</label>
                     <ColorButton id={"color"+track.id} color={track.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}></ColorButton>
@@ -254,12 +254,12 @@ function BigWigTrack({track,set_value,openColorPanel}){
     )
 }
 
-function CoverageTrack({track,set_value,openColorPanel}){
+function CoverageTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= (!track.file.endsWith(".bam"))? "unsetPath":""; 
     return (
         <>
             <div className="optionGroup">
-            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}/>
+            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
                 <div className='formItem' >
                     <label htmlFor={"color"+track.id}>Color:</label>
                     <ColorButton id={"color"+track.id} color={track.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}></ColorButton>
@@ -299,7 +299,7 @@ function CoverageTrack({track,set_value,openColorPanel}){
     )
 }
 
-function AlignmentsTrack({track,set_value,openColorPanel}){
+function AlignmentsTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= (!track.file.endsWith(".bam"))? "unsetPath":""; 
 
     function handleGroupbyChange(e){
@@ -338,7 +338,7 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} />
+            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
             <div className='formItem'>
                 <label htmlFor={"hgap_bp"+track.id}>h-gap (bp):</label>
                 <input id={"hgap_bp"+track.id} style={{width:"2em"}} value={track.hgap_bp}  onChange={(e)=>set_value("hgap_bp",e.target.value)} ></input>
@@ -485,13 +485,13 @@ function AlignmentsTrack({track,set_value,openColorPanel}){
 }
 
 
-function HicTrack({track,set_value}){
+function HicTrack({track,set_value, setFileDialogData,setFileDialogActive}){
     const fileClass= ((!track.file.endsWith(".cool")) && (!track.file.includes(".mcool::resolutions/")))? "unsetPath":""; 
 
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} />
+            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
             <div className='formItem'>
                 <label htmlFor={"color_map"+track.id}>Color map:</label>
                 <select id={"color_map"+track.id} value={track.color_map} onChange={(e) =>{set_value("color_map",e.target.value)}}> 
@@ -566,12 +566,12 @@ function HicTrack({track,set_value}){
     )
 }
 
-function SvTrack({track,set_value,openColorPanel}){
+function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= (track.file.endsWith(".vcf") || track.file.endsWith(".vcf.gz") ||track.file.endsWith(".tsv"))? "":"unsetPath"; 
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} />
+            <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
 
             <div className='formItem'>
                 <label htmlFor={"lw"+track.id}>Line width:</label>
@@ -610,14 +610,14 @@ function SvTrack({track,set_value,openColorPanel}){
 }
 
 
-function CopynumberTrack({track,set_value,openColorPanel}){
+function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass= (track.freec_ratios!=="" || track.freec_CNAs!=="" || track.purple_cn!=="")? "":"unsetPath"; 
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"freec_ratios"+track.id} label="Ratios file:" value={track.freec_ratios} set_value={(val) => set_value("freec_ratios",val)} className={fileClass}/>
-            <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)} className={fileClass}/>
-            <PathEntry id={"purple_cn"+track.id} label="Purple CN file:" value={track.purple_cn} set_value={(val) => set_value("purple_cn",val)} className={fileClass}/>
+            <PathEntry id={"freec_ratios"+track.id} label="Ratios file:" value={track.freec_ratios} set_value={(val) => set_value("freec_ratios",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+            <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+            <PathEntry id={"purple_cn"+track.id} label="Purple CN file:" value={track.purple_cn} set_value={(val) => set_value("purple_cn",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
 
             <div className='formItem'>
                 <label htmlFor={"genes"+track.id}>Genes:</label>
@@ -813,18 +813,24 @@ export function TrackIcon({track_type, onClick}){
 }
 
 
-function select_file(set_value,initial_value){
-    fetch('/browse',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:initial_value}),
-    method:"POST"}).then(res => res.json()).then(data => {
-        if (data.path.length>0) set_value(data.path);
-      });
+function select_file(set_value,initial_value,setFileDialogData,setFileDialogActive){
+      fetch('/browse',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:initial_value,dialog_type:"open_file"}),
+      method:"POST"}).then(res => res.json()).then(data => {
+        if (data.hasOwnProperty("current_dir")){
+          setFileDialogData({current_dir:data.current_dir,dirs:data.dirs,files:data.files,file:"",dialog_type:"open_file",update:set_value})
+          setFileDialogActive(true);
+        }
+        else{
+          set_value(data.path)
+        }
+        });
 }
-export function PathEntry({id,label,value,set_value,className=""}){
+export function PathEntry({id,label,value,set_value,className="",setFileDialogData,setFileDialogActive}){
     return(
         <div className='formItem '>
             <label htmlFor={id}>{label}</label>
             <input id={id} value={value} className={className} onChange={(e)=>set_value(e.target.value) } style={{marginLeft:"2mm", marginRight:"1mm"}}></input>
-            <button name="file" onClick={()=>select_file(set_value,value)} className="buttonImage">
+            <button name="file" onClick={()=>select_file(set_value,value,setFileDialogData,setFileDialogActive)} className="buttonImage">
             <svg width="4.6mm" height="4.5mm" version="1.1" viewBox="0 0 576 512" xmlns="http://www.w3.org/2000/svg">
                 <path d="M384 480h48c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224H144c-11.4 0-21.9 6-27.6 15.9L48 357.1V96c0-8.8 7.2-16 16-16H181.5c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8H416c8.8 0 16 7.2 16 16v32h48V160c0-35.3-28.7-64-64-64H298.5c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H87.7 384z" fill="#555555"/>
             </svg>

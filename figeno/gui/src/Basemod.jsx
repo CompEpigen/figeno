@@ -7,7 +7,7 @@ import { DndContainer } from './DndContainer';
 import { PathEntry } from './Track';
 
 
-function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPanel}){
+function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass=(bam.file.endsWith(".bam"))?"":"unsetPath";
 
     function setLabel(e,index){
@@ -35,7 +35,7 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
     return(
         <DndItem id={bam.id} copy_item={copy_bam} delete_item={delete_bam} className={className}> 
             <div className="trackOption" style={{display:"flex",alignItems:"center"}}>
-                <PathEntry id={"file"+bam.id+trackID} label="File:" value={bam.file} set_value={(val) => set_value("file",val)} className={fileClass}/>
+                <PathEntry id={"file"+bam.id+trackID} label="File:" value={bam.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
 
                 <div className='formItem'>
                     <input id={"base"+bam.id+trackID} style={{width:"2em"}} value={bam.base} onChange={(e) => set_value("base",e.target.value)} />
@@ -89,12 +89,12 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
     )
 }
 
-function Bedmethyl({trackID, bed, copy_bed,delete_bed, set_value,className,openColorPanel}){
+function Bedmethyl({trackID, bed, copy_bed,delete_bed, set_value,className,openColorPanel, setFileDialogData,setFileDialogActive}){
     const fileClass=(bed.file.endsWith(".bed.gz") || bed.file.endsWith(".bedmethyl.gz") )?"":"unsetPath";
     return(
         <DndItem id={bed.id} copy_item={copy_bed} delete_item={delete_bed} className={className}> 
             <div className="trackOption" style={{display:"flex",alignItems:"center"}}>
-                <PathEntry id={"file"+bed.id+trackID} label="File:" value={bed.file} set_value={(val) => set_value("file",val)} className={fileClass}/>
+                <PathEntry id={"file"+bed.id+trackID} label="File:" value={bed.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
 
                 <div className='formItem'>
                     <input id={"mod"+bed.id+trackID} style={{width:"2em"}} value={bed.mod} onChange={(e) => set_value("mod",e.target.value)} />
@@ -121,7 +121,7 @@ function Bedmethyl({trackID, bed, copy_bed,delete_bed, set_value,className,openC
     )
 }
 
-export function BasemodfreqTrack({track,set_value,openColorPanel}){
+export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
 
     function add_bam(){
         set_value("bams",[...track.bams,{id:uuid4(),file:"",base:"C",mod:"m",min_coverage:6,linewidth:3,opacity:1.0,fix_hardclip:false,split_by_haplotype:false,

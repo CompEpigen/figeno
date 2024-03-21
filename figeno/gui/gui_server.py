@@ -18,39 +18,23 @@ config_file="config.json"
 @app.route('/browse', methods=["POST"])
 def browse():
     global last_dir
-    global config_dir
-    global config_file
     data=request.get_json()
-    if data["dialog_type"]=="open_file":
-        start_dir = last_dir
-        if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
-            start_dir = os.path.dirname(data["path"])
-        t=filedialpy.openFile(initial_dir=start_dir, title="Select file")
-        if len(t)>0: last_dir= os.path.dirname(t)
-        return jsonify({"path":t})
-    elif data["dialog_type"]=="open_files":
-        t=filedialpy.openFiles(initial_dir=last_dir,title="Select files")
-        if len(t)>0 and len(t[0])>0: last_dir= os.path.dirname(t[0])
-        return jsonify({"files":t})
-    elif data["dialog_type"]=="save_file":
-        start_dir = last_dir
-        if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
-            start_dir=os.path.dirname(data["path"])
-        save_filename="figure.svg"
-        if len(data["path"])>0:
-            filename = os.path.basename(data["path"])
-            if len(filename)>0 and (filename.endswith(".svg") or filename.endswith(".pdf") or filename.endswith(".ps") or filename.endswith(".eps") or filename.endswith(".png")):
-                save_filename=filename
-        t=filedialpy.saveFile(initial_dir=start_dir,initial_file=save_filename,title="Select output path for the figure", filter="*.svg *.pdf *.png *.eps *.ps")
-        if len(t)>0:last_dir= os.path.dirname(t)
-        return jsonify({"path":t})
-    elif data["dialog_type"]=="load_config":
-        filename=filedialpy.openFile(initial_dir=config_dir,filter="*.json",title="Select config file to load")
-        return jsonify({"path":filename})
-    elif data["dialog_type"]=="save_config":
-        filename=filedialpy.saveFile(initial_dir=config_dir,initial_file=config_file,title="Select path to save the config file",filter="*.json")
-        return jsonify({"path":filename})
-    
+    start_dir = last_dir
+    if data["dialog_type"] in ["save_config","load_config"]: start_dir=config_dir
+    if len(data["path"])>0 and os.path.exists((data["path"])):
+        if os.path.isdir(data["path"]):
+            start_dir = data["path"]
+        else: start_dir = os.path.dirname(data["path"])
+    dirs=[]
+    files=[]
+    for f in os.listdir(start_dir):
+        full_path = os.path.join(start_dir,f)
+        if os.path.isfile(full_path): 
+            if (not data["dialog_type"] in ["load_config","save_config"]) or f.endswith(".json"):
+                files.append(f)
+        else: dirs.append(f)
+    return jsonify({"current_dir":start_dir,"dirs":sorted(dirs),"files":sorted(files)})
+
 @app.route('/save_config', methods = ['POST'])
 def save_config():
     global config_dir
@@ -103,8 +87,8 @@ def main(args=None):
         logging.getLogger('werkzeug').disabled = True
     port=5000
     if args is not None: port = args.port
-    print("Starting local server on http://localhost:"+str(port))
-    webbrowser.open_new_tab('http://localhost:'+str(port)+'/')
+    print("Starting server on http://localhost:"+str(port))
+    #webbrowser.open_new_tab('http://localhost:'+str(port)+'/')
     app.run(debug=debug,port=port)
 
 if __name__=="__main__":

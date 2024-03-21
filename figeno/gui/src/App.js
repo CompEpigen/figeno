@@ -8,6 +8,7 @@ import { RegionsContainer } from './RegionsContainer';
 import { HighlightsContainer } from './HighlightsContainer';
 import { TracksContainer, defaultTrackValues} from "./TracksContainer"
 import { LoadingScreen } from './LoadingScreen';
+import { FileDialog } from './FileDialog';
 
 import {ColorButton, ColorPanel} from "./ColorButton"
 import { TrackTypePanel } from './TrackTypePanel';
@@ -32,6 +33,9 @@ export default function App() {
 
   const [loadingscreenActive,setLoadingscreenActive] = useState(false);
   const [errorMessage,setErrorMessage] = useState("");
+
+  const [fileDialogActive,setFileDialogActive] = useState(false);
+  const [fileDialogData,setFileDialogData] = useState({current_dir:"",dirs:[],files:[],file:"",dialog_type:"",update:function() {return}})
 
   let show_regions_color=false;
   for (const t of tracksList){
@@ -61,7 +65,9 @@ export default function App() {
   function get_config(){
     const regions_out=[];
     for (const region of regionsList){
-      const reg = {chr:region.chr,start:parseInt(region.start),end:parseInt(region.end)};
+      const reg={chr:region.chr};
+      if (region.hasOwnProperty("start") && (Number.isInteger(region.start) || region.start.length>0)){reg.start=parseInt(region.start)};
+      if (region.hasOwnProperty("end") && (Number.isInteger(region.end) || region.end.length>0)){reg.end=parseInt(region.end)};
       if (show_regions_color){reg.color = region.color;}
       regions_out.push(reg);
     }
@@ -108,8 +114,24 @@ export default function App() {
 
   function save_config(){
     const config_dict = get_config();
-    fetch("/save_config",{headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config_dict),
+
+    function save_configfile(path){
+      fetch("/save_config",{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:path,config:config_dict}),
         method:"POST"})
+    }
+    
+
+    fetch('/browse',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:"",dialog_type:"save_config"}),
+    method:"POST"}).then(res => res.json()).then(data => {
+      if (data.hasOwnProperty("current_dir")){
+        setFileDialogData({current_dir:data.current_dir,dirs:data.dirs,files:data.files,file:"config.json",dialog_type:"save_config",update:save_configfile})
+        setFileDialogActive(true);
+      }
+      else{
+        save_configfile(data.path)
+      }
+      
+      });
   }
 
   function run_figeno(){
@@ -127,7 +149,7 @@ export default function App() {
   }
 
   function load_config(){
-    fetch('/load_config').then(res => res.json()).then(data => {
+    function load_data(data){
       if (!data.hasOwnProperty("general")){return}
       setGeneralParams(data.general);
       setOutputParams(data.output);
@@ -165,7 +187,32 @@ export default function App() {
         }
       }
       setTracksList(tracks);
-    });
+    }
+
+    function load_configfile(path){
+      fetch('/load_config',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:path}),
+      method:"POST"}).then(res => res.json()).then(data => {
+        load_data(data)
+      })
+    }
+
+
+    
+    fetch('/browse',{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path:fileDialogData.current_dir,dialog_type:"load_config"}),
+    method:"POST"}).then(res => res.json()).then(data => {
+      if (data.hasOwnProperty("current_dir")){
+        setFileDialogData({current_dir:data.current_dir,dirs:data.dirs,files:data.files,file:"",dialog_type:"load_config",update:load_configfile})
+        setFileDialogActive(true);
+      }
+      else{
+        load_configfile(data.path)
+      }
+      
+      });
+
+    /*fetch('/load_config').then(res => res.json()).then(data => {
+      
+    });*/
   }
 
   return (
@@ -197,12 +244,13 @@ export default function App() {
         </button>
     </div>
     {render_colorPanel()}
+    {fileDialogActive ? (<FileDialog fileDialogData={fileDialogData} setFileDialogData={setFileDialogData} close={()=>setFileDialogActive(false)}/>):""}
     {trackTypePanelActive ? (<TrackTypePanel setTrackType={setTrackType} close={()=>setTrackTypePanelActive(false)}/>):""}
     {loadingscreenActive ? (<LoadingScreen errorMessage={errorMessage} setErrorMessage={setErrorMessage} setLoadingscreenActive={setLoadingscreenActive} />):""}
     {templatePanelActive && (<TemplatePanel setTracksList={setTracksList} setRegionsList={setRegionsList} setHighlightsList={setHighlightsList} setGeneralParams={setGeneralParams} close={()=>setTemplatePanelActive(false)}/>)}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
       <GeneralContainer generalParams={generalParams} setGeneralParams={setGeneralParams}/>
-      <OutputContainer outputParams={outputParams} setOutputParams={setOutputParams}/>
+      <OutputContainer outputParams={outputParams} setOutputParams={setOutputParams} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
@@ -212,7 +260,7 @@ export default function App() {
 
 
         <div>
-          <TracksContainer key="tracks" tracksList={tracksList} setTracksList={setTracksList} openColorPanel={openColorPanel} openTrackTypePanel={openTrackTypePanel} />
+          <TracksContainer key="tracks" tracksList={tracksList} setTracksList={setTracksList} openColorPanel={openColorPanel} openTrackTypePanel={openTrackTypePanel} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
         </div>
 
     </div>

@@ -590,3 +590,12 @@ input{
 .greenButton:hover{
   background-color: #066819;
 }
+
+
+.file{
+  display:flex;
+  align-items:center;
+  margin:3px;
+  width:50em;
+  min-height:2em;
+}
