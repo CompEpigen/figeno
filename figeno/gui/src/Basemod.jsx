@@ -201,25 +201,21 @@ export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogD
     
     return (
         <>
-         <div className="trackOption">
            
             <DndContainer header={header} items={track.bams} setItems={(x)=>set_value("bams",x)} show_active_item={show_active_item} className="subContainer">
             {track.bams.map((bam)=>{
-                    return <Bam key={bam.id} trackID={track.id} bam={bam} set_value={(attribute,value)=>set_value_bam(bam.id,attribute,value)}  className={"track noShadow"} copy_bam={()=>copy_bam(bam.id)} delete_bam={()=>delete_bam(bam.id)} openColorPanel={openColorPanel} />
+                    return <Bam key={bam.id} trackID={track.id} bam={bam} set_value={(attribute,value)=>set_value_bam(bam.id,attribute,value)}  className={"track noShadow"} copy_bam={()=>copy_bam(bam.id)} delete_bam={()=>delete_bam(bam.id)} openColorPanel={openColorPanel} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
                 })}
 
             </DndContainer>
-        </div>
 
-        <div className="trackOption">
-           
+
            <DndContainer header={header_bed} items={track.bedmethyls} setItems={(x)=>set_value("bedmethyls",x)} show_active_item={show_active_item_bed} className="subContainer subContainerNarrow">
            {track.bedmethyls.map((bed)=>{
-                   return <Bedmethyl key={bed.id} trackID={track.id} bed={bed} set_value={(attribute,value)=>set_value_bed(bed.id,attribute,value)}  className={"track noShadow"} copy_bed={()=>copy_bed(bed.id)} delete_bed={()=>delete_bed(bed.id)} openColorPanel={openColorPanel} />
+                   return <Bedmethyl key={bed.id} trackID={track.id} bed={bed} set_value={(attribute,value)=>set_value_bed(bed.id,attribute,value)}  className={"track noShadow"} copy_bed={()=>copy_bed(bed.id)} delete_bed={()=>delete_bed(bed.id)} openColorPanel={openColorPanel} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
                })}
 
            </DndContainer>
-       </div>
 
 
         </>

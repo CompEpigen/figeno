@@ -1,9 +1,7 @@
 import React from 'react';
-import { useState } from 'react';
 import { ColorButton } from './ColorButton';
 import "./style.css";
 import { DndItem } from './DndItem';
-import { DndContainer } from './DndContainer';
 import {BasemodfreqTrack} from './Basemod.jsx'
 
 

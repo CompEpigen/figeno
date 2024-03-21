@@ -163,6 +163,11 @@ input{
   box-shadow: 2px 2px 2px black;
 }
 
+.GeneSelector{
+  width:700px;
+  margin-left:-350px;
+}
+
 
 select{
   font-size: 1.0em;
@@ -211,19 +216,31 @@ h2{
   margin-top:5px;
 }
 
+.optionGroup{
+  display:flex;
+  /*flex-wrap: wrap;*/
+  flex-direction: column;
+  align-items: flex-start;
+  gap:6px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding:10px;
+  margin:1px;
+}
+
 .subContainer{
   display: flex;
-  flex-grow: 1;
-  align-items: left;
   flex-direction: column;
+  align-items: flex-start;
   width:700px;
   /*border: black 1px solid;*/
-  border-radius: 4px;
-  padding:5px;
-  margin:3px;
+  border-radius: 6px;
+  padding:10px;
+  margin:1px;
   box-sizing: border-box;
   /*height:500px;*/
   background-color: #ffffff;
+  gap:6px;
   
 }
 

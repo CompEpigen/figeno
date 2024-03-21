@@ -1,8 +1,10 @@
 import gzip
-
+import importlib_resources as resources
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import pathlib
+
+import figeno.data
 
 from collections import namedtuple
 Transcript = namedtuple('Transcript', 'name chr start end strand exons')
@@ -313,6 +315,44 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                                  transcripts[x].strand,exons))
     return result
 
+
+def find_genecoord_refseq_wrapper(gene_name,reference,genes_file=None):
+    
+    if genes_file is None or genes_file=="":
+        if reference in ["hg19","hg38"]:
+            with resources.as_file(resources.files(figeno.data) / (reference+"_genes.txt.gz")) as infile:
+                return find_genecoord_refseq(gene_name,infile)
+        else:
+            raise Exception("Using a custom reference genome, but no gene file was provided.")
+    else:
+        return find_genecoord_refseq(gene_name,genes_file)
+
+def find_genecoord_refseq(gene_name,file=None):
+    chr=""
+    min_coord=1e10
+    max_coord=0
+
+    if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath):
+        if file.name.endswith(".gz") : infile = gzip.open(file,"rt")
+        else: infile =open(file,"r")
+    elif file.endswith(".gz") : infile = gzip.open(file,"rt")
+    else: infile =open(file,"r")
+
+    for line in infile:
+        if line.startswith("#"): continue 
+        linesplit = line.split("\t")
+        if linesplit[12]==gene_name:
+            chr=linesplit[2].lstrip("chr")
+            min_coord=min(min_coord,int(linesplit[4]))
+            max_coord=max(max_coord,int(linesplit[5]))
+
+    if chr!="":
+        length=max_coord-min_coord
+        min_coord-= max(10,int(0.05*length))
+        max_coord+= max(10,int(0.05*length))
+
+        
+    return (chr,min_coord,max_coord)
 
 
 

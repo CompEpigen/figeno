@@ -231,7 +231,7 @@ def get_track(type):
 		}
     if type=="basemod_freq":
         return {
-			"type": "basemod freq",
+			"type": "basemod_freq",
             "bams":[],
             "bedmethyls":[],
 			"height": 20,

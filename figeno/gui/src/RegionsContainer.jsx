@@ -5,7 +5,7 @@ import {Region} from './Region'
 import { DndContainer } from './DndContainer';
 
 
-export function RegionsContainer({regionsList,setRegionsList,openColorPanel,show_regions_color}) {
+export function RegionsContainer({regionsList,setRegionsList,openColorPanel, openGeneSelector,show_regions_color}) {
     
 
     function set_value(id,attribute,value){
@@ -72,7 +72,7 @@ export function RegionsContainer({regionsList,setRegionsList,openColorPanel,show
         <>
         <DndContainer header={header} items={regionsList} setItems={setRegionsList} show_active_item={show_active_item} >
         {regionsList.map((region)=>{
-                    return <Region key={region.id} region={region} set_value={(attribute,value)=>set_value(region.id,attribute,value)}  className={"track"} copy_region={copy_region} delete_region={delete_region} openColorPanel={openColorPanel} show_region_color={show_regions_color}/>
+                    return <Region key={region.id} region={region} set_value={(attribute,value)=>set_value(region.id,attribute,value)}  className={"track"} copy_region={copy_region} delete_region={delete_region} openColorPanel={openColorPanel} openGeneSelector={openGeneSelector} show_region_color={show_regions_color}/>
                 })}
         </DndContainer>
         </>

@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request
 import json
 import filedialpy
 from figeno import figeno_make
+from figeno.genes import find_genecoord_refseq_wrapper
 
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
@@ -87,6 +88,18 @@ def run():
         try:
             figeno_make(data)
             return jsonify({"success":True})
+        except Exception as e:
+            print(traceback.format_exc())
+            return jsonify({"success":False,"error":traceback.format_exc()})
+        
+@app.route('/find_gene', methods = ['POST'])
+def find_gene():
+    if request.is_json:
+        data = request.get_json()
+        try:
+            chr,start,end=find_genecoord_refseq_wrapper(data["gene_name"],data["reference"],data["genes_file"])
+            if chr=="": return jsonify({"success":False,"error":"Could not find gene: "+data["gene_name"]})
+            else: return jsonify({"success":True,"chr":chr,"start":start,"end":end})
         except Exception as e:
             print(traceback.format_exc())
             return jsonify({"success":False,"error":traceback.format_exc()})

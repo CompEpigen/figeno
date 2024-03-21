@@ -8,6 +8,7 @@ import { RegionsContainer } from './RegionsContainer';
 import { HighlightsContainer } from './HighlightsContainer';
 import { TracksContainer, defaultTrackValues} from "./TracksContainer"
 import { LoadingScreen } from './LoadingScreen';
+import { GeneSelector } from './GeneSelector';
 import { FileDialog } from './FileDialog';
 
 import {ColorButton, ColorPanel} from "./ColorButton"
@@ -28,6 +29,9 @@ export default function App() {
 
   const [trackTypePanelActive,setTrackTypePanelActive] = useState(false);
   const [setTrackType, setSetTrackType] = useState(()=>{return false});
+
+  const [geneSelectorActive,setGeneSelectorActive] = useState(false);
+  const [updateRegion, setUpdateRegion] = useState(()=>{return false});
 
   const [templatePanelActive,setTemplatePanelActive] = useState(false);
 
@@ -60,6 +64,11 @@ export default function App() {
   function openTrackTypePanel(set_type){
     setSetTrackType(()=>set_type);
     setTrackTypePanelActive(true);
+  }
+
+  function openGeneSelector(set_region){
+    setUpdateRegion(()=>set_region);
+    setGeneSelectorActive(true);
   }
 
   function get_config(){
@@ -246,15 +255,16 @@ export default function App() {
     {render_colorPanel()}
     {fileDialogActive ? (<FileDialog fileDialogData={fileDialogData} setFileDialogData={setFileDialogData} close={()=>setFileDialogActive(false)}/>):""}
     {trackTypePanelActive ? (<TrackTypePanel setTrackType={setTrackType} close={()=>setTrackTypePanelActive(false)}/>):""}
+    {geneSelectorActive ? (<GeneSelector updateRegion={updateRegion} setGeneSelectorActive={setGeneSelectorActive} generalParams={generalParams}/>):""}
     {loadingscreenActive ? (<LoadingScreen errorMessage={errorMessage} setErrorMessage={setErrorMessage} setLoadingscreenActive={setLoadingscreenActive} />):""}
     {templatePanelActive && (<TemplatePanel setTracksList={setTracksList} setRegionsList={setRegionsList} setHighlightsList={setHighlightsList} setGeneralParams={setGeneralParams} close={()=>setTemplatePanelActive(false)}/>)}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(520px,1fr))", width:"100%", gap:"10px"}}>
       <GeneralContainer generalParams={generalParams} setGeneralParams={setGeneralParams}/>
       <OutputContainer outputParams={outputParams} setOutputParams={setOutputParams} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(500px,1fr))", width:"100%", gap:"10px"}}>
-      <RegionsContainer key="regions" regionsList={regionsList} setRegionsList={setRegionsList} openColorPanel={openColorPanel} show_regions_color={show_regions_color}/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(520px,1fr))", width:"100%", gap:"10px"}}>
+      <RegionsContainer key="regions" regionsList={regionsList} setRegionsList={setRegionsList} openColorPanel={openColorPanel} openGeneSelector={openGeneSelector} show_regions_color={show_regions_color}/>
       <HighlightsContainer key="highlights" regionsList={highlightsList} setRegionsList={setHighlightsList} openColorPanel={openColorPanel}/>
       </div>
 

@@ -7,8 +7,15 @@ import { DndItem } from './DndItem';
 
 
 
-export function Region({region, set_value, className, copy_region, delete_region, openColorPanel, show_region_color}) {
+export function Region({region, set_value, className, copy_region, delete_region, openColorPanel,openGeneSelector, show_region_color}) {
     const chrClass=(region.chr!=="")?"":"unsetPath";
+
+    function updateRegionCoords(chr,start,end){
+        set_value("chr",chr);
+        set_value("start",start);
+        set_value("end",end);
+    }
+
     return (
         <DndItem id ={region.id} copy_item={()=>copy_region(region.id)} delete_item={()=>delete_region(region.id)} className={className}>
             <div className="trackHeader">
@@ -30,6 +37,7 @@ export function Region({region, set_value, className, copy_region, delete_region
                 {show_region_color&&(
                     <ColorButton id={"color"+region.id} color={region.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}/>
                 )}
+                <button onClick={()=>openGeneSelector(updateRegionCoords)}>Around gene</button>
                 
             </div>
         </DndItem>
