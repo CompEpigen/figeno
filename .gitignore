@@ -9,6 +9,8 @@ docs/_build
 figeno/gui/node_modules
 figeno/gui/build
 figeno/gui/build.zip
+test_data/*.svg
+test_data/*.png
 
 pyinstaller/build
 pyinstaller/dist
