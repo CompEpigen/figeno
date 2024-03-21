@@ -27,7 +27,7 @@ def browse():
         start_dir = last_dir
         if len(data["path"])>0 and os.path.exists(os.path.dirname(data["path"])):
             start_dir = os.path.dirname(data["path"])
-        t = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False ,directory=start_dir, title="Select file")
+        t = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False ,directory=start_dir)
         if t is None: t=""
         if not isinstance(t,str):  t=t[0]
         if len(t)>0: last_dir= os.path.dirname(t)
