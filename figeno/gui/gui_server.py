@@ -4,7 +4,6 @@ import os
 import logging
 from flask import Flask, jsonify, request
 import json
-import filedialpy
 from figeno import figeno_make
 from figeno.genes import find_genecoord_refseq_wrapper
 

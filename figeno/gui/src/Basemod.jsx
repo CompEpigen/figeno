@@ -18,7 +18,7 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
     function setColor(c,index){
         const colors = [...bam.colors]
         colors[index] = c
-        set_value("haplotype_colors",colors)
+        set_value("colors",colors)
     }
     function setNgroups(){
         if (bam.split_by_haplotype){
