@@ -61,7 +61,7 @@ class hic_track:
         if self.scale=="auto":
             vmin,vmax = self.get_min_max_values(regions,0,self.scale_max_percentile)
         else: vmin,vmax = np.exp(self.scale_min),np.exp(self.scale_max)
-        
+
         norm = matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax)
         if self.color_map=="red" or self.color_map=="Red":
              self.color_map = LinearSegmentedColormap.from_list('interaction',
@@ -118,6 +118,7 @@ class hic_track:
                 #start1,end1,left_offset = region1.start, region1.end,0
                 mat = c.matrix(balance=True).fetch(region1.chr+":"+str(start1)+"-"+str(end1),
                                                 region2.chr+":"+str(start2)+"-"+str(end2))
+                mat[np.isnan(mat)]=0
                 if region1.orientation=="-": mat = mat[::-1,:]
                 if region2.orientation=="-": mat = mat[:,::-1]
 
@@ -211,6 +212,7 @@ class hic_track:
                 region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames)
                 mat = c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end),
                                                 region2.chr+":"+str(region2.start)+"-"+str(region2.end))
+                mat[np.isnan(mat)]=0
                 if a!=b and self.double_interactions_across_regions: mat = 1+2*mat
                 else: mat = 1+mat
                 l.append(mat.flatten())
