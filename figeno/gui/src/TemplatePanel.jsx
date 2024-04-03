@@ -44,7 +44,7 @@ export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,se
         let alignmentsTrack= {id:uuid4(),type:"alignments",...defaultTrackValues.alignments,group_by:"haplotype",color_by:"basemod"};
         let basemodfreqTrack= {id:uuid4(),type:"basemod_freq",...defaultTrackValues["basemod_freq"],
                         bams:[{id:uuid4(),"file": "","base": "C","mod": "m","min_coverage": 6,"linewidth": 3,"opacity": 1,
-                        "fix_hardclip": false,"split_by_haplotype": true,"colors": ["#27ae60","#e67e22"]}]};
+                        "fix_hardclip": false,"split_by_haplotype": true,"colors": ["#27ae60","#e67e22"],"labels":["",""]}]};
         let genesTrack={id:uuid4(),type:"genes",...defaultTrackValues.genes};
         let chrTrack={id:uuid4(),type:"chr_axis",...defaultTrackValues["chr_axis"]};
         setHighlightsList([]);

@@ -58,11 +58,11 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
                 </div>
                 <div className='formItem'>
                     <label htmlFor={"fix_hardclip"+bam.id+trackID}>Fix hardclip:</label>
-                    <input type="checkbox" id={"fix_hardclip"+bam.id+trackID} value={bam.fix_hardclip}  onChange={()=>set_value("fix_hardclip",!bam.fix_hardclip)} />
+                    <input type="checkbox" id={"fix_hardclip"+bam.id+trackID} checked={bam.fix_hardclip}  onChange={()=>set_value("fix_hardclip",!bam.fix_hardclip)} />
                 </div>
                 <div className='formItem'>
                     <label htmlFor={"split_by_haplotype"+bam.id+trackID}>Split by haplotype:</label>
-                    <input type="checkbox" id={"split_by_haplotype"+bam.id+trackID} value={bam.split_by_haplotype}  onChange={setNgroups} />
+                    <input type="checkbox" id={"split_by_haplotype"+bam.id+trackID} checked={bam.split_by_haplotype}  onChange={setNgroups} />
                 </div>
                 {!bam.split_by_haplotype?(
                     <>
