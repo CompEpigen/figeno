@@ -20,7 +20,7 @@ export function ColorPanel({color,setColor,updateColor,close}){
     const predefined_colors=["#000000","#222222","#444444","#666666","#888888","#aaaaaa",
                             "#c0392b","#e74c3c","#d35400","#e67e22","#f39c12","#f1c40f",
                             "#2980b9","#3498db","#27ae60","#2ecc71","#16a085","#1abc9c",
-                            "#8e44ad","#9b59b6","#2c3e50","#34495e","#a29bfe","#ffffff"]
+                            "#8e44ad","#9b59b6","#a29bfe","#2c3e50","#34495e","#95cdcd"]
     //const [color,setColor] = useState("#333333");
     // setColor sets the color of the colorpanel, updateColor updates the color of the color button.
     const popover = useRef();
