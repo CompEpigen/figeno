@@ -48,7 +48,7 @@ class tracks_plot:
         self.reference=reference
         self.genes_file=genes_file
         self.chrarms_file=chrarms_file
-        if config is not None:
+        if config is not None and "general" in config:
             if "reference" in config["general"]: self.reference=config["general"]["reference"]
             if "genes_file" in config["general"]: self.genes_file=config["general"]["genes_file"]
             if "chrarms_file" in config["general"]: self.chrarms_file = config["general"]["chrarms_file"]
@@ -80,7 +80,7 @@ class tracks_plot:
             if "regions" in config:
                 for s in config["regions"]:
                     if "chr" in s:
-                        chr = s["chr"].lstrip("chr")
+                        chr = str(s["chr"]).lstrip("chr")
                         if chr=="": raise Exception("Must specify the chromosome of the region.")
                         orientation = s["orientation"] if "orientation" in s else "+"
                         if "start" in s and s["start"]is not None: start = s["start"]
@@ -101,7 +101,7 @@ class tracks_plot:
                 for hl in config["highlights"]:
                     start,end = hl["start"],hl["end"]
                     if start>end: start,end = end,start
-                    self.highlights.append(Highlight(hl["chr"],start,end,hl["color"],hl["opacity"]))
+                    self.highlights.append(Highlight(str(hl["chr"]).lstrip("chr"),start,end,hl["color"],hl["opacity"]))
 
             # Tracks
             if "tracks" in config:
@@ -139,8 +139,10 @@ class tracks_plot:
                         self.tracks_list.append(ase_track(**t))
                     else:
                         print("WARNING: unrecognized track type: "+str(t))
-
-            self.figure_layout = config["general"]["layout"]
+            if "general" in config and "layout" in config["general"]:
+                self.figure_layout = config["general"]["layout"]
+            else:
+                self.figure_layout="horizontal"
             self.output = None
             if "output" in config: self.output=config["output"]
 
