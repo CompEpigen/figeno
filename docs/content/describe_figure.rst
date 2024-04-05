@@ -17,7 +17,14 @@ General
   * ``symmetrical``: Draw the regions in two rows, such that the tracks are symmetric: the bottom row has the tracks in the normal order, but the top row has its tracks in the reverse order. This is mainly intended to show copy numbers and breakpoints, with sv as the topmost track.
   
   * ``stacked``: Draw all regions horizontally, but instead of being next to each other horizontally, the different regions are stacked vertically.
-* ``reference``: Reference genome used. Files for hg19 and hg38 are provided. You can also choose a custom reference genome, but then you will need to provide the required files. If you use a genes track, you will need to provide a genes file. If you use a chr_axis with the "ideogram" style, you will need to provide an ideogram file. If you do not specify the ends of the regions, you will need to specify a chr_arms file.
+* ``reference``: Reference genome used. Files for hg19 and hg38 are provided. You can also choose a custom reference genome, but then you will need to provide the required files: 
+
+  * ``genes_file``: only required if you use a "genes" track, or if you want to highlight genes in a "copynumber" track. Should be in NCBI RefSeq format, which you can download for any reference genome from the  `UCSC table browser <https://genome.ucsc.edu/cgi-bin/hgTables>`_ (Group: Genes and Genes Predictions, track: NCBI RefSeq, table: RefSeq All, output field separator: tsv, file type returned: gzip compressed). See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_genes.txt.gz>`_. Alternatively, gtf files are also supported (but a bit slower).
+  
+  * ``chrarms_file``: only required if you do not specify the end coordinate of a region. See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_chrarms.txt>`_.
+  
+  * ``cytobands_file``: only required if you use a "chr_axis" track with the "ideogram" style. The file can be downloaded for any genome from the `UCSC table browser <https://genome.ucsc.edu/cgi-bin/hgTables>`_ (Group: Mapping and Sequencing, track: Chromosome Band (Ideogram), table: cytoBandIdeo, output field separator: tsv, file type returned: plain text). See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_cytobands.tsv>`_. 
+
 
 Output
 -------
