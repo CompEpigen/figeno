@@ -1,6 +1,7 @@
 import traceback
 import webbrowser
 import os
+import sys
 import logging
 from flask import Flask, jsonify, request
 import json
@@ -116,8 +117,10 @@ def main(args=None):
         logging.getLogger('werkzeug').disabled = True
     port=5000
     if args is not None: port = args.port
-    print("Starting local server on http://localhost:"+str(port))
-    webbrowser.open_new_tab('http://localhost:'+str(port)+'/')
+    if sys.platform=="darwin": web_address="http://127.0.0.1:"+str(port)+"/"
+    else:  web_address="http://localhost:"+str(port)+"/"
+    print("Starting local server on "+web_address)
+    webbrowser.open_new_tab(web_address)
     app.run(debug=debug,port=port)
 
 if __name__=="__main__":
