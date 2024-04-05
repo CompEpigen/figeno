@@ -66,9 +66,9 @@ class basemodfreq_track:
 
         def transform_coord(pos):
             if region.orientation=="+":
-                return box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
+                return min(box["right"]-0.4,max(box["left"]+0.4,box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
             else:
-                return box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
+                return min(box["right"]-0.4,max(box["left"]+0.4,box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
 
         # Read methylation
         reads_HP1,reads_HP2,reads_unphased,reads_all = read_read_groups(samfile,region)
@@ -93,8 +93,8 @@ class basemodfreq_track:
             for i in range(len(boundaries)-1):
                 a,b = boundaries[i], boundaries[i+1]
                 if b-a>1:
-                    zorder = 1 if linewidth>1 else 0
-                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=opacity,zorder=zorder) 
+                    #zorder = 1 if linewidth>1 else 0
+                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=opacity,zorder=1) 
 
     def draw_region_bedmethyl(self,region,box,file,mod,min_coverage=5,linewidth=3,opacity=1,label="",color="#27ae60"):
         min_coverage=int(min_coverage)
