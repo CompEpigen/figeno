@@ -86,8 +86,6 @@ class alignments_track:
         if self.bounding_box:
             draw_bounding_box(box)
 
-        if self.exchange_haplotypes: group_piles = [group_piles[1],group_piles[0]] + list(group_piles[2:])
-
         n_rows_group = self.group_sizes
         total_rows = np.sum(n_rows_group)
         total_rows_margin = total_rows + max(0,len(group_piles)-1) # Use one empty row as spacer between groups.
@@ -306,7 +304,11 @@ class alignments_track:
                                                                                           min_splitreads_breakpoints=self.min_splitreads_breakpoints)
         self.region_group_piles = add_reads_to_piles(self.samfile,region_group_piles,regions,self.splitreads,margin=self.hgap_bp,
                                                      only_show_splitreads=self.only_show_splitreads,only_one_splitread_per_row=self.only_one_splitread_per_row)
-        
+        if self.exchange_haplotypes and self.group_by=="haplotype":
+            tmp = []
+            for x in self.region_group_piles:
+                tmp.append([x[1],x[0]]+x[2:])
+            self.region_group_piles=tmp
         sizes = [len(x) for x in self.region_group_piles[0]]
         for i in range(len(self.region_group_piles)):
             sizes = [max(sizes[j],len(self.region_group_piles[i][j])) for j in range(len(sizes))]
