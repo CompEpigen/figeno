@@ -17,13 +17,13 @@ export function GeneralContainer({generalParams,setGeneralParams}) {
             if (value=="custom"){
                 newVal["genes_file"] = "";
                 newVal["chrarms_file"] = "";
-                newVal["ideogram_file"] = "";
+                newVal["cytobands_file"] = "";
 
             }
             else if (generalParams.reference=="custom"){
                 delete newVal.genes_file;
                 delete newVal.chrarms_file;
-                delete newVal.ideogram_file;
+                delete newVal.cytobands_file;
             }
             setGeneralParams(newVal);
         }
@@ -63,7 +63,7 @@ export function GeneralContainer({generalParams,setGeneralParams}) {
                     {generalParams.reference==="custom"?(<>
                         <PathEntry id={"genes_file"} label="Genes file:" value={generalParams.genes_file} set_value={(val) => set_value("genes_file",val)}/>
                         <PathEntry id={"chrarms_file"} label="Chr arms file:" value={generalParams.chrarms_file} set_value={(val) => set_value("chrarms_file",val)}/>
-                        <PathEntry id={"ideogram"} label="Ideogram file:" value={generalParams.ideogram_file} set_value={(val) => set_value("ideogram_file",val)}/>
+                        <PathEntry id={"cytobands"} label="Cytobands file:" value={generalParams.cytobands_file} set_value={(val) => set_value("cytobands_file",val)}/>
                     </>):""}
                 </div>
             </div>

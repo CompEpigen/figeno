@@ -9,7 +9,7 @@ import figeno.data
 from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="hg19",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="custom",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False):
         self.style=style
         self.unit=unit
@@ -32,7 +32,11 @@ class chr_track:
                 else:
                     raise Exception("Must provide a cytobands file.")
             else:
-                self.df_cytobands = pd.read_csv(self.cytobands_file,sep="\t",header=None)
+                with open(cytobands_file,"r") as infile:
+                    if infile.readline().startswith("#"):
+                        self.df_cytobands = pd.read_csv(cytobands_file,sep="\t")
+                    else:
+                        self.df_cytobands = pd.read_csv(cytobands_file,sep="\t",header=None)
             self.df_cytobands.columns = ["chr","start","end","value1","value2"]
             self.df_cytobands["chr"] = [x.lstrip("chr") for x in self.df_cytobands["chr"]]
 

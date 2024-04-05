@@ -125,6 +125,11 @@ class tracks_plot:
                         t["genes_file"] = self.genes_file
                         self.tracks_list.append(genes_track(**t))
                     elif track_type=="chr_axis":
+                        if t["style"]=="ideogram" and "general" in config:
+                            if "reference" in config["general"]:
+                                t["reference"]=config["general"]["reference"]
+                            if "cytobands_file" in config["general"]:
+                                t["cytobands_file"] = config["general"]["cytobands_file"]
                         self.tracks_list.append(chr_track(**t))
                     elif track_type=="copynumber":
                         t["reference"] = self.reference
