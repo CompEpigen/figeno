@@ -3,6 +3,7 @@
 Tool for making genomics figures.
 
 ![figeno](docs/content/images/figeno.png)
+Example figures generated with figeno. Left: allele-specific methylation with nanopore data. Right: HiC data across a structural rearrangement.
 
 ## Features
 - Large collection of tracks (bigwig, HiC, alignments, copy number, SV…)
