@@ -41,9 +41,11 @@ class coverage_track:
         if self.bounding_box: draw_bounding_box(box)
         #if region.end-region.start<5000000:
         coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
+        coverage=np.nan_to_num(coverage,0)
         n_bins = min(self.n_bins,len(coverage))
         n_bases_per_bin = (region.end-region.start) / n_bins
         coverage_bin = [np.mean(coverage[int(i*n_bases_per_bin):int((i+1)*n_bases_per_bin)]) for i in range(n_bins)]
+
         #else:
         #    n_bins = self.n_bins
         #    coverage_bin=[]
@@ -56,6 +58,7 @@ class coverage_track:
 
         
         max_coverage = np.max(coverage_bin) * 1.1
+        if max_coverage<1 or max_coverage!=max_coverage: max_coverage=1
         if self.scale=="auto per region": self.scale_max=max_coverage
         rect_width = (box["right"] - box["left"]) / len(coverage_bin)
 
@@ -128,6 +131,7 @@ class coverage_track:
             reg = region[0]
             region = correct_region_chr(reg,self.samfile.references)
             coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
+            coverage=np.nan_to_num(coverage,nan=0)
             n_bins = min(self.n_bins,len(coverage))
             n_bases_per_bin = (region.end-region.start) // n_bins
             coverage_bin = [np.mean(coverage[i*n_bases_per_bin:(i+1)*n_bases_per_bin]) for i in range(n_bins)]
@@ -136,6 +140,7 @@ class coverage_track:
                 if new_value==new_value:coverage_bin.append(new_value)
                 coverage_bin+= []
             max_cov=max(max_cov,np.max(coverage_bin) * 1.1)
+        if max_cov<1 or max_cov!=max_cov: max_cov=1
         return round(max_cov)
 
 
