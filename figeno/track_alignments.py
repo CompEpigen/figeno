@@ -71,6 +71,7 @@ class alignments_track:
        
 
     def draw(self, regions, box ,hmargin):
+        regions = [(correct_region_chr(region, self.samfile.references),w) for (region,w) in regions]
         if self.rephase: self.assign_SNPs_haplotypes(regions)
         self.compute_read_piles(regions,box)
         #self.update_group_sizes(regions,box) # Compute group sizes so that the same borders can be used for all regions
@@ -82,7 +83,6 @@ class alignments_track:
         self.draw_title(box)
 
     def draw_region(self,region,box,group_piles):
-        region = correct_region_chr(region,self.samfile.references)
         if self.bounding_box:
             draw_bounding_box(box)
 
