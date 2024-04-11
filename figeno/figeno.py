@@ -83,9 +83,17 @@ class tracks_plot:
                         chr = str(s["chr"]).lstrip("chr")
                         if chr=="": raise Exception("Must specify the chromosome of the region.")
                         orientation = s["orientation"] if "orientation" in s else "+"
-                        if "start" in s and s["start"]is not None: start = s["start"]
+                        if "start" in s and (s["start"]is not None) and (s["start"]!=""): 
+                            start = s["start"]
+                            if isinstance(start,str):
+                                if start.isdigit(): start=int(start)
+                                else: raise Exception("Region start should be an integer: "+start)
                         else: start = 0
-                        if "end" in s and s["end"] is not None: end = s["end"]
+                        if "end" in s and (s["end"] is not None) and (s["end"]!=""): 
+                            end = s["end"]
+                            if isinstance(end,str):
+                                if end.isdigit(): end=int(end)
+                                else: raise Exception("Region end should be an integer: "+end)
                         else: 
                             if not chr in self.chr_lengths: 
                                 raise Exception("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a chrarms_file must be provided (or a non-custom reference).")
@@ -225,6 +233,7 @@ class tracks_plot:
             raise Exception("Unknown figure layout: "+self.figure_layout)
 
     def draw_horizontal(self,file,width=183,dpi=150,transparent=False):
+        width=float(width)
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
@@ -264,12 +273,13 @@ class tracks_plot:
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
         plt.tight_layout(pad=0.1)
-        fig.savefig(file,dpi=dpi,transparent=transparent)
+        fig.savefig(file,dpi=float(dpi),transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
     
     def draw_stacked(self,file,width=183,dpi=150,transparent=False):
+        width=float(width)
         self.update_total_width(width)
         self.update_regions_width_stacked()
         self.update_margins()
@@ -300,12 +310,13 @@ class tracks_plot:
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
         plt.tight_layout(pad=0.1)
-        fig.savefig(file,dpi=dpi,transparent=transparent)
+        fig.savefig(file,dpi=float(dpi),transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
 
     def draw_symmetrical(self,file,width=183,dpi=150,transparent=False):
+        width=float(width)
         self.update_total_width(width)
         self.update_regions_width_symmetrical()
         self.update_margins()
@@ -345,12 +356,13 @@ class tracks_plot:
             current_height+=t.height
         plt.axis('off')
         plt.tight_layout(pad=0.1)
-        fig.savefig(file,dpi=dpi,transparent=transparent)
+        fig.savefig(file,dpi=float(dpi),transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
 
     def draw_circular(self,file,width=183,dpi=150,transparent=False):
+        width=float(width)
         self.update_total_width(width)
         self.update_regions_width()
         self.update_margins()
@@ -391,7 +403,7 @@ class tracks_plot:
         ax.set_rmin(0)
         ax.set_rmax(current_r)
         plt.tight_layout(pad=0.1)
-        fig.savefig(file,dpi=dpi,transparent=transparent)
+        fig.savefig(file,dpi=float(dpi),transparent=transparent)
         plt.cla() 
         plt.clf() 
         plt.close('all')
