@@ -9,7 +9,7 @@ packages = ["figeno", "figeno.data", "figeno.cli", "figeno.gui"]
 
 [project]
 name = 'figeno'
-version = "1.0.8"
+version = "1.0.9"
 description = 'Package for generating genomics figures.'
 readme = 'README.md'
 authors = [
