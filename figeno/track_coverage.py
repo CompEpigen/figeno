@@ -8,7 +8,7 @@ from figeno.utils import correct_region_chr, split_box, draw_bounding_box
 from figeno.vcf import read_phased_vcf
 
 class coverage_track:
-    def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",upside_down=False,label="",label_rotate=False,fontscale=1,
                            vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=False,height=10,margin_above=1.5):
         self.samfile = pysam.AlignmentFile(file, "rb")
         self.n_bins = int(n_bins)
@@ -21,6 +21,7 @@ class coverage_track:
         if self.scale_max is not None: self.scale_max=float(self.scale_max)
         self.scale_pos = scale_pos
         if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
+        self.upside_down= upside_down
         self.vcf = vcf
         self.SNP_colors=SNP_colors
         self.exchange_haplotypes = exchange_haplotypes
@@ -80,7 +81,10 @@ class coverage_track:
         #           bin2vaf[(pos-region.start)//n_bases_per_bin] = (cov1/total_cov,cov2/total_cov)
 
         # Draw rectangles for each bin
-        vertices=[(box["right"],box["bottom"]),(box["left"],box["bottom"])]
+        if not self.upside_down:
+            vertices=[(box["right"],box["bottom"]),(box["left"],box["bottom"])]
+        else:
+            vertices=[(box["right"],box["top"]),(box["left"],box["top"])]
         for i in range(len(coverage_bin)):
             if region.orientation=="+":
                 rect_left = box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
@@ -90,8 +94,12 @@ class coverage_track:
             #rect = patches.Rectangle((rect_left,box["bottom"]),
             #                        rect_width,rect_height,color=self.color,lw=0.2,zorder=1)  
             #box["ax"].add_patch(rect)
-            vertices.append((rect_left,box["bottom"]+rect_height))
-            vertices.append((rect_left+rect_width,box["bottom"]+rect_height))
+            if not self.upside_down:
+                vertices.append((rect_left,box["bottom"]+rect_height))
+                vertices.append((rect_left+rect_width,box["bottom"]+rect_height))
+            else:
+                vertices.append((rect_left,box["top"]-rect_height))
+                vertices.append((rect_left+rect_width,box["top"]-rect_height))
             
             #if i in bin2vaf: # if there is a SNP in the bin
             #    rect = patches.Rectangle((rect_left,box["bottom"]),
@@ -117,8 +125,12 @@ class coverage_track:
             box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
         if self.scale_pos=="left":
-            upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
-            lowerlimit_string = "0" 
+            if not self.upside_down:
+                upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                lowerlimit_string = "0" 
+            else:
+                lowerlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                upperlimit_string = "0" 
             box["ax"].text(box["left"] - 0.5,box["top"],
                         upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
             box["ax"].text(box["left"] - 0.5,box["bottom"],

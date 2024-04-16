@@ -7,7 +7,7 @@ import pandas as pd
 from figeno.utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
-    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down="false",label="",label_rotate=False,fontscale=1,
                  bounding_box=False,height=10,margin_above=1.5):
         if not os.path.exists(file): raise Exception("The following file does not exist (in bigwig track): "+file)
         try:
@@ -20,6 +20,7 @@ class bigwig_track:
         self.label_rotate=label_rotate
         self.scale = scale
         self.scale_max= scale_max
+        self.upside_down=upside_down
         if self.scale_max is not None: self.scale_max=float(self.scale_max)
         self.scale_pos = scale_pos
         if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
@@ -62,11 +63,16 @@ class bigwig_track:
         if self.scale=="auto per region": self.scale_max = np.max(values_binned) * 1.1
         values_binned = [max(min(self.scale_max,x),0) for x in values_binned]
         
-        
-        polygon_vertices=[(box["right"],box["bottom"]) , (box["left"],box["bottom"])]
+        if not self.upside_down:
+            polygon_vertices=[(box["right"],box["bottom"]) , (box["left"],box["bottom"])]
+        else:
+            polygon_vertices=[(box["right"],box["top"]) , (box["left"],box["top"])]
         for i in range(nbins):
             x=box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
-            y= box["bottom"] + values_binned[i]/self.scale_max * (box["top"]-box["bottom"])
+            if not self.upside_down:
+                y= box["bottom"] + values_binned[i]/self.scale_max * (box["top"]-box["bottom"])
+            else:
+                y= box["top"] - values_binned[i]/self.scale_max * (box["top"]-box["bottom"])
             polygon_vertices.append((x,y))
         if "projection" in box and box["projection"]=="polar":
             polygon_vertices = interpolate_polar_vertices(polygon_vertices)
@@ -91,8 +97,12 @@ class bigwig_track:
                 box["ax"].text(theta,r,
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=10*self.fontscale)
             if self.scale_pos=="left":
-                upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
-                lowerlimit_string = "0" 
+                if not self.upside_down:
+                    upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                    lowerlimit_string = "0" 
+                else:
+                    lowerlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                    upperlimit_string = "0" 
                 x,y= polar2cartesian((box["left"],box["top"]))
                 theta,r = cartesian2polar((x-0.2,y))
                 box["ax"].text(theta,r,
@@ -111,10 +121,16 @@ class bigwig_track:
             if self.scale_pos=="left":
                 upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
                 lowerlimit_string = "0" 
-                box["ax"].text(box["left"] - 0.5,box["top"],
-                            upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
-                box["ax"].text(box["left"] - 0.5,box["bottom"],
-                            lowerlimit_string,horizontalalignment="right",verticalalignment="bottom",fontsize=6*self.fontscale)
+                if not self.upside_down:
+                    box["ax"].text(box["left"] - 0.5,box["top"],
+                                upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
+                    box["ax"].text(box["left"] - 0.5,box["bottom"],
+                                lowerlimit_string,horizontalalignment="right",verticalalignment="bottom",fontsize=6*self.fontscale)
+                else:
+                    box["ax"].text(box["left"] - 0.5,box["top"],
+                                lowerlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
+                    box["ax"].text(box["left"] - 0.5,box["bottom"],
+                                upperlimit_string,horizontalalignment="right",verticalalignment="bottom",fontsize=6*self.fontscale)
     
     def compute_max_regions(self,regions,bins):
         m=0

@@ -246,6 +246,11 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                     </select>
                 </div>
 
+                <div className='formItem'>
+                    <label htmlFor={"upside_down"+track.id}>Upside down:</label>
+                    <input type="checkbox" id={"upside_down"+track.id} checked={track.upside_down} onChange={() => set_value("upside_down",!track.upside_down)} />
+                </div>
+
             </div>
            
         </>
@@ -289,6 +294,11 @@ function CoverageTrack({track,set_value,openColorPanel, setFileDialogData,setFil
                                 <option className="dropDownOption" key="corner all"  value="corner all">corner all</option>
                                 <option className="dropDownOption" key="none"  value="none">none</option>
                     </select>
+                </div>
+
+                <div className='formItem'>
+                    <label htmlFor={"upside_down"+track.id}>Upside down:</label>
+                    <input type="checkbox" id={"upside_down"+track.id} checked={track.upside_down} onChange={() => set_value("upside_down",!track.upside_down)} />
                 </div>
 
             </div>

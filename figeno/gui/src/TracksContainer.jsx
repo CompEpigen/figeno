@@ -53,7 +53,8 @@ export const defaultTrackValues={
         n_bins:500,
         scale:"auto",
         scale_max:"",
-        scale_pos:"corner"
+        scale_pos:"corner",
+        upside_down:false
     },
     "coverage":{
         height:"10",
@@ -67,7 +68,8 @@ export const defaultTrackValues={
         n_bins:500,
         scale:"auto",
         scale_max:"",
-        scale_pos:"corner"
+        scale_pos:"corner",
+        upside_down:false
     },
     "alignments":{
         height:"50",
