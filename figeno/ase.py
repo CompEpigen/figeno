@@ -67,7 +67,7 @@ def read_SNPs_DNA(vcf_file,df_ase):
         df_ase["VAF_DNA"] = VAF_DNA
         df_ase["depth_DNA"] = depth_DNA
         df_ase["refCount_DNA"] = refCount_DNA
-        df_ase["altCount_DNA"] = refCount_DNA
+        df_ase["altCount_DNA"] = altCount_DNA
     else:
         print("Some SNPs in the RNAseq were not found in the DNAseq")
     return df_ase

@@ -12,7 +12,7 @@ import importlib_resources as resources
 import figeno.data
 
 class ase_track:
-    def __init__(self,reference="hg19",genes_file=None,ase_file=None,vcf_DNA=None,min_depth=6,color1="#e55039",color2="#4a69bd",only_exonic=False,grid=False,labels=["RNA","DNA"],labels_rotate=True,fontscale=1,
+    def __init__(self,reference="hg19",genes_file=None,ase_file=None,vcf_DNA=None,min_depth=6,color1="#e55039",color2="#4a69bd",bar_width=0.7,only_exonic=False,grid=False,labels=["RNA","DNA"],labels_rotate=True,fontscale=1,
                 bounding_box=False,height=10,margin_above=1.5):
         self.reference=reference
         self.genes_file = genes_file
@@ -21,6 +21,7 @@ class ase_track:
         self.min_depth=min_depth
         self.color1=color1
         self.color2=color2
+        self.bar_width=bar_width
         self.only_exonic=only_exonic
         self.grid=grid
         self.labels=labels
@@ -74,12 +75,12 @@ class ase_track:
             box_RNA = {"ax":box["ax"],"left":box["left"]+(box["right"]-box["left"])*0.15,"right":box["left"]+(box["right"]-box["left"])*0.95,"bottom":box["bottom"] + (box["top"]-box["bottom"]) * 0.2, "top":box["bottom"] + (box["top"]-box["bottom"]) * 0.55}
         else:
             box_RNA = {"ax":box["ax"],"left":box["left"]+(box["right"]-box["left"])*0.15,"right":box["left"]+(box["right"]-box["left"])*0.95,"bottom":box["bottom"] + (box["top"]-box["bottom"]) * 0.2, "top":box["top"]}
-        x_positions = draw_hist_VAF(box_RNA,list(df_ase["VAF"]),color1=self.color1,color2=self.color2)
+        x_positions = draw_hist_VAF(box_RNA,list(df_ase["VAF"]),color1=self.color1,color2=self.color2,bar_width=self.bar_width)
         if self.grid: draw_grid(box_RNA)
         if self.box_RNA is None: self.box_RNA = box_RNA
 
         if self.use_DNA:
-            tmp = draw_hist_VAF(box_DNA,list(df_ase["VAF_DNA"]),color1=self.color1,color2=self.color2)
+            tmp = draw_hist_VAF(box_DNA,list(df_ase["VAF_DNA"]),color1=self.color1,color2=self.color2,bar_width=self.bar_width)
             if self.grid: draw_grid(box_DNA)
             if self.box_DNA is None: self.box_DNA = box_DNA
 
@@ -118,8 +119,8 @@ class ase_track:
                         label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=12*self.fontscale)
         
 
-def draw_hist_VAF(box,VAFs,color1="#e55039",color2="#4a69bd"):
-    bar_width=(box["right"]-box["left"]) * 0.7 / len(VAFs)
+def draw_hist_VAF(box,bar_width,VAFs,color1="#e55039",color2="#4a69bd"):
+    bar_width=(box["right"]-box["left"]) * bar_width / len(VAFs)
     x_positions = []
     for i in range(len(VAFs)):
         x = box["left"] + (box["right"]-box["left"]) * (i+0.5)/len(VAFs)
