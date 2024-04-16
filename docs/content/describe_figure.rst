@@ -158,6 +158,8 @@ Parameters:
   * ``corner all``: in the top-left corner of the track, for all regions (only option available if you use different scales for each region)
   
   * ``none``: do not show the scale
+  
+* ``upside_down``: if true, the track will be upside down.
 
 
 coverage
@@ -190,6 +192,8 @@ Parameters:
   * ``corner all``: in the top-left corner of the track, for all regions (only option available if you use different scales for each region)
   
   * ``none``: do not show the scale
+
+* ``upside_down``: if true, the track will be upside down.
 
 
 alignments
