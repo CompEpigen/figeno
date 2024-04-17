@@ -86,11 +86,12 @@ class coverage_track:
         else:
             vertices=[(box["right"],box["top"]),(box["left"],box["top"])]
         for i in range(len(coverage_bin)):
+            rect_left = box["left"] + i*rect_width
+
             if region.orientation=="+":
-                rect_left = box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
+                rect_height = coverage_bin[i]/self.scale_max * (box["top"]-box["bottom"])
             else:
-                rect_left = box["left"] + (len(coverage_bin)-i-1)*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
-            rect_height = coverage_bin[i]/self.scale_max * (box["top"]-box["bottom"])
+                rect_height = coverage_bin[len(coverage_bin)-1-i]/self.scale_max * (box["top"]-box["bottom"])
             #rect = patches.Rectangle((rect_left,box["bottom"]),
             #                        rect_width,rect_height,color=self.color,lw=0.2,zorder=1)  
             #box["ax"].add_patch(rect)
