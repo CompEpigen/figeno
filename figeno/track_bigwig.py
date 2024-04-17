@@ -32,7 +32,7 @@ class bigwig_track:
     def draw(self, regions, box ,hmargin):
         # Assign bins to regions depending on their sizes
         total_length_regions = np.sum([abs(reg[0].end-reg[0].start) for reg in regions])
-        bins_regions = [int(self.n_bins/total_length_regions * abs(reg[0].end-reg[0].start)) for reg in regions]
+        bins_regions = [max(1,int(self.n_bins/total_length_regions * abs(reg[0].end-reg[0].start))) for reg in regions]
         # Autoscale across all regions
         if self.scale=="auto": self.scale_max = self.compute_max_regions(regions,bins_regions)
 
