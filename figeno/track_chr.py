@@ -133,6 +133,7 @@ class chr_track:
         arrow_height = (box["top"]-box['bottom']) * 0.5
         line_height = arrow_height*0.5
         arrow_width = arrow_height
+        if arrow_width>abs(box["right"]-box["left"])*0.7: arrow_width = abs(box["right"]-box["left"])*0.5
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
             h1=box["top"]-arrow_height/2+line_height/2
         else:
@@ -145,7 +146,8 @@ class chr_track:
             polygon_vertices = [ (box["right"],h1) , (box["left"]+arrow_width,h1) , (box["left"]+arrow_width,h1+arrow_height/2-line_height/2),
                                  (box["left"], h1-line_height/2) , (box["left"] +arrow_width,h1-line_height/2-arrow_height/2),
                                  (box["left"] + arrow_width,h1-line_height) , (box["right"],h1-line_height)]
-        polygon = patches.Polygon(polygon_vertices,lw=0.0,color=region.color)
+        polygon_vertices=[(min(box['right'],max(box["left"],x)),y) for (x,y) in polygon_vertices]
+        polygon = patches.Polygon(polygon_vertices,lw=0.1,color=region.color)
         box["ax"].add_patch(polygon)
 
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
