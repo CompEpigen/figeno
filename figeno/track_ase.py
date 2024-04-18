@@ -119,7 +119,7 @@ class ase_track:
                         label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=12*self.fontscale)
         
 
-def draw_hist_VAF(box,bar_width,VAFs,color1="#e55039",color2="#4a69bd"):
+def draw_hist_VAF(box,VAFs,color1="#e55039",color2="#4a69bd",bar_width=0.7):
     bar_width=(box["right"]-box["left"]) * bar_width / len(VAFs)
     x_positions = []
     for i in range(len(VAFs)):
