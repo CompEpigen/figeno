@@ -178,7 +178,7 @@ class genes_track:
                 transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.genes,
                                                collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
             
-            
+            transcripts= sorted(transcripts,key=lambda x:x.start)
             lines = []
             if self.style=="default":
                 for transcript in transcripts:
