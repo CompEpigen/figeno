@@ -57,7 +57,7 @@ export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,se
         setRegionsList([{id:uuid4(),chr:"",start:"",end:"",color:"#f4a460"}]);
         let svTrack= {id:uuid4(),type:"sv",...defaultTrackValues.sv};
         let copynumberTrack= {id:uuid4(),type:"copynumber",...defaultTrackValues.copynumber,margin_above:0};
-        let chrTrack={id:uuid4(),type:"chr_axis",...defaultTrackValues["chr_axis"],margin_above:0};
+        let chrTrack={id:uuid4(),type:"chr_axis",...defaultTrackValues["chr_axis"],margin_above:0,unit:"Mb"};
         setHighlightsList([]);
         setTracksList([svTrack,copynumberTrack,chrTrack])
         close();

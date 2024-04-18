@@ -32,7 +32,7 @@ Parameters:
   * bigwig. Will have the following tracks: bigwig, genes, chr_axis.
   * hic. Will have the following tracks: hic, genes, chr_axis.
   * asm. Will have the following tracks: alignments (with split by haplotype and color by basemod), basemod_freq, genes, chr_axis.
-  * wgs_chr. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0.
+  * wgs_chr. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0 and unit to Mb for chr_axis.
   * wgs_circos. Will have the following tracks: sv, copynumber, chr_axis. Will also set margin_above to 0, max_cn to 3.9 and disable the vertical grid for the copynumber track, set layout to circular and set the regions to all chromosomes.
   
 * ``--tracks``: comma-separated list of tracks, eg: bigwig,genes,chr_axis. 

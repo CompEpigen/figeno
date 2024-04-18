@@ -110,6 +110,7 @@ def get_tracks(args):
             copynumber_track["grid_minor"]=False
             chr_track=get_track("chr_axis")
             chr_track["margin_above"]=0
+            chr_track["unit"]="Mb"
             tracks+=[sv_track,copynumber_track,chr_track]
         else:
             raise Exception("Unrecognized template: "+str(args.template)+". Please choose from: bigwig, hic, asm, wgs_chr, wgs_circos")
