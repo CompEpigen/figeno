@@ -151,10 +151,10 @@ class chr_track:
         box["ax"].add_patch(polygon)
 
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
-            ytext=box["top"]-arrow_height*1.2
+            ytext=box["top"]-arrow_height*1.1
             valign = "top"
         else:
-            ytext=box["bottom"]+arrow_height*1.2
+            ytext=box["bottom"]+arrow_height*1.1
             valign="bottom"
 
         if region.orientation=="+":
@@ -169,10 +169,10 @@ class chr_track:
                            fontsize=8*self.fontscale)
 
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
-            box["ax"].text((box["right"]+box["left"])/2,box["top"]-arrow_height*1.5,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="top",
+            box["ax"].text((box["right"]+box["left"])/2,box["top"]-arrow_height*1.55,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="top",
                            fontsize=10*self.fontscale)
         else:
-            box["ax"].text((box["right"]+box["left"])/2,box["bottom"]+arrow_height*1.5,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="bottom",
+            box["ax"].text((box["right"]+box["left"])/2,box["bottom"]+arrow_height*1.55,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="bottom",
                            fontsize=10*self.fontscale)
             
     def draw_region_ideogram(self,region,box):
