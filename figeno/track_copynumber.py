@@ -72,6 +72,13 @@ class copynumber_track:
             min_cn,max_cn = self.compute_min_max_cn(regions)
             if self.min_cn is None: self.min_cn = min_cn
             if self.max_cn is None: self.max_cn = max_cn
+        self.yticks_freq=1 # by default, put one vertical tick per integer copy number. If too many copy numbers, set a higher interval between ticks.
+        cn_amplitude=max_cn-min_cn
+        while cn_amplitude/self.yticks_freq>8:
+            if int(str(self.yticks_freq)[0])==2: self.yticks_freq*=2.5
+            else: self.yticks_freq*=2
+        self.yticks_freq=int(self.yticks_freq)
+
 
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
@@ -91,7 +98,7 @@ class copynumber_track:
     def draw_region_ratios(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
         
-        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,major=self.grid_major,minor=self.grid_minor,cn=self.grid_cn)
+        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,major=self.grid_major,minor=self.grid_minor,cn=self.grid_cn,yticks_freq=self.yticks_freq)
 
         #elif purple_cn_filename is not None: # Purple
         #    df_segments_cn = read_cnsegments_purple(purple_cn_filename=purple_cn_filename,scale=1e6)
@@ -155,7 +162,7 @@ class copynumber_track:
     def draw_region_segments(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
         
-        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid)
+        draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,yticks_freq=self.yticks_freq)
         
         df_segments_reg = self.df_segments.loc[(self.df_segments["chromosome"]==region.chr) & (self.df_segments["end"]>=region.start) & (self.df_segments["start"]<=region.end),:]
         
@@ -241,7 +248,7 @@ class copynumber_track:
         
         if "projection" in box and box["projection"]=="polar":
             for y in range(round(self.min_cn),round(self.max_cn)+1):
-                if y>=self.min_cn and y<=self.max_cn:
+                if y>=self.min_cn and y<=self.max_cn and y%self.yticks_freq==0:
                     y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (self.max_cn-self.min_cn) * (y-self.min_cn)
                     xl,yl = polar2cartesian((box["left"],y_converted))
                     xl-=1
@@ -249,7 +256,7 @@ class copynumber_track:
                     box["ax"].text(thetal,rl,str(y),horizontalalignment="right",verticalalignment="center",fontsize=self.fontscale*12)
         else:
             for y in range(round(self.min_cn),round(self.max_cn)+1):
-                if y>=self.min_cn and y<=self.max_cn:
+                if y>=self.min_cn and y<=self.max_cn and y%self.yticks_freq==0:
                     y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (self.max_cn-self.min_cn) * (y-self.min_cn)
                     box["ax"].add_patch(patches.Rectangle((box["left"]-0.8,y_converted-0.1),width=0.8,height=0.2,lw=0,color="black"))
                     #box["ax"].plot([box["left"],box["left"]-0.5],[y_converted,y_converted],color="black",linewidth=0.8,zorder=4)
@@ -269,7 +276,7 @@ class copynumber_track:
                 df_segments_reg =  self.df_segments.loc[(self.df_segments["chromosome"]==region.chr) & (self.df_segments["end"]>=region.start) & (self.df_segments["start"]<=region.end),:]
                 min_cn = min(min_cn,np.min(df_segments_reg["copyNumber"]))
                 max_cn = max(max_cn,np.max(df_segments_reg["copyNumber"]))
-        return (min_cn-0.2,max_cn+0.2)
+        return (min_cn-0.2,max_cn*1.05+0.2)
 
 def read_cna_freec(cna_freec_filename,return_type=False):
     CNAs={}
@@ -325,7 +332,7 @@ def read_cnsegments_CNAs(CNAs,round_cn=False,chr_lengths={},ploidy=2):
     return pd.DataFrame(d)
 
 
-def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,major=True,minor=True,cn=True):
+def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,major=True,minor=True,cn=True,yticks_freq=1):
     # Vertical lines
     if vertical_lines:
         if "projection" in box and box["projection"]=="polar":
@@ -359,7 +366,7 @@ def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,major=Tru
     if cn:
         if "projection" in box and box["projection"]=="polar":
             for y in range(round(ymin),round(ymax)+1):
-                if y>=ymin and y<=ymax:
+                if y>=ymin and y<=ymax and y%yticks_freq==0:
                     y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
                     n_points = round(abs(box["right"]-box["left"])*100)
                     x_list = np.linspace(box["left"],box["right"],n_points)
@@ -367,7 +374,7 @@ def draw_grid_box(box,region,ymin,ymax,fontscale=1,vertical_lines=True,major=Tru
                     box["ax"].plot(x_list,y_list,zorder=0,linewidth=0.5,color="#AAAAAA")
         else:
             for y in range(round(ymin),round(ymax)+1):
-                if y>=ymin and y<=ymax:
+                if y>=ymin and y<=ymax and y%yticks_freq==0:
                     y_converted = box["bottom"] + (box["top"]-box["bottom"]) / (ymax-ymin) * (y-ymin)
                     box["ax"].plot([box["left"],box["right"]],[y_converted,y_converted],zorder=0,linewidth=0.5,color="#AAAAAA")
                
