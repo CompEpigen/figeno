@@ -26,6 +26,7 @@ class genes_track:
 
     def draw(self, regions, box ,hmargin=0):
         boxes = split_box(box,regions,hmargin)
+        self.margin_between_genes = 1.5*np.sum([abs(r[0].end-r[0].start) for r in regions]) / abs(box["right"]-box["left"]) # in bp
         lines_regions = self.read_transcripts_lines_regions(regions)
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i],lines_regions[i])
@@ -178,11 +179,12 @@ class genes_track:
                 transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.genes,
                                                collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
             
+            # Assign transcripts to lines, so that they do not overlap
             transcripts= sorted(transcripts,key=lambda x:x.start)
             lines = []
             if self.style=="default":
                 for transcript in transcripts:
-                    add_transcript_pile(transcript,lines)
+                    add_transcript_pile(transcript,lines,margin=self.margin_between_genes)
             else:
                 lines.append([])
                 for transcript in transcripts:
