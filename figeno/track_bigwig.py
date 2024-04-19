@@ -61,6 +61,7 @@ class bigwig_track:
         rect_width = (box["right"] - box["left"]) / nbins
 
         if self.scale=="auto per region": self.scale_max = np.max(values_binned) * 1.1
+        if self.scale_max<=0: self.scale_max=0.001
         values_binned = [max(min(self.scale_max,x),0) for x in values_binned]
         
         if not self.upside_down:
