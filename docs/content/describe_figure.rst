@@ -63,7 +63,7 @@ General parameters which can be applied to all tracks:
 
 * ``fontscale``: lower (resp. higher) values will make the fonts for this track smaller (resp. higher).
 
-* ``label``: Name of the track, written to the left of the track.
+* ``label``: Name of the track, written to the left of the track. If you want to write your label on multiple lines, you can use the linebreak symbol: \n .
 
 * ``label_rotate``: if false, the label is written horizontally. Otherwise, it will be written vertically.
 
