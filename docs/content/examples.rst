@@ -10,6 +10,8 @@ You are free to combine tracks however you like, but to help you get started we 
 bigwig
 ^^^^^^
 
+A simple template with a single bigwig track, as well a chr_axis and a genes track. You can of course add additional tracks after initializing this template.
+
 .. image:: images/template_bigwig.png 
 
 .. toggle:: 
@@ -82,6 +84,8 @@ bigwig
 
 hic
 ^^^
+
+A simple template with a single hic track (showing chromatin interactions from HiC data in .cool format), as well a chr_axis and a genes track. You can of course add additional tracks after inializing this template.
 
 .. image:: images/template_hic.png 
 
@@ -474,17 +478,118 @@ wgs_circos
 Other examples
 ---------------
 
+HiC data across breakpoints
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have HiC data for a sample with a structural rearrangement, you can use several regions around the breakpoint to visualize chromatin interactions across this rearrangement. The data to replicate this figure can be found at https://github.com/CompEpigen/figeno/tree/main/test_data (files starting with LNCaP). 
+
+.. image:: images/example_hic.png 
+
+.. toggle:: 
+
+  .. code:: json
+
+    {
+    	"general": {
+    		"layout": "horizontal",
+    		"reference": "hg38"
+    	},
+    	"output": {
+    		"dpi": 400,
+    		"file": "LNCaP_figure.svg",
+    		"width": 80
+    	},
+    	"regions": [
+    		{
+    			"chr": "7",
+    			"start": 13100000,
+    			"end": 14150000,
+    			"color": "#f4a460"
+    		},
+    		{
+    			"chr": "14",
+    			"start": 37510000,
+    			"end": 36600000,
+    			"color": "#95CDCD"
+    		}
+    	],
+    	"highlights": [],
+    	"tracks": [
+    		{
+    			"type": "hic",
+    			"height": 25,
+    			"margin_above": 1.5,
+    			"bounding_box": true,
+    			"fontscale": 1,
+    			"label": "HiC   ",
+    			"label_rotate": false,
+    			"file": "LNCaP_subset_hg38.cool",
+    			"color_map": "red",
+    			"pixel_border": false,
+    			"upside_down": false,
+    			"max_dist": "1300",
+    			"extend": true,
+    			"scale": "auto",
+    			"scale_max_percentile": 90,
+    			"show_colorbar": false,
+    			"interactions_across_regions": true,
+    			"double_interactions_across_regions": true
+    		},
+    		{
+    			"type": "bigwig",
+    			"height": 10,
+    			"margin_above": 1.5,
+    			"bounding_box": false,
+    			"fontscale": 1,
+    			"label": "DNase-seq",
+    			"label_rotate": false,
+    			"file": "LNCaP_ENCFF282KWR_subset.bigwig",
+    			"color": "#2980b9",
+    			"n_bins": 500,
+    			"scale": "auto",
+    			"scale_pos": "corner"
+    		},
+    		{
+    			"type": "genes",
+    			"height": 11,
+    			"margin_above": 1.5,
+    			"bounding_box": false,
+    			"fontscale": 1,
+    			"label": "",
+    			"label_rotate": false,
+    			"style": "default",
+    			"collapsed": true,
+    			"only_protein_coding": true,
+    			"exon_color": "#2980b9",
+    			"genes": "auto"
+    		},
+    		{
+    			"type": "chr_axis",
+    			"height": 10,
+    			"margin_above": 1.5,
+    			"bounding_box": false,
+    			"fontscale": 0.8,
+    			"label": "",
+    			"label_rotate": false,
+    			"style": "arrow",
+    			"unit": "Mb",
+    			"ticklabels_pos": "below",
+    			"ticks_interval": "auto"
+    		}
+    	]
+    }
+
 Symmetrical layout for WGS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For WGS data, you can use the "symmetrical" layout to show the copy-number data on two rows, with the SVs in between. 
+For WGS data, you can use the "symmetrical" layout to show the copy-number data on two rows, with the SVs in between. The data to replicate this figure can be found at https://github.com/CompEpigen/figeno/tree/main/test_data (files starting with THP1). 
 
 .. image:: images/example_symmetrical.png 
 
 .. toggle:: 
 
   .. code:: json
-	
+
     {
     	"general": {
     		"layout": "symmetrical",
