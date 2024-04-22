@@ -19,11 +19,14 @@ author = 'Etienne Sollier'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx_rtd_theme','sphinx.ext.autosectionlabel']
+extensions = ['sphinx_rtd_theme','sphinx.ext.autosectionlabel','sphinx_togglebutton']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+
+togglebutton_hint = "Show config file."
+togglebutton_hint_hide = "Hide config file."
 
 
 # -- Options for HTML output -------------------------------------------------
