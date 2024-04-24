@@ -17,13 +17,11 @@ General
   * ``symmetrical``: Draw the regions in two rows, such that the tracks are symmetric: the bottom row has the tracks in the normal order, but the top row has its tracks in the reverse order. This is mainly intended to show copy numbers and breakpoints, with sv as the topmost track.
   
   * ``stacked``: Draw all regions horizontally, but instead of being next to each other horizontally, the different regions are stacked vertically.
-* ``reference``: Reference genome used. Files for hg19 and hg38 are provided. You can also choose a custom reference genome, but then you will need to provide the required files: 
+* ``reference``: Reference genome used. Files for hg19, hg38 and mm10 are provided. You can also choose a custom reference genome, but then you will need to provide the required files: 
 
   * ``genes_file``: only required if you use a "genes" track, or if you want to highlight genes in a "copynumber" track. Should be in NCBI RefSeq format, which you can download for any reference genome from the  `UCSC table browser <https://genome.ucsc.edu/cgi-bin/hgTables>`_ (Group: Genes and Genes Predictions, track: NCBI RefSeq, table: RefSeq All, output field separator: tsv, file type returned: gzip compressed). See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_genes.txt.gz>`_. Alternatively, gtf files are also supported (but a bit slower).
   
-  * ``chrarms_file``: only required if you do not specify the end coordinate of a region. See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_chrarms.txt>`_.
-  
-  * ``cytobands_file``: only required if you use a "chr_axis" track with the "ideogram" style. The file can be downloaded for any genome from the `UCSC table browser <https://genome.ucsc.edu/cgi-bin/hgTables>`_ (Group: Mapping and Sequencing, track: Chromosome Band (Ideogram), table: cytoBandIdeo, output field separator: tsv, file type returned: plain text). See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_cytobands.tsv>`_. 
+  * ``cytobands_file``: only required if you use a "chr_axis" track with the "ideogram" style, or if you do not specify the end of a region (in which case the region is assumed to go until the end of the chromosome). The file can be downloaded for any genome from the `UCSC table browser <https://genome.ucsc.edu/cgi-bin/hgTables>`_ (Group: Mapping and Sequencing, track: Chromosome Band (Ideogram), table: cytoBandIdeo, output field separator: tsv, file type returned: plain text). See `example here <https://github.com/CompEpigen/figeno/blob/main/figeno/data/hg19_cytobands.tsv>`_. 
 
 
 Output
@@ -161,6 +159,39 @@ Parameters:
   
 * ``upside_down``: if true, the track will be upside down.
 
+hic
+^^^^^^^^
+
+Track showing chromatin interactions from HiC data in cool format.
+
+.. image:: images/figure_hic.png 
+
+Parameters:
+
+* ``file``: file in cool or mcool format. If a mcool file is provided, you should specify the resolution by setting file to: "path/to/file.mcool::resolutions//xxxxx" 
+
+* ``color_map``: how the interaction values are mapped to colors.
+
+  * ``Red`` (default): red indicates strong interactions and white absence of interactions
+  
+  * ``Heat``: red indicates strong interactions and dark blue absence of interactions
+  
+* ``pixel_border``: If true, add a black border around each pixel.
+
+* ``upside_down``: By default, long-distance interactions are shown at the top. Setting this to True will show long-distance interactions at the bottom, resulting in triangles whose summits face down. This can be useful to show HiC data for two samples from the same region: one sample can be shown at the top in normal orientation, and the other sample can be displayed at the bottom in upside-down orientation.
+
+* ``max_dist``: maximum genomic distance between bins where interactions are shown
+  
+* ``extend``: if True (default), also show interactions from bins within regions to bins outside regions, as opposed to only interactions to and from bins within regions (which results in a lot of unused space outside of the triangle).
+
+* ``interactions_across_regions``: if True (default), will show interactions occurring across different regions (only relevant if more than one region is used, and typically if the regions are joined by a genomic rearrangement). Otherwise, only show interactions occuring within the region.
+
+* ``double_across_regions``: if True (default), the interaction score for two bins from different regions will be doubled. Intra-region interactions typically occur on both copies whereas inter-region interactions only occur on the rearranged copy, so this can be used to counter this effect.
+
+.. warning::
+  Only .cool and .mcool files are supported. If you have .hic files, please convert them to cool using https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html.
+
+
 
 coverage
 ^^^^^^^^
@@ -242,16 +273,30 @@ Parameters:
   
   * ``fix_hardclip_basemod``: the base modification in the MM/ML tags require the full read sequence, which is not provided in case of hard clipping (default for supplementary alignments with minimap2). If this is set to true, figeno will look for the primary alignment elsewhere in the bam file, and use its sequence to infer the methylation in the supplementary alignment. Otherwise, will simply not display the methylation status of hardclipped alignments. This option is somewhat experimental, and will slow down the generation of the figure.
 
-  
+.. warning::
+  MM and ML tags are required in the bam file in order to color by base modifications. They should be included in the bam file automatically if you use dorado with a modified bases model.
+
 
 basemod_freq
 ^^^^^^^^^^^^
 
-Track showing base modification frequencies (e.g. methylation), either from bam files with MM/ML tags or from bedmethyl files (e.g. generated by modkit) indexed by tabix. Several bam and bedmethyl files can be visualized in the same track, and bam files can be split by haplotype (if an HP tag is provided).
+Track showing base modification frequencies (e.g. methylation). The supported file types are:
+
+* bam file with MM and ML tags (must be indexed).
+* bedmethyl file (e.g. generated by modkit, with the format described `here <https://nanoporetech.github.io/modkit/intro_bedmethyl.html#bedmethyl-column-descriptions>`_). Bedmethyl files must be bgzip-compressed and indexed with tabix, which can be done with ``bgzip sample.bedmethyl`` and ``tabix -p bed sample.bedmethyl.gz``).
+* bedgraph file: tab-separated file with no header and four columns: chr pos pos+1 basemodPercentage
+* 3-column tsv file: tab-separated file with no header and three columns: chr pos basemodPercentage
+
 
 .. image:: images/figure_basemod.png 
 
 Parameters:
+
+* ``style``: "lines" (default) will plot a link all data points by a line. "dots" will show one dot per data point, which may be better for sparse data.
+
+* ``smooth``: only applicable if style is "lines". If the value is 0, will simply show the raw base modification frequency at each position, which might result in ragged lines. If the value is x>0, the basemodification frequency will be averaged among the next x and previous x positions (but only if they are within 100bp of the original position). Default: 4.
+
+* ``gap_frac``: only applicable if style is "lines". If two positions are separated by more than this value multiplied by the length of the region, the line will be split. This is to avoid long straight lines in places where there is no data. If you set this value to 1, there will always be a continous lines. Default: 0.1. 
 
 * ``bams``: list of dictionaries with the following keys:
   
@@ -275,7 +320,7 @@ Parameters:
 
 * ``bedmethyls``: list of dictionaries with the following keys:
 
-  * ``file``: path to a bedmethyl file. This file must be bgzip-compressed and indexed with tabix.
+  * ``file``: path to a bedmethyl file, a bedgraph file, or a 3-column tsv file (see above for details about these formats).
   
   * ``mod``: modification, e.g. m for methylation or h for hydroxymethylation.
   
@@ -287,37 +332,6 @@ Parameters:
   
   * ``color``: Color of the line showing the basemod frequency.
 
-hic
-^^^^^^^^
-
-Track showing chromatin interactions from HiC data in cool format.
-
-.. image:: images/figure_hic.png 
-
-Parameters:
-
-* ``file``: file in cool or mcool format. If a mcool file is provided, you should specify the resolution by setting file to: "path/to/file.mcool::resolutions//xxxxx" 
-
-* ``color_map``: how the interaction values are mapped to colors.
-
-  * ``Red`` (default): red indicates strong interactions and white absence of interactions
-  
-  * ``Heat``: red indicates strong interactions and dark blue absence of interactions
-  
-* ``pixel_border``: If true, add a black border around each pixel.
-
-* ``upside_down``: By default, long-distance interactions are shown at the top. Setting this to True will show long-distance interactions at the bottom, resulting in triangles whose summits face down. This can be useful to show HiC data for two samples from the same region: one sample can be shown at the top in normal orientation, and the other sample can be displayed at the bottom in upside-down orientation.
-
-* ``max_dist``: maximum genomic distance between bins where interactions are shown
-  
-* ``extend``: if True (default), also show interactions from bins within regions to bins outside regions, as opposed to only interactions to and from bins within regions (which results in a lot of unused space outside of the triangle).
-
-* ``interactions_across_regions``: if True (default), will show interactions occurring across different regions (only relevant if more than one region is used, and typically if the regions are joined by a genomic rearrangement). Otherwise, only show interactions occuring within the region.
-
-* ``double_across_regions``: if True (default), the interaction score for two bins from different regions will be doubled. Intra-region interactions typically occur on both copies whereas inter-region interactions only occur on the rearranged copy, so this can be used to counter this effect.
-
-.. warning::
-  Only .cool and .mcool files are supported. If you have .hic files, please convert them to cool using https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html
 
 sv
 ^^^^^^^^

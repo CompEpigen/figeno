@@ -49,7 +49,7 @@ class ase_track:
         if self.bounding_box: draw_bounding_box(box)
 
         if self.genes_file is None or self.genes_file=="":
-            if self.reference in ["hg19","hg38"]:
+            if self.reference in ["hg19","hg38","mm10"]:
                 with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                     transcripts = read_transcripts(infile,region.chr,region.start,region.end)
             else:

@@ -829,7 +829,7 @@ function select_file(set_value,initial_value,setFileDialogData,setFileDialogActi
           setFileDialogActive(true);
         }
         else{
-          set_value(data.path)
+          if (data.path.length>0) set_value(data.path)
         }
         });
 }

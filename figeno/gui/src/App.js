@@ -75,8 +75,8 @@ export default function App() {
     const regions_out=[];
     for (const region of regionsList){
       const reg={chr:region.chr};
-      if (region.hasOwnProperty("start") && (Number.isInteger(region.start) || region.start.length>0)){reg.start=parseInt(region.start)};
-      if (region.hasOwnProperty("end") && (Number.isInteger(region.end) || region.end.length>0)){reg.end=parseInt(region.end)};
+      if (region.hasOwnProperty("start") && (region.start!==null) && (Number.isInteger(region.start) || region.start.length>0)){reg.start=parseInt(region.start)};
+      if (region.hasOwnProperty("end") && (region.end!==null) && (Number.isInteger(region.end) || region.end.length>0)){reg.end=parseInt(region.end)};
       if (show_regions_color){reg.color = region.color;}
       regions_out.push(reg);
     }
@@ -187,10 +187,19 @@ export default function App() {
 
           if (t.type=="basemod_freq"){
             let bams = [];
-            for (const x of t.bams){
-              bams.push({id:uuid4(),...x})
+            if (t.hasOwnProperty("bams")){
+              for (const x of t.bams){
+                bams.push({id:uuid4(),...x})
+              }
             }
             track.bams = bams;
+            let bedmethyls = [];
+            if (t.hasOwnProperty("bedmethyls")){
+              for (const x of t.bedmethyls){
+                bedmethyls.push({id:uuid4(),...x})
+              }
+            }
+            track.bedmethyls = bedmethyls;
           }
           tracks.push(track);
         }

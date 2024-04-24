@@ -100,13 +100,6 @@ class copynumber_track:
         
         draw_grid_box(box,region,self.min_cn,self.max_cn,self.fontscale,vertical_lines=self.grid,major=self.grid_major,minor=self.grid_minor,cn=self.grid_cn,yticks_freq=self.yticks_freq)
 
-        #elif purple_cn_filename is not None: # Purple
-        #    df_segments_cn = read_cnsegments_purple(purple_cn_filename=purple_cn_filename,scale=1e6)
-        #elif CNAs is not None and chr_arms is not None: # Only CNAs (!=normal cn) are provided
-        #    df_segments_cn = read_cnsegments_CNAs(CNAs,chromosomes,round_cn=round_cn,chr_lengths=chr_lengths,scale=1e6)
-        #elif freec_CNAs_filename is not None and chr_arms is not None:
-        #    CNAs = read_cna_freec(cna_freec_filename=freec_CNAs_filename,return_type=False)
-        #    df_segments_cn = read_cnsegments_CNAs(CNAs,chromosomes,round_cn=round_cn,chr_lengths=chr_lengths,scale=1e6)
         df_ratios_reg = self.df_ratios.loc[(self.df_ratios["Chromosome"]==region.chr) & (self.df_ratios["Start"]>=region.start) & (self.df_ratios["Start"]<=region.end),:]
         colors=[]
         x_converted=[]
@@ -134,7 +127,7 @@ class copynumber_track:
         # Highlight genes
         if len(self.genes)>0:
             if self.genes_file is None or self.genes_file=="":
-                if self.reference in ["hg19","hg38"]:
+                if self.reference in ["hg19","hg38","mm10"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:
@@ -201,7 +194,7 @@ class copynumber_track:
         # Highlight genes
         if len(self.genes)>0:
             if self.genes_file=="":
-                if self.reference in ["hg19","hg38"]:
+                if self.reference in ["hg19","hg38","mm10"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:

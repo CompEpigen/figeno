@@ -1,4 +1,3 @@
 include figeno/data/*genes.txt.gz
-include figeno/data/*chrarms.txt
 include figeno/data/*cytobands.tsv
 recursive-include figeno/gui/build *

@@ -31,7 +31,7 @@ matplotlib.rcParams["svg.fonttype"] = "none"
 
 
 class tracks_plot:
-    def __init__(self,config=None,config_file=None,reference=None,genes_file=None,chrarms_file=None):
+    def __init__(self,config=None,config_file=None,reference=None,genes_file=None,cytobands_file=None):
         self.total_height=0
         self.width=0
         self.tracks_list=[]
@@ -47,33 +47,32 @@ class tracks_plot:
         # Reference
         self.reference=reference
         self.genes_file=genes_file
-        self.chrarms_file=chrarms_file
+        self.cytobands_file=cytobands_file
         if config is not None and "general" in config:
             if "reference" in config["general"]: self.reference=config["general"]["reference"]
             if "genes_file" in config["general"]: self.genes_file=config["general"]["genes_file"]
-            if "chrarms_file" in config["general"]: self.chrarms_file = config["general"]["chrarms_file"]
+            if "cytobands_file" in config["general"]: self.cytobands_file = config["general"]["cytobands_file"]
         
         self.chr_lengths={}
-        self.centromeres={}
-        if self.chrarms_file is not None and self.chrarms_file!="":
-            with open(self.chrarms_file,"r") as infile2:
+        if self.cytobands_file is not None and self.cytobands_file!="":
+            with open(self.cytobands_file,"r") as infile2:
                 for line in infile2:
-                    linesplit = line.rstrip("\n").split(" ")
-                    chr = linesplit[1].lstrip("chr")
-                    if linesplit[0].endswith("q"):
-                        self.chr_lengths[chr] = int(linesplit[3])
-                    else:
-                        self.centromeres[chr] = int(linesplit[4])
-        elif self.reference in ["hg19","hg38"]:
-            with resources.as_file(resources.files(figeno.data) / (self.reference+"_chrarms.txt")) as infile:
+                    if line.startswith("#"): continue
+                    linesplit = line.rstrip("\n").split("\t")
+                    chr = linesplit[0].lstrip("chr")
+                    end=int(linesplit[2])
+                    if not chr in self.chr_lengths: self.chr_lengths[chr]=end
+                    else: self.chr_lengths[chr]=max(end,self.chr_lengths[chr])
+        elif self.reference in ["hg19","hg38","mm10"]:
+            with resources.as_file(resources.files(figeno.data) / (self.reference+"_cytobands.tsv")) as infile:
                 with open(infile,"r") as infile2:
                     for line in infile2:
-                        linesplit = line.rstrip("\n").split(" ")
-                        chr = linesplit[1].lstrip("chr")
-                        if linesplit[0].endswith("q"):
-                            self.chr_lengths[chr] = int(linesplit[3])
-                        else:
-                            self.centromeres[chr] = int(linesplit[4])
+                        if line.startswith("#"): continue
+                        linesplit = line.rstrip("\n").split("\t")
+                        chr = linesplit[0].lstrip("chr")
+                        end=int(linesplit[2])
+                        if not chr in self.chr_lengths: self.chr_lengths[chr]=end
+                        else: self.chr_lengths[chr]=max(end,self.chr_lengths[chr])
         
         if config is not None:
             # Regions
@@ -96,7 +95,7 @@ class tracks_plot:
                                 else: raise Exception("Region end should be an integer: "+end)
                         else: 
                             if not chr in self.chr_lengths: 
-                                raise Exception("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a chrarms_file must be provided (or a non-custom reference).")
+                                raise Exception("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a cytobands_file must be provided (or use a non-custom reference).")
                             end = self.chr_lengths[chr]
                         if end < start: 
                             start,end = end,start

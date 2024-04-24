@@ -319,7 +319,7 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
 def find_genecoord_refseq_wrapper(gene_name,reference,genes_file=None):
     
     if genes_file is None or genes_file=="":
-        if reference in ["hg19","hg38"]:
+        if reference in ["hg19","hg38","mm10"]:
             with resources.as_file(resources.files(figeno.data) / (reference+"_genes.txt.gz")) as infile:
                 return find_genecoord_refseq(gene_name,infile)
         else:

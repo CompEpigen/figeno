@@ -26,7 +26,7 @@ class chr_track:
 
         if self.style=="ideogram":
             if cytobands_file is None or cytobands_file=="":
-                if self.reference in ["hg19","hg38"]:
+                if self.reference in ["hg19","hg38","mm10"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_cytobands.tsv")) as infile:
                         self.df_cytobands = pd.read_csv(infile,sep="\t",header=None)
                 else:
@@ -205,6 +205,8 @@ class chr_track:
                 color_coef = 0.4
             elif df_cytobands_chr.loc[i,"value2"] in ["gpos100","gvar","acen"]:
                 color_coef = 0.2
+            elif df_cytobands_chr.loc[i,"value2"].startswith("gpos"):
+                color_coef=float(df_cytobands_chr.loc[i,"value2"].lstrip("gpos"))/100
             else:
                 print("Unrecognized cytoband value: "+ df_cytobands_chr.loc[i,"value2"])
             color_adjusted = change_color("#ffffff",color_coef=color_coef)

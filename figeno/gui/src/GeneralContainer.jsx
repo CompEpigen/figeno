@@ -16,13 +16,11 @@ export function GeneralContainer({generalParams,setGeneralParams}) {
             const newVal={...generalParams,reference:value};
             if (value=="custom"){
                 newVal["genes_file"] = "";
-                newVal["chrarms_file"] = "";
                 newVal["cytobands_file"] = "";
 
             }
             else if (generalParams.reference=="custom"){
                 delete newVal.genes_file;
-                delete newVal.chrarms_file;
                 delete newVal.cytobands_file;
             }
             setGeneralParams(newVal);
@@ -56,13 +54,13 @@ export function GeneralContainer({generalParams,setGeneralParams}) {
                         <select id={"reference"} value={generalParams.reference} onChange={(e) =>{handle_reference_change(e.target.value)}}> 
                                     <option className="dropDownOption" key="hg19" value="hg19">hg19</option>
                                     <option className="dropDownOption" key="hg38" value="hg38">hg38</option>
+                                    <option className="dropDownOption" key="mm10" value="mm10">mm10</option>
                                     <option className="dropDownOption" key="custom" value="custom">custom</option>
                         </select>
                     </div>
 
                     {generalParams.reference==="custom"?(<>
                         <PathEntry id={"genes_file"} label="Genes file:" value={generalParams.genes_file} set_value={(val) => set_value("genes_file",val)}/>
-                        <PathEntry id={"chrarms_file"} label="Chr arms file:" value={generalParams.chrarms_file} set_value={(val) => set_value("chrarms_file",val)}/>
                         <PathEntry id={"cytobands"} label="Cytobands file:" value={generalParams.cytobands_file} set_value={(val) => set_value("cytobands_file",val)}/>
                     </>):""}
                 </div>

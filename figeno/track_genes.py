@@ -170,7 +170,7 @@ class genes_track:
         max_nlines=0
         for region in regions:
             if self.genes_file is None or self.genes_file=="":
-                if self.reference in ["hg19","hg38"]:
+                if self.reference in ["hg19","hg38","mm10"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,region.chr,region.start,region.end,self.genes,collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
                 else:
