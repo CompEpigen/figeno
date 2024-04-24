@@ -248,6 +248,10 @@ h2{
   width:550px;
 }
 
+.subContainerVeryNarrow{
+  width:250px;
+}
+
 .TrackContainerHeader{
   display: flex;
   background-color: #555555;

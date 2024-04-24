@@ -90,7 +90,7 @@ function Bam({trackID, bam, copy_bam,delete_bam, set_value,className,openColorPa
 }
 
 function Bedmethyl({trackID, bed, copy_bed,delete_bed, set_value,className,openColorPanel, setFileDialogData,setFileDialogActive}){
-    const fileClass=(bed.file.endsWith(".bed.gz") || bed.file.endsWith(".bedmethyl.gz") )?"":"unsetPath";
+    const fileClass=(bed.file.endsWith(".bed.gz") || bed.file.endsWith(".bedmethyl.gz") ) || (bed.file.endsWith(".bedgraph") ) || (bed.file.endsWith(".bedGraph") ) || (bed.file.endsWith(".tsv") )?"":"unsetPath";
     return(
         <DndItem id={bed.id} copy_item={copy_bed} delete_item={delete_bed} className={className}> 
             <div className="trackOption" style={{display:"flex",alignItems:"center"}}>
@@ -182,7 +182,7 @@ export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogD
         Bams
     <button className="subButtonHeader" onClick={add_bam}>
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" fill="#000000" /></svg>
-        Add bam</button>
+        Add</button>
     </div>;
     function show_active_item(active_id){
         return <Bam bam={{...getBamById(active_id),id:active_id+"overlay"}} className={"track trackOverlay"} /> 
@@ -192,29 +192,55 @@ export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogD
     Bedmethyls
     <button className="subButtonHeader" onClick={add_bed}>
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" fill="#000000" /></svg>
-    Add bedmethyl</button>
+    Add</button>
     </div>;
     function show_active_item_bed(active_id){
         return <Bedmethyl bed={{...getBedById(active_id),id:active_id+"overlay"}} className={"track trackOverlay"} /> 
     }
+    console.log(track.bedmethyls)
+
+    const bams_class= (track.bams.length>0)? "subContainer":" subContainer subContainerVeryNarrow";
+    const beds_class= (track.bedmethyls.length>0)? "subContainer subContainerNarrow":" subContainer subContainerVeryNarrow";
 
     
     return (
         <>
+
+            <div className="optionGroup">
+
+                <div className='formItem'>
+                    <label htmlFor={"style"+track.id}>Style:</label>
+                    <select id={"style"+track.id} value={track.style} onChange={(e) =>{set_value("style",e.target.value)}}> 
+                            <option className="dropDownOption" key="default" value="lines">lines</option>
+                            <option className="dropDownOption" key="dots" value="dots">dots</option>
+                    </select>
+                </div>
+
+                {(track.style=="lines")?(
+                <>
+                    <div className='formItem'>
+                        <label htmlFor={"smooth"+track.id}>Smooth:</label>
+                        <input id={"smooth"+track.id} style={{width:"3em"}} value={track.smooth} onChange={(e) => set_value("smooth",e.target.value)}/>
+                    </div>
+                    <div className='formItem'>
+                        <label htmlFor={"gap_frac"+track.id}>gap_frac:</label>
+                        <input id={"gap_frac"+track.id} style={{width:"3em"}} value={track.gap_frac} onChange={(e) => set_value("gap_frac",e.target.value)}/>
+                    </div>
+                </>
+                ):""}
+
+            </div>
            
-            <DndContainer header={header} items={track.bams} setItems={(x)=>set_value("bams",x)} show_active_item={show_active_item} className="subContainer">
+            <DndContainer header={header} items={track.bams} setItems={(x)=>set_value("bams",x)} show_active_item={show_active_item} className={bams_class}>
             {track.bams.map((bam)=>{
                     return <Bam key={bam.id} trackID={track.id} bam={bam} set_value={(attribute,value)=>set_value_bam(bam.id,attribute,value)}  className={"track noShadow"} copy_bam={()=>copy_bam(bam.id)} delete_bam={()=>delete_bam(bam.id)} openColorPanel={openColorPanel} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
                 })}
-
             </DndContainer>
 
-
-           <DndContainer header={header_bed} items={track.bedmethyls} setItems={(x)=>set_value("bedmethyls",x)} show_active_item={show_active_item_bed} className="subContainer subContainerNarrow">
+           <DndContainer header={header_bed} items={track.bedmethyls} setItems={(x)=>set_value("bedmethyls",x)} show_active_item={show_active_item_bed} className={beds_class}>
            {track.bedmethyls.map((bed)=>{
                    return <Bedmethyl key={bed.id} trackID={track.id} bed={bed} set_value={(attribute,value)=>set_value_bed(bed.id,attribute,value)}  className={"track noShadow"} copy_bed={()=>copy_bed(bed.id)} delete_bed={()=>delete_bed(bed.id)} openColorPanel={openColorPanel} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive} />
                })}
-
            </DndContainer>
 
 

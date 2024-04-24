@@ -14,11 +14,14 @@ from figeno.utils import correct_region_chr, split_box,draw_bounding_box
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
-    def __init__(self,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
+    def __init__(self,style="lines",smooth=4,gap_frac=0.1,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
+        self.style=style
+        self.smooth=int(smooth) # if set to a value x>0, will have at each position the methylation values at this position, and at the next and previous x positions. If set to 0, does not perform any smoothing
+        if self.style=="dots": self.smooth=0
+        self.gap_frac=float(gap_frac)
         self.bams = bams
         self.bedmethyls = bedmethyls
 
-    
         self.label=label
         self.label_rotate=label_rotate
         self.show_legend = show_legend
@@ -66,18 +69,18 @@ class basemodfreq_track:
 
         def transform_coord(pos):
             if region.orientation=="+":
-                return min(box["right"]-0.4,max(box["left"]+0.4,box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
+                return min(box["right"]-0.5,max(box["left"]+0.5,box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
             else:
-                return min(box["right"]-0.4,max(box["left"]+0.4,box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
+                return min(box["right"]-0.5,max(box["left"]+0.5,box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
 
         # Read methylation
         reads_HP1,reads_HP2,reads_unphased,reads_all = read_read_groups(samfile,region)
         if split_by_haplotype:
-            df_met1 = smooth_methylation(create_basemod_table_bam(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)
-            df_met2 = smooth_methylation(create_basemod_table_bam(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)
+            df_met1 = smooth_methylation(create_basemod_table_bam(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)
+            df_met2 = smooth_methylation(create_basemod_table_bam(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)
             dfs = [df_met1,df_met2]
         else:
-            dfs = [smooth_methylation(create_basemod_table_bam(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=4,samfile=samfile,fix_hardclip=fix_hardclip),w=4,start=region.start,end=region.end)]
+            dfs = [smooth_methylation(create_basemod_table_bam(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)]
 
         for j in range(len(dfs)):
             df = dfs[j]
@@ -90,42 +93,72 @@ class basemodfreq_track:
                 if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) / 10:
                     boundaries.append(i+1)
             boundaries.append(len(x))
-            for i in range(len(boundaries)-1):
-                a,b = boundaries[i], boundaries[i+1]
-                if b-a>1:
-                    #zorder = 1 if linewidth>1 else 0
-                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=opacity,zorder=1) 
+
+            if self.style=="lines":
+                for i in range(len(boundaries)-1):
+                    a,b = boundaries[i], boundaries[i+1]
+                    if b-a>1:
+                        box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=colors[j],alpha=opacity,zorder=1) 
+            else:
+                box["ax"].plot(x,y,"o",color=colors[j],alpha=opacity,zorder=1,markersize=linewidth)
+
+            
 
     def draw_region_bedmethyl(self,region,box,file,mod,min_coverage=5,linewidth=3,opacity=1,label="",color="#27ae60"):
+        # bedmethyl or tsv format. tsv format is chr pos percentage
         min_coverage=int(min_coverage)
         linewidth=float(linewidth)
         opacity=float(opacity)
         margin_y = (box["top"]-box["bottom"]) * 0.03
-        tabixfile = pysam.TabixFile(file)
-        region = correct_region_chr(region,tabixfile.contigs)
-
         def transform_coord(pos):
             if region.orientation=="+":
-                return box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
+                return min(box["right"]-0.5,max(box["left"]+0.5,box["left"] + (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
             else:
-                return box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])
+                return min(box["right"]-0.5,max(box["left"]+0.5,box["right"] - (pos-region.start) / (region.end-region.start) *(box["right"]-box["left"])))
+            
+        # Read first line to determine format
+        if file.endswith(".gz"):
+            with gzip.open(file,"rt") as f:
+                first_line = f.readline()
+        else:
+            with open(file) as f:
+                first_line = f.readline()
+            
+        firstlinesplit= first_line.split('\t')
 
-        df = smooth_methylation(create_basemod_table_bedmethyl(mod,region.chr,region.start-200,region.end+200,min_coverage=4,tabixfile=tabixfile),w=4,start=region.start,end=region.end)
+        if len(firstlinesplit)>4: # assume bedmethyl file
+            tabixfile = pysam.TabixFile(file)
+            region = correct_region_chr(region,tabixfile.contigs)
+            df = smooth_methylation(create_basemod_table_bedmethyl(mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),tabixfile=tabixfile),w=self.smooth,start=region.start,end=region.end)
+            df = df.loc[df["coverage"]>=min_coverage,:]
+        else: # bedgraph or tsv with 3 columns
+            if len(firstlinesplit)==4:
+                df = pd.read_csv(file,sep="\t",header=None,names=["chr","pos","end","metPercentage"],dtype={"chr":str})
+            elif len(firstlinesplit)==3:
+                df = pd.read_csv(file,sep="\t",header=None,names=["chr","pos","metPercentage"],dtype={"chr":str})
+            else: raise Exception("File "+file+" has only "+str(len(firstlinesplit))+" columns, but at least 3 columns are required: chr pos BaseModPercentage.")
+            contigs=set([str(x) for x in df["chr"]])
+            region = correct_region_chr(region,contigs)
+            df = df.loc[(df["chr"]==region.chr) & (df["pos"]>=region.start-200) & (df["pos"]<=region.end+200),:]
+            df = smooth_methylation(df,w=self.smooth,start=region.start,end=region.end)
 
-        df = df.loc[df["coverage"]>=min_coverage,:]
+        
         x = [transform_coord(pos) for pos in df["pos"]]
         y = [box["bottom"] + margin_y + val/100 * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
 
         boundaries=[0]
         for i in range(len(x)-1):
-            if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) / 10:
+            if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) *self.gap_frac:
                 boundaries.append(i+1)
         boundaries.append(len(x))
-        for i in range(len(boundaries)-1):
-            a,b = boundaries[i], boundaries[i+1]
-            if b-a>1:
-                zorder = 1 if linewidth>1 else 0
-                box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=color,alpha=opacity,zorder=zorder) 
+        if self.style=="lines":
+            for i in range(len(boundaries)-1):
+                a,b = boundaries[i], boundaries[i+1]
+                if b-a>1:
+                    zorder = 1 if linewidth>1 else 0
+                    box["ax"].plot(x[a:b],y[a:b],linewidth=linewidth,color=color,alpha=opacity,zorder=zorder) 
+        else:
+            box["ax"].plot(x,y,"o",color=color,alpha=opacity,zorder=1,markersize=linewidth)
 
 
 
@@ -180,14 +213,14 @@ def read_metbed(filename,chr,start,end):
 def smooth_methylation(df,w=2,start=None,end=None):
     df = df.copy(deep=True)
     smoothed_values = []
-    for i in range(w,df.shape[0]-w):
-        window_start = i-w
-        window_end = i+w
+    for i in range(0,df.shape[0]):
+        window_start = max(i-w,0)
+        window_end = min(i+w,df.shape[0]-1)
         while abs(df.loc[i,"pos"]-df.loc[window_start,"pos"]) > 100 and window_start<i: window_start+=1
         while abs(df.loc[i,"pos"]-df.loc[window_end,"pos"]) > 100 and window_end>i+1: window_end-=1
         smoothed = np.mean(df.loc[window_start:window_end,"metPercentage"])
         smoothed_values.append(smoothed)
-    df = df.loc[w:df.shape[0]-w-1,:]
+    #df = df.loc[w:df.shape[0]-w-1,:]
     df["smoothed"] = smoothed_values
     if start is not None: df = df.loc[df["pos"]>=start,:]
     if end is not None: df = df.loc[df["pos"]<=end,:]

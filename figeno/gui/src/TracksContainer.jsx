@@ -106,6 +106,9 @@ export const defaultTrackValues={
         fontscale:1.0,
         label:"Methylation freq",
         label_rotate:true,
+        style:"lines",
+        smooth:4,
+        gap_frac:0.1,
         bams:[],
         bedmethyls:[]
     },
