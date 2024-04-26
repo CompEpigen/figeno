@@ -126,11 +126,9 @@ class basemodfreq_track:
             
         firstlinesplit= first_line.split('\t')
 
-        if len(firstlinesplit)>4: # assume bedmethyl file
-            tabixfile = pysam.TabixFile(file)
-            region = correct_region_chr(region,tabixfile.contigs)
-            df = smooth_methylation(create_basemod_table_bedmethyl(mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),tabixfile=tabixfile),w=self.smooth,start=region.start,end=region.end)
-            df = df.loc[df["coverage"]>=min_coverage,:]
+        if len(firstlinesplit)>4: # bedmethyl file
+            df = smooth_methylation(create_basemod_table_bedmethyl(mod,region,min_coverage=min(4,min_coverage),file=file),
+                                    w=self.smooth,start=region.start,end=region.end)
         else: # bedgraph or tsv with 3 columns
             if len(firstlinesplit)==4:
                 df = pd.read_csv(file,sep="\t",header=None,names=["chr","pos","end","metPercentage"],dtype={"chr":str})
@@ -139,7 +137,7 @@ class basemodfreq_track:
             else: raise Exception("File "+file+" has only "+str(len(firstlinesplit))+" columns, but at least 3 columns are required: chr pos BaseModPercentage.")
             contigs=set([str(x) for x in df["chr"]])
             region = correct_region_chr(region,contigs)
-            df = df.loc[(df["chr"]==region.chr) & (df["pos"]>=region.start-200) & (df["pos"]<=region.end+200),:]
+            df = df.loc[(df["chr"]==region.chr) & (df["pos"]>=region.start) & (df["pos"]<=region.end),:]
             df = smooth_methylation(df,w=self.smooth,start=region.start,end=region.end)
 
         
@@ -253,19 +251,32 @@ def create_basemod_table_bam(reads,base,mod,chr,start,end,samfile=None,fix_hardc
     df = pd.DataFrame(d)
     return df
 
-def create_basemod_table_bedmethyl(mod,chr,start,end,tabixfile,min_coverage=5):
+def add_entry_bedmethyl(entry,d,mod,chr,start,end,min_coverage):
+    entry_split = entry.split("\t")
+    pos = int(entry_split[1])
+    cov=int(entry_split[4])
+    if entry_split[0].lstrip("chr")==chr and pos>=start and pos<=end and entry_split[3]==mod and cov>=min_coverage:
+        d["chr"].append(chr)
+        d["pos"].append(pos)
+        values = entry_split[9].split(" ")
+        d["metPercentage"].append(float(values[1]))
+        d["coverage"].append(cov)
+
+def create_basemod_table_bedmethyl(mod,region,file,min_coverage=5):
     d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
 
-    for entry in tabixfile.fetch(chr,start,end):
-        entry_split = entry.split("\t")
-        pos = int(entry_split[1])
-        cov=int(entry_split[4])
-        if pos>=start and pos<=end and entry_split[3]==mod and cov>=min_coverage:
-            d["chr"].append(chr)
-            d["pos"].append(pos)
-            values = entry_split[9].split(" ")
-            d["metPercentage"].append(float(values[1]))
-            d["coverage"].append(cov)
+    if os.path.isfile(file+".tbi") or os.path.isfile(file+".csi"):
+        tabixfile = pysam.TabixFile(file)
+        region = correct_region_chr(region,tabixfile.contigs)
+        for entry in tabixfile.fetch(region.chr,region.start,region.end):
+            add_entry_bedmethyl(entry,d,mod,region.chr,region.start,region.end,min_coverage)
+    else:
+        print("Warning: bedmethyl file "+file+ " is not indexed. Index it with tabix to speed up the figure generation.")
+        if file.endswith(".gz"): f=gzip.open(file,"rt")
+        else: f=open(file)
+        for line in f:
+            add_entry_bedmethyl(line.rstrip("\n"),d,mod,region.chr,region.start,region.end,min_coverage)
+        f.close()
 
     df = pd.DataFrame(d)
     return df
