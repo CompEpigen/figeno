@@ -75,15 +75,31 @@ export default function App() {
     const regions_out=[];
     for (const region of regionsList){
       const reg={chr:region.chr};
-      if (region.hasOwnProperty("start") && (region.start!==null) && (Number.isInteger(region.start) || region.start.length>0)){reg.start=parseInt(region.start)};
-      if (region.hasOwnProperty("end") && (region.end!==null) && (Number.isInteger(region.end) || region.end.length>0)){reg.end=parseInt(region.end)};
+      if (region.hasOwnProperty("start") && (region.start!==null)){
+        if (Number.isInteger(region.start)) {reg.start=region.start}
+        else if (region.start.length>0) {reg.start=parseInt(region.start.replaceAll(",",""))}
+      };
+      if (region.hasOwnProperty("end") && (region.end!==null)){
+        if (Number.isInteger(region.end)) {reg.end=region.end}
+        else if (region.end.length>0) {reg.end=parseInt(region.end.replaceAll(",",""))}
+      };
       if (show_regions_color){reg.color = region.color;}
       regions_out.push(reg);
     }
 
     const highlights_out=[];
     for (const region of highlightsList){
-      const reg = {chr:region.chr,start:parseInt(region.start),end:parseInt(region.end),color:region.color,opacity:parseFloat(region.opacity)};
+      const reg={chr:region.chr};
+      if (region.hasOwnProperty("start") && (region.start!==null)){
+        if (Number.isInteger(region.start)) {reg.start=region.start}
+        else if (region.start.length>0) {reg.start=parseInt(region.start.replaceAll(",",""))}
+      };
+      if (region.hasOwnProperty("end") && (region.end!==null)){
+        if (Number.isInteger(region.end)) {reg.end=region.end}
+        else if (region.end.length>0) {reg.end=parseInt(region.end.replaceAll(",",""))}
+      };
+      reg.color=region.color;
+      reg.opacity=parseFloat(region.opacity);
       highlights_out.push(reg);
     }
 

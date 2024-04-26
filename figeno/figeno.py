@@ -85,12 +85,14 @@ class tracks_plot:
                         if "start" in s and (s["start"]is not None) and (s["start"]!=""): 
                             start = s["start"]
                             if isinstance(start,str):
+                                start=start.replace(",","")
                                 if start.isdigit(): start=int(start)
                                 else: raise Exception("Region start should be an integer: "+start)
                         else: start = 0
                         if "end" in s and (s["end"] is not None) and (s["end"]!=""): 
                             end = s["end"]
                             if isinstance(end,str):
+                                end = end.replace(",","")
                                 if end.isdigit(): end=int(end)
                                 else: raise Exception("Region end should be an integer: "+end)
                         else: 
