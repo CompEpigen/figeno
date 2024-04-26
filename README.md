@@ -33,4 +33,9 @@ Example input files to test figeno are provided in [test_data](https://github.co
 
 ## Bugs and improvements
 If you encounter a bug or would like to have a new feature added, please do not hesitate to [raise an issue](https://github.com/CompEpigen/figeno/issues/new) or to [contact me directly](https://www.dkfz.de/en/CanEpi/staff/kontakt/Sollier_Etienne.php).
-  
+
+## Citation
+If you use figeno in your research, we would appreciate it if you would cite the manuscript describing figeno:
+
+Etienne Sollier, Jessica Heilmanm, Clarissa Gerhauser, Michael Scherer, Christoph Plass, Pavlo Lutsik. Figeno: multi-region genomic figures with long-read support. [doi:10.1101/2024.04.22.590500](https://doi.org/10.1101/2024.04.22.590500).
+
