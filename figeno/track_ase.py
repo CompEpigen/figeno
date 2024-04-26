@@ -53,10 +53,9 @@ class ase_track:
                 with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                     transcripts = read_transcripts(infile,region.chr,region.start,region.end)
             else:
-                raise Exception("Must provide a gene file.")
+                transcripts=[]
         else:
-            transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end)
-        if len(transcripts)==0: return False
+            transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,only_protein_coding=False)
 
         exons=[]
         for transcript in transcripts:
