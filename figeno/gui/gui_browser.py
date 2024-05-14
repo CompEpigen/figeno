@@ -2,16 +2,20 @@ import traceback
 import webbrowser
 import os
 import sys
+import subprocess
 import logging
 from flask import Flask, jsonify, request
 import json
 import filedialpy
 from figeno import figeno_make
 from figeno.genes import find_genecoord_refseq_wrapper
-
+from figeno.utils import KnownException
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
-last_dir=os.getcwd()
+if sys.platform=="win32":
+    last_dir=os.path.expanduser("~")
+else:
+    last_dir=os.getcwd()
 config_dir=last_dir
 config_file="config.json"
 
@@ -87,11 +91,39 @@ def run():
     if request.is_json:
         data = request.get_json()
         try:
-            figeno_make(data)
-            return jsonify({"success":True})
+            warnings=[]
+            figeno_make(data,warnings=warnings)
+            warning="\n\n".join(warnings)
+            print(warning)
+            return jsonify({"status":"success","message":data["output"]["file"],"warning":warning})
+        except KnownException as e:
+            print(str(e))
+            return jsonify({"status":"known_error","message":str(e)})
         except Exception as e:
             print(traceback.format_exc())
-            return jsonify({"success":False,"error":traceback.format_exc()})
+            return jsonify({"status":"unknown_error","message":traceback.format_exc()})
+        
+@app.route('/open_image', methods = ['POST'])
+def open_image():
+    if request.is_json:
+        data = request.get_json()
+        if sys.platform == "win32":
+            os.startfile(data["file"])
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener,data["file"]])
+    return {}
+
+@app.route('/open_dir', methods = ['POST'])
+def open_dir():
+    if request.is_json:
+        data = request.get_json()
+        if sys.platform == "win32":
+            os.startfile(os.path.dirname(data["file"]))
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener,os.path.dirname(data["file"])])
+    return {}
         
 @app.route('/find_gene', methods = ['POST'])
 def find_gene():
@@ -99,11 +131,14 @@ def find_gene():
         data = request.get_json()
         try:
             chr,start,end=find_genecoord_refseq_wrapper(data["gene_name"],data["reference"],data["genes_file"])
-            if chr=="": return jsonify({"success":False,"error":"Could not find gene: "+data["gene_name"]})
-            else: return jsonify({"success":True,"chr":chr,"start":start,"end":end})
+            if chr=="": return jsonify({"status":"known_error","message":"Could not find gene: "+data["gene_name"]})
+            else: return jsonify({"status":"success","chr":chr,"start":start,"end":end})
+        except KnownException as e:
+            print(str(e))
+            return jsonify({"status":"known_error","message":str(e)})
         except Exception as e:
             print(traceback.format_exc())
-            return jsonify({"success":False,"error":traceback.format_exc()})
+            return jsonify({"status":"unknown_error","message":traceback.format_exc()})
 
 
 @app.route('/')

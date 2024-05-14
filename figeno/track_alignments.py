@@ -1,3 +1,4 @@
+import os
 import pysam
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -6,7 +7,7 @@ from matplotlib.collections import PatchCollection
 import numpy as np
 import pandas as pd
 
-from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
+from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
 from figeno.vcf import read_phased_vcf
 from figeno.bam import read_read_groups, decode_read_basemods, find_splitreads, add_reads_to_piles, read2query_start_end
 
@@ -21,7 +22,17 @@ class alignments_track:
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
                  link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, hgap_bp=100, vgap_frac=0.3,
                  is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5):
-        self.samfile =pysam.AlignmentFile(file, "rb")
+        if file=="" or file is None:
+            raise KnownException("Please provide a bam file for the alignments track.")
+        if not os.path.isfile(file):
+            raise KnownException("The following bam file does not exist (in alignments track): "+file)
+        try:
+            self.samfile =pysam.AlignmentFile(file, "rb")
+        except: 
+            raise KnownException("Failed to open bam file (in alignments track): "+str(file))
+        if not self.samfile.has_index():
+            raise KnownException("Missing index file for bam file (in alignments track): "+str(file)+". Such an index (ending in .bai) is required and can be generated with samtools index.")
+        self.filename=file
         self.breakpoints_file=breakpoints_file
         self.label=label
         self.label_rotate=label_rotate
@@ -70,10 +81,20 @@ class alignments_track:
         self.splitreads_coords={}
        
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
         regions = [(correct_region_chr(region, self.samfile.references),w) for (region,w) in regions]
+
+        # Check if MM and ML tags are set
+        if self.color_by=="basemod":
+            for read in self.samfile:
+                if (not read.has_tag("MM")) or (not read.has_tag("ML")):
+                    raise KnownException("MM and ML tags are missing from the bam file, but are required in order to visualize base modifications.\n\n"\
+                                         "For ONT data, these tags should automatically be added if you run dorado with a modified bases model "\
+                                        "(see https://github.com/nanoporetech/dorado#modified-basecalling).")
+                break
+
         if self.rephase: self.assign_SNPs_haplotypes(regions)
-        self.compute_read_piles(regions,box)
+        self.compute_read_piles(regions,box,warnings=warnings)
         #self.update_group_sizes(regions,box) # Compute group sizes so that the same borders can be used for all regions
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
@@ -89,6 +110,7 @@ class alignments_track:
         n_rows_group = self.group_sizes
         total_rows = np.sum(n_rows_group)
         total_rows_margin = total_rows + max(0,len(group_piles)-1) # Use one empty row as spacer between groups.
+        if total_rows_margin==0: total_rows_margin=1
         margin = (box["top"]-box["bottom"]) * 0.03
         height = (box["top"]-box["bottom"]-margin)/total_rows_margin * (1-self.vgap_frac)
         self.SRlink_height = (box["top"]-box["bottom"]-margin)/total_rows_margin /2
@@ -283,7 +305,7 @@ class alignments_track:
             #for i in range(min(len(self.group_sizes),len(self.haplotype_labels))):
             #    box["ax"].text(labels_pos,(self.group_boundaries[i]+self.group_boundaries[i+1])/2,self.haplotype_labels[i],horizontalalignment="right",verticalalignment="center",rotation=90,fontsize=7*self.fontscale)
 
-    def compute_read_piles(self,regions,box):
+    def compute_read_piles(self,regions,box,warnings=[]):
 
         regions = [region[0] for region in regions]
         region_group_piles = [] # List for each region, then for each group (haplotype), then for each row, and finally all reads in this row.
@@ -302,8 +324,35 @@ class alignments_track:
         if self.link_splitreads:
             self.splitreads, self.query_qpos_breakpoints,self.bp_counts = find_splitreads(self.samfile,regions,keep_unphased,
                                                                                           min_splitreads_breakpoints=self.min_splitreads_breakpoints)
+            
+        
         self.region_group_piles = add_reads_to_piles(self.samfile,region_group_piles,regions,self.splitreads,margin=self.hgap_bp,
                                                      only_show_splitreads=self.only_show_splitreads,only_one_splitread_per_row=self.only_one_splitread_per_row)
+        # Check that at least one read was shown, and that reads could be phased; otherwise show a warning.
+        has_reads=False
+        for x in self.region_group_piles:
+            for group in x:
+                for row in group:
+                    for read in row:
+                        has_reads=True
+                        break
+                    if has_reads: break
+                if has_reads: break
+            if has_reads: break
+        if not has_reads: warnings.append("No reads were found in the displayed regions in the bam file "+self.filename+".")
+        if self.group_by=="haplotype":
+            has_phased_reads=False
+            for x in self.region_group_piles:
+                for group in x[:-1]:
+                    for row in group:
+                        for read in row:
+                            has_phased_reads=True
+                            break
+                        if has_phased_reads: break
+                    if has_phased_reads: break
+                if has_phased_reads: break
+            if not has_phased_reads: warnings.append("No phased reads were found in the displayed regions in the bam file "+self.filename+". Figeno can only group by haplotype if reads were phased and have an HP tag.")
+        
         if self.exchange_haplotypes and self.group_by=="haplotype":
             tmp = []
             for x in self.region_group_piles:

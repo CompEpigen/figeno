@@ -1,8 +1,18 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+import traceback
 from figeno import figeno_make
+from figeno.utils import KnownException
 
 def main(args):
-    figeno_make(config_file=args.config)
+    try:
+        figeno_make(config_file=args.config)
+    except KnownException as e:
+        print("An error occured:")
+        print(str(e))
+    except Exception as e:
+        print("An error occured.")
+        print(traceback.format_exc())
+
 
 
 def argparser():

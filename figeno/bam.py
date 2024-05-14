@@ -1,4 +1,4 @@
-from figeno.utils import correct_region_chr, chr_to_int
+from figeno.utils import KnownException, correct_region_chr, chr_to_int
 import numpy as np
 import pysam
 import copy
@@ -295,12 +295,14 @@ def read_read_groups(samfile,region):
         else: add_read_pile(read,reads_unphased,margin)
     return reads_HP1, reads_HP2, reads_unphased, reads_all
 
+"""
 def decode_read_basemod(read,base="C",mod="m"):
     if "H" in read.cigarstring: return [],0
     index_seq2ref_coord = {}
     for x in read.get_aligned_pairs():
         if x[1] is not None:
             index_seq2ref_coord[x[0]] = x[1]
+    
     if (base, 1, mod) in read.modified_bases: 
         methyl = read.modified_bases[(base, 1, mod)]
         strand=1
@@ -317,7 +319,7 @@ def decode_read_basemod(read,base="C",mod="m"):
     return l,strand
 
 def decode_read_basemods2(read,basemods):
-    """basemods is a list of 1 or 2 tuples: (base,mod,color)"""
+    #basemods is a list of 1 or 2 tuples: (base,mod,color)
     if "H" in read.cigarstring: return [],0
     index_seq2ref_coord = {}
     for x in read.get_aligned_pairs():
@@ -349,6 +351,8 @@ def decode_read_basemods2(read,basemods):
     for x in sorted(d.keys()):
         l.append((x,x+1,d[x]))
     return l
+    return l
+"""
 
 def reverse_complement(seq):
     l=""
@@ -358,7 +362,6 @@ def reverse_complement(seq):
         elif x=="G": l+="C"
         elif x=="T": l+="A"
         else: l+=x
-    return l
 
 def fix_hardclipped_read(read,samfile):
     # It is not possible to get methylation information (MM/ML tags) for hardclipped alignments, because part of the sequence information is missing.
@@ -396,6 +399,10 @@ def decode_read_basemods(read,basemods,samfile,fix_hardclip_basemod=True):
             else:
                 index_seq2ref_coord[read_length-x[0]-1] = x[1]
 
+    if (not read.has_tag("MM")) or (not read.has_tag("ML")):
+        raise KnownException("MM and ML tags are missing from the bam file, but are required in order to visualize base modifications.\n\n"\
+                            "For ONT data, these tags should automatically be added if you run dorado with a modified bases model "\
+                            "(see https://github.com/nanoporetech/dorado#modified-basecalling).")
     MMs = read.get_tag("MM").rstrip(";").split(";")
     ML=read.get_tag("ML")
     ML_index=0
@@ -430,6 +437,7 @@ def decode_read_basemods(read,basemods,samfile,fix_hardclip_basemod=True):
         l.append((x,x+1,d[x]))
     return l
 
+"""
 def decode_read_m_hm(read):
     index_seq2ref_coord = {}
     for x in read.get_aligned_pairs():
@@ -451,3 +459,5 @@ def decode_read_m_hm(read):
             elif lik_h>120: l.append((index_seq2ref_coord[pos],index_seq2ref_coord[pos]+1,2))
             else: l.append((index_seq2ref_coord[pos],index_seq2ref_coord[pos]+1,0))
     return l,strand
+
+"""

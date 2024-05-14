@@ -1,8 +1,9 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
-from figeno.utils import split_box, draw_bounding_box
+from figeno.utils import split_box, draw_bounding_box, KnownException
 
 
 class bed_track:
@@ -18,6 +19,13 @@ class bed_track:
         self.margin_above=margin_above
 
     def draw(self, regions, box ,hmargin):
+        # Check that the bed file exists
+        if self.file=="" or self.file is None:
+            raise KnownException("Please provide a file for the bed track.")
+        self.file=str(self.file)
+        if not os.path.isfile(self.file):
+            raise KnownException("The following bed file could not be found: "+self.file)
+        
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i])
@@ -32,8 +40,12 @@ class bed_track:
         with open(self.file,"r") as infile:
             for line in infile:
                 linesplit = line.rstrip("\n").split("\t")
+                if len(linesplit)<3: raise KnownException("The following bed file has the wrong format: "+self.file+".\nThe file should be tab-separated, without header, with at least 3 columns: chr, start, end.\nProblematic line:\n"+line[:70])
                 if linesplit[0].lstrip("chr")==region.chr.lstrip("chr"):
-                    start,end = int(linesplit[1]),int(linesplit[2])
+                    try:
+                        start,end = int(linesplit[1]),int(linesplit[2])
+                    except:
+                        raise KnownException("The following bed file has the wrong format: "+self.file+".\nThe file should be tab-separated, without header, with at least 3 columns: chr, start, end (where start and end should be integers). \nProblematic line:\n"+line[:70])
                     if start <=region.end and end >= region.start:
                         if region.orientation=="+":
                             converted_start = box["left"] + (start-region.start) / (region.end-region.start) * (box["right"] - box["left"])

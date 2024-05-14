@@ -7,7 +7,7 @@ import pandas as pd
 import importlib_resources as resources
 import figeno.data
 from figeno.genes import read_transcripts
-from figeno.utils import split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
+from figeno.utils import KnownException, split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
 
 class copynumber_track:
     def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
@@ -60,12 +60,12 @@ class copynumber_track:
             self.df_segments = read_cnsegments_purple(self.purple_cn)
         if self.df_ratios is None and self.purple_cn is None:
             if self.CNAs is None:
-                raise Exception("Must provide either copy number ratios, CN segments or CNAs.")
+                raise KnownException("Please provide either copy number ratios, CN segments or CNAs for a copynumber track.")
             else:
                 self.df_segments = read_cnsegments_CNAs(self.CNAs,round_cn=self.round_cn, chr_lengths=self.chr_lengths, ploidy=self.ploidy)
         
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
 
         # find min and max cn across all regions
         if self.min_cn is None or self.max_cn is None:
@@ -73,7 +73,7 @@ class copynumber_track:
             if self.min_cn is None: self.min_cn = min_cn
             if self.max_cn is None: self.max_cn = max_cn
         self.yticks_freq=1 # by default, put one vertical tick per integer copy number. If too many copy numbers, set a higher interval between ticks.
-        cn_amplitude=max_cn-min_cn
+        cn_amplitude=self.max_cn-self.min_cn
         while cn_amplitude/self.yticks_freq>8:
             if int(str(self.yticks_freq)[0])==2: self.yticks_freq*=2.5
             else: self.yticks_freq*=2

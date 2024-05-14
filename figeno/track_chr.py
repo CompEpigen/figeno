@@ -6,7 +6,7 @@ import importlib_resources as resources
 import colorsys
 
 import figeno.data
-from figeno.utils import split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
+from figeno.utils import KnownException, split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
     def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="custom",cytobands_file="",
@@ -30,7 +30,7 @@ class chr_track:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_cytobands.tsv")) as infile:
                         self.df_cytobands = pd.read_csv(infile,sep="\t",header=None)
                 else:
-                    raise Exception("Must provide a cytobands file.")
+                    raise KnownException("Please provide a cytobands file, if you want to use the ideogram style for a chr_axis track while using a custom reference.")
             else:
                 with open(cytobands_file,"r") as infile:
                     if infile.readline().startswith("#"):
@@ -40,7 +40,7 @@ class chr_track:
             self.df_cytobands.columns = ["chr","start","end","value1","value2"]
             self.df_cytobands["chr"] = [x.lstrip("chr") for x in self.df_cytobands["chr"]]
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         if self.ticks_interval=="auto":
             self.scale=1000
@@ -124,10 +124,11 @@ class chr_track:
                 else:
                     box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale)
         # Chr label
-        if self.ticklabels_pos=="below" and (not "upside_down" in box):
-            box["ax"].text((box["left"]+box["right"])/2,box["bottom"],"chr"+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
-        else:
-            box["ax"].text((box["left"]+box["right"])/2,box["top"],"chr"+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
+        if self.ticklabels_pos!="none":
+            if self.ticklabels_pos=="below" and (not "upside_down" in box):
+                box["ax"].text((box["left"]+box["right"])/2,box["bottom"],"chr"+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
+            else:
+                box["ax"].text((box["left"]+box["right"])/2,box["top"],"chr"+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
     
     def draw_region_arrow(self,region,box):
         arrow_height = (box["top"]-box['bottom']) * 0.5

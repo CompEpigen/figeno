@@ -17,7 +17,7 @@ export function TrackTypePanel({setTrackType,close}){
                 return <TrackIcon key={t} track_type={t} onClick={()=>{setTrackType(t);close();}}/>
             })}
         </div>
-        <button onClick={close}>Cancel</button>
+        <button style={{fontSize:"1.2em"}} onClick={close}>Cancel</button>
     </ div>
     )
 }

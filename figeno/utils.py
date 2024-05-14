@@ -5,14 +5,22 @@ from collections import namedtuple
 Region = namedtuple('Region', 'chr start end orientation color')
 Highlight = namedtuple('Highlight', 'chr start end color alpha')
 
-def correct_region_chr(region,chromosomes):
+
+class KnownException(Exception):
+    pass
+
+def correct_region_chr(region,chromosomes,file=""):
     if region.chr in chromosomes:
         return region
     elif "chr"+region.chr in chromosomes:
         return Region("chr"+region.chr,region.start,region.end,region.orientation,region.color)
     elif region.chr.lstrip("chr") in chromosomes:
         return Region(region.chr.lstrip("chr"),region.start,region.end,region.orientation,region.color)
-    else: raise Exception("Could not find chromosome: "+region.chr)
+    else: 
+        error_message="Could not find chromosome: "+region.chr
+        if file!="": error_message+=" in file "+file+"."
+        else: error_message+="."
+        raise KnownException(error_message)
 
 def split_box(box,regions,hmargin):
     boxes=[]

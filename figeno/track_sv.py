@@ -6,14 +6,14 @@ Path = mpath.Path
 import numpy as np
 import pandas as pd
 import vcfpy
-from figeno.utils import correct_region_chr, split_box,draw_bounding_box, chr_to_int
+from figeno.utils import KnownException,correct_region_chr, split_box,draw_bounding_box, chr_to_int
 
 class sv_track:
     def __init__(self,file=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
                  color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,
                  fontscale=1,bounding_box=True,height=10,margin_above=1.5):
         self.file=file
-        self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a vcf.
+        self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a file (for use with python API).
         self.sv_across_regions=sv_across_regions
         self.upside_down=upside_down
         self.label=label
@@ -31,16 +31,17 @@ class sv_track:
         self.margin_above=margin_above
 
         if self.df_SVs is None:
-            if self.file is None:
-                raise Exception("SVs or VCF must be provided.")
+            if self.file is None or self.file=="":
+                raise KnownException("Please provide a file for the sv track. This file must be a vcf or a tsv file (with at least four columns: chr1, pos1, chr2, pos2; can also add the columns strand1 and strand2, or color).")
             elif self.file.endswith(".tsv"):
                 self.df_SVs = self.read_SVs_tsv()
-            else:
+            elif self.file.endswith(".vcf") or self.file.endswith(".vcf.gz"):
                 self.df_SVs = self.read_SVs_vcf()
+            else: raise KnownException("The extension was not recognized for the file in sv track: "+self.file+".\nAccepted extensions are .tsv, .vcf, or .vcf.gz.")
         if not "color" in self.df_SVs.columns:
             self.add_SV_color()
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
         if "projection" in box and box["projection"]=="polar":
             self.draw_circle(regions,box,hmargin)
             return
@@ -143,7 +144,10 @@ class sv_track:
             box["ax"].text(box["left"] - 3.0,(box["top"]+box["bottom"])/2,
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
     def read_SVs_tsv(self):
-        df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
+        try: df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
+        except: raise KnownException("Failed to open tsv file for sv track: "+str(self.file))
+        if (not "pos1" in df_SVs.columns): raise KnownException("Missing column pos1 for tsv file in sv track: "+self.file)
+        if (not "pos2" in df_SVs.columns): raise KnownException("Missing column pos2 for tsv file in sv track: "+self.file)
         if not "color" in df_SVs.columns:
             if "strand1" in df_SVs.columns and "strand2" in df_SVs.columns:
                 colors=[]
@@ -168,7 +172,9 @@ class sv_track:
 
     def read_SVs_vcf(self):
         SVs=[]
-        reader = vcfpy.Reader.from_path(self.file)
+        try:
+            reader = vcfpy.Reader.from_path(self.file)
+        except: raise KnownException("Failed to open vcf file for sv track: "+str(self.file))
         for record in reader:
             chr1 = record.CHROM.lstrip("chr")
             pos1 = record.POS

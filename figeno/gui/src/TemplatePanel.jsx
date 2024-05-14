@@ -94,7 +94,7 @@ export function TemplatePanel({setTracksList,setRegionsList,setHighlightsList,se
             <TemplateButton name="wgs_chr" onClick={select_wgs_chr} ><img src={wgs_figure} width="200" height="50" alt="hic" /></TemplateButton>
             <TemplateButton name="wgs_circos" onClick={select_wgs_circos}><img src={circos_figure} width="100" height="100" alt="hic" /></TemplateButton>
         </div>
-        <button onClick={close}>Cancel</button>
+        <button onClick={close} style={{fontSize:"1.2em", marginTop:"8px"}}>Cancel</button>
     </ div>
     )
 }

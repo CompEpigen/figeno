@@ -36,7 +36,9 @@ export default function App() {
   const [templatePanelActive,setTemplatePanelActive] = useState(false);
 
   const [loadingscreenActive,setLoadingscreenActive] = useState(false);
-  const [errorMessage,setErrorMessage] = useState("");
+  const [message,setMessage] = useState("");
+  const [warning,setWarning] = useState("");
+  const [status,setStatus] = useState("");
 
   const [fileDialogActive,setFileDialogActive] = useState(false);
   const [fileDialogData,setFileDialogData] = useState({current_dir:"",dirs:[],files:[],file:"",dialog_type:"",update:function() {return}})
@@ -160,16 +162,15 @@ export default function App() {
   }
 
   function run_figeno(){
+    if (loadingscreenActive) return;
     const config_dict = get_config();
     setLoadingscreenActive(true);
     fetch("/run",{headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config_dict),
         method:"POST"}).then(res => res.json()).then((data)=>{
-          if (data.success){
-            setLoadingscreenActive(false)
-          }
-          else{
-            setErrorMessage(data.error)
-          }
+          setStatus(data.status);
+          setMessage(data.message);
+          setLoadingscreenActive(true);
+          if (data.hasOwnProperty("warning")) setWarning(data.warning);
         });
   }
 
@@ -281,7 +282,7 @@ export default function App() {
     {fileDialogActive ? (<FileDialog fileDialogData={fileDialogData} setFileDialogData={setFileDialogData} close={()=>setFileDialogActive(false)}/>):""}
     {trackTypePanelActive ? (<TrackTypePanel setTrackType={setTrackType} close={()=>setTrackTypePanelActive(false)}/>):""}
     {geneSelectorActive ? (<GeneSelector updateRegion={updateRegion} setGeneSelectorActive={setGeneSelectorActive} generalParams={generalParams}/>):""}
-    {loadingscreenActive ? (<LoadingScreen errorMessage={errorMessage} setErrorMessage={setErrorMessage} setLoadingscreenActive={setLoadingscreenActive} />):""}
+    {loadingscreenActive ? (<LoadingScreen message={message} setMessage={setMessage} status={status} setStatus={setStatus} warning={warning} setWarning={setWarning} setLoadingscreenActive={setLoadingscreenActive} />):""}
     {templatePanelActive && (<TemplatePanel setTracksList={setTracksList} setRegionsList={setRegionsList} setHighlightsList={setHighlightsList} setGeneralParams={setGeneralParams} close={()=>setTemplatePanelActive(false)}/>)}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(520px,1fr))", width:"100%", gap:"10px"}}>
       <GeneralContainer generalParams={generalParams} setGeneralParams={setGeneralParams}/>

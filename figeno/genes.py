@@ -1,3 +1,4 @@
+import os
 import gzip
 import importlib_resources as resources
 import matplotlib.pyplot as plt
@@ -5,6 +6,7 @@ import matplotlib.patches as patches
 import pathlib
 
 import figeno.data
+from figeno.utils import KnownException
 
 from collections import namedtuple
 Transcript = namedtuple('Transcript', 'name chr start end strand exons')
@@ -220,6 +222,7 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
     for line in infile:
         if line.startswith("#"): continue 
         linesplit = line.split("\t")
+        if len(linesplit)<14: raise KnownException("Wrong format for the genes file "+str(file)+" (there should be at least 14 columns per line).")
         
         # Filter based on coordinates
         if (chr is not None) and linesplit[2].lstrip("chr") != chr.lstrip("chr"): continue
@@ -320,11 +323,25 @@ def find_genecoord_refseq_wrapper(gene_name,reference,genes_file=None):
     
     if genes_file is None or genes_file=="":
         if reference in ["hg19","hg38","mm10"]:
+            
             with resources.as_file(resources.files(figeno.data) / (reference+"_genes.txt.gz")) as infile:
-                return find_genecoord_refseq(gene_name,infile)
+                (chr,min_coord,max_coord) = find_genecoord_refseq(gene_name,infile)
+                with resources.as_file(resources.files(figeno.data) / (reference+"_cytobands.tsv")) as infile2: #Ensure the end is smaller than the chr size.
+                    chr_length=-1
+                    with open(infile2,"r") as f:
+                        for line in f:
+                            if line.startswith("#"): continue
+                            linesplit=line.split("\t")
+                            if linesplit[0].lstrip("chr")==chr:
+                                chr_length=max(chr_length,int(linesplit[2]))
+                    if chr_length>=0:
+                        min_coord=min(min_coord,chr_length)
+                        max_coord=min(max_coord,chr_length)
+                return (chr,min_coord,max_coord) 
         else:
-            raise Exception("Using a custom reference genome, but no gene file was provided.")
+            raise KnownException("You are using a custom reference genome, but did not provide a genes file. See https://figeno.readthedocs.io/en/latest/content/describe_figure.html#general for the format of a genes file.")
     else:
+        if not os.path.isfile(genes_file): raise KnownException("The provided genes file does not exist: "+str(genes_file)+".")
         return find_genecoord_refseq(gene_name,genes_file)
 
 def find_genecoord_refseq(gene_name,file=None):
@@ -341,7 +358,7 @@ def find_genecoord_refseq(gene_name,file=None):
     for line in infile:
         if line.startswith("#"): continue 
         linesplit = line.split("\t")
-        if linesplit[12]==gene_name:
+        if linesplit[12].upper()==gene_name.upper():
             chr=linesplit[2].lstrip("chr")
             min_coord=min(min_coord,int(linesplit[4]))
             max_coord=max(max_coord,int(linesplit[5]))
@@ -351,7 +368,7 @@ def find_genecoord_refseq(gene_name,file=None):
         min_coord-= max(10,int(0.05*length))
         max_coord+= max(10,int(0.05*length))
 
-        
+    if min_coord<=0: min_coord=0
     return (chr,min_coord,max_coord)
 
 

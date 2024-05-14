@@ -35,7 +35,7 @@ class ase_track:
         self.box_DNA=None
         self.box_RNA=None
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             res=self.draw_region(regions[i][0],boxes[i])

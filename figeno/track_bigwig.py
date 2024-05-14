@@ -4,16 +4,18 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 import pandas as pd 
-from figeno.utils import correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
+from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
     def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,label="",label_rotate=False,fontscale=1,
                  bounding_box=False,height=10,margin_above=1.5):
-        if not os.path.exists(file): raise Exception("The following file does not exist (in bigwig track): "+file)
+        if file=="" or file is None: raise KnownException("Please provide a file for the bigwig track.")
+        if not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
         try:
             self.bw = pyBigWig.open(file)
         except:
-            raise Exception("Error when opening the bigwig file: "+file)
+            raise KnownException("Error when opening the bigwig file: "+file)
+        self.filename=file
         self.n_bins = int(n_bins)
         self.color=color
         self.label=label
@@ -29,7 +31,7 @@ class bigwig_track:
         self.height = height
         self.margin_above=margin_above
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
         # Assign bins to regions depending on their sizes
         total_length_regions = np.sum([abs(reg[0].end-reg[0].start) for reg in regions])
         bins_regions = [max(1,int(self.n_bins/total_length_regions * abs(reg[0].end-reg[0].start))) for reg in regions]
@@ -138,6 +140,8 @@ class bigwig_track:
         for i in range(len(regions)):
             reg = regions[i][0]
             region = correct_region_chr(reg,self.bw.chroms())
+            if region.end>self.bw.chroms()[region.chr]:
+                raise KnownException("The region "+region.chr+":"+str(region.start)+"-"+str(region.end)+" has coordinates greater than the chromosome length ("+str(self.bw.chroms()[region.chr])+") in the bigwig file "+self.filename)
             values_binned=self.bw.stats(region.chr,region.start,region.end,nBins=bins[i],exact=True,type="mean")
             values_binned = [x if x is not None else 0 for x in values_binned]
             m=max(m,np.max(values_binned)*1.1)

@@ -1,13 +1,13 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import json
-import pathlib
 
 import importlib_resources as resources
 import figeno.data
 
-from figeno.utils import Region, Highlight, draw_highlights
+from figeno.utils import Region, Highlight, draw_highlights, KnownException
 from figeno.track_chr import chr_track
 from figeno.track_genes import genes_track
 from figeno.track_bed import bed_track
@@ -23,7 +23,6 @@ from figeno.track_ase import ase_track
 
 matplotlib.use("svg")
 matplotlib.use("pdf")
-matplotlib.use("ps")
 matplotlib.use("ps")
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -55,6 +54,7 @@ class tracks_plot:
         
         self.chr_lengths={}
         if self.cytobands_file is not None and self.cytobands_file!="":
+            if not os.path.isfile(self.cytobands_file): raise KnownException("The cytobands file could not be found: "+str(self.cytobands_file))
             with open(self.cytobands_file,"r") as infile2:
                 for line in infile2:
                     if line.startswith("#"): continue
@@ -78,44 +78,92 @@ class tracks_plot:
             # Regions
             if "regions" in config:
                 for s in config["regions"]:
-                    if "chr" in s:
-                        chr = str(s["chr"]).lstrip("chr")
-                        if chr=="": raise Exception("Must specify the chromosome of the region.")
-                        orientation = s["orientation"] if "orientation" in s else "+"
-                        if "start" in s and (s["start"]is not None) and (s["start"]!=""): 
-                            start = s["start"]
-                            if isinstance(start,str):
-                                start=start.replace(",","")
-                                if start.isdigit(): start=int(start)
-                                else: raise Exception("Region start should be an integer: "+start)
-                        else: start = 0
-                        if "end" in s and (s["end"] is not None) and (s["end"]!=""): 
-                            end = s["end"]
-                            if isinstance(end,str):
-                                end = end.replace(",","")
-                                if end.isdigit(): end=int(end)
-                                else: raise Exception("Region end should be an integer: "+end)
-                        else: 
-                            if not chr in self.chr_lengths: 
-                                raise Exception("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a cytobands_file must be provided (or use a non-custom reference).")
-                            end = self.chr_lengths[chr]
-                        if end < start: 
-                            start,end = end,start
-                            orientation="-"
-                        color=s["color"] if "color" in s else "#000000"
-                        self.add_region(chr=s["chr"].lstrip("chr"),start=start,end=end,orientation=orientation,color=color) 
+                    if not "chr" in s: raise KnownException("Please provide at least the chromosome for each region (and optionally the start and end coordinates, otherwise figeno will assume than the region spans the whole chromosome).")
+                    if s["chr"]=="" or s["chr"]=="chr" or s["chr"] is None: raise KnownException("Please provide at least the chromosome for each region (and optionally the start and end coordinates, otherwise figeno will assume than the region spans the whole chromosome).")
+                    chr = str(s["chr"]).lstrip("chr")
+                    orientation = s["orientation"] if "orientation" in s else "+"
+
+                    if "start" in s and (s["start"] is not None) and (s["start"]!=""): 
+                        start = s["start"]
+                        if isinstance(start,str):
+                            start=start.replace(",","")
+                            if start.isdigit(): start=int(start)
+                            else: raise KnownException("Region start should be an integer: "+start)
+                        elif not isinstance(start,int): raise KnownException("Region start should be an integer: "+str(start))
+                    else: start = 0
+
+                    if "end" in s and (s["end"] is not None) and (s["end"]!=""): 
+                        end = s["end"]
+                        if isinstance(end,str):
+                            end = end.replace(",","")
+                            if end.isdigit(): end=int(end)
+                            else: raise KnownException("Region end should be an integer: "+end)
+                        elif not isinstance(end,int): raise KnownException("Region end should be an integer: "+str(start))
+                    else: 
+                        if not chr in self.chr_lengths: 
+                            raise KnownException("Could not find length of chromosome \""+str(chr)+"\". If the end of a region is not provided, a cytobands_file must be provided (or use a non-custom reference).")
+                        end = self.chr_lengths[chr]
+                    if end < start: 
+                        start,end = end,start
+                        orientation="-"
+
+                    if "color" in s:
+                        if matplotlib.colors.is_color_like(s["color"]): color=s["color"]
+                        else: raise KnownException("The following color for a region could not be interpreted: "+str(s["color"])+". The color must either be a hexadecimal value, e.g. #FF0000, or the name of the color, e.g. red.")
+                    else: color= "#000000"
+                    self.add_region(chr=s["chr"].lstrip("chr"),start=start,end=end,orientation=orientation,color=color) 
+
+            if len(self.regions)==0:
+                raise KnownException("Please provide at least one region (defined by chr, start and end).")
 
             # Highlights
             if "highlights" in config:
                 for hl in config["highlights"]:
-                    start,end = hl["start"],hl["end"]
-                    if start>end: start,end = end,start
-                    self.highlights.append(Highlight(str(hl["chr"]).lstrip("chr"),start,end,hl["color"],hl["opacity"]))
+                    if not "chr" in hl: raise KnownException("You did not specify the chromosome for a highlight.")
+                    chr = hl["chr"]
+                    if chr=="" or chr=="chr" or chr is None: raise KnownException("You did not specify the chromosome for one highlight.")
+                    chr = str(chr).lstrip("chr")
+
+                    if "start" in hl and (hl["start"] is not None) and (hl["start"]!=""): 
+                        start = hl["start"]
+                        if isinstance(start,str):
+                            start=start.replace(",","")
+                            if start.isdigit(): start=int(start)
+                            else: raise KnownException("Highlight start should be an integer: "+start)
+                        elif not isinstance(start,int): raise KnownException("Highlight start should be an integer: "+str(start))
+                    else: start = 0
+
+                    if "end" in hl and (hl["end"] is not None) and (hl["end"]!=""): 
+                        end = hl["end"]
+                        if isinstance(end,str):
+                            end = end.replace(",","")
+                            if end.isdigit(): end=int(end)
+                            else: raise KnownException("Highlight end should be an integer: "+end)
+                        elif not isinstance(end,int): raise KnownException("Highlight end should be an integer: "+str(start))
+                    else: 
+                        if not chr in self.chr_lengths: 
+                            raise KnownException("Could not find length of chromosome \""+str(chr)+"\". If the end of a highlight is not provided, a cytobands_file must be provided (or use a non-custom reference).")
+                        end = self.chr_lengths[chr]
+                    if end < start: 
+                        start,end = end,start
+
+                    if "color" in hl:
+                        if matplotlib.colors.is_color_like(hl["color"]): color=hl["color"]
+                        else: raise KnownException("The following color for a region could not be interpreted: "+str(s["color"])+". The color must either be a hexadecimal value, e.g. #FF0000, or the name of the color, e.g. red.")
+                    else: color="#eba434"
+
+                    if "opacity" in hl:
+                        try:
+                            opacity=float(hl["opacity"])
+                        except: raise KnownException("The opacity for a highlight should be a float between 0 and 1, but you specified: "+str(hl["opacity"]))
+                        if opacity<0 or opacity>1: raise KnownException("The opacity for a highlight should be a float between 0 and 1, but you specified: "+str(hl["opacity"]))
+                    else: opacity=0.3
+                    self.highlights.append(Highlight(chr,start,end,color,opacity))
 
             # Tracks
             if "tracks" in config:
                 for t in config["tracks"]:
-                    if not "type" in t: raise Exception("Must specify the type for track: " +str(t))
+                    if not "type" in t: raise KnownException("Must specify the type for track: " +str(t))
                     track_type = t.pop("type")
                     if track_type == "alignments":
                         self.tracks_list.append(alignments_track(**t))
@@ -134,7 +182,7 @@ class tracks_plot:
                         t["genes_file"] = self.genes_file
                         self.tracks_list.append(genes_track(**t))
                     elif track_type=="chr_axis":
-                        if t["style"]=="ideogram" and "general" in config:
+                        if "style" in t and t["style"]=="ideogram" and "general" in config:
                             if "reference" in config["general"]:
                                 t["reference"]=config["general"]["reference"]
                             if "cytobands_file" in config["general"]:
@@ -152,7 +200,8 @@ class tracks_plot:
                         t["genes_file"] = self.genes_file
                         self.tracks_list.append(ase_track(**t))
                     else:
-                        print("WARNING: unrecognized track type: "+str(t))
+                        raise KnownException("Unrecognized track type: "+str(t))
+            if len(self.tracks_list)==0: raise KnownException("Please provide at least one track.")
             if "general" in config and "layout" in config["general"]:
                 self.figure_layout = config["general"]["layout"]
             else:
@@ -216,24 +265,27 @@ class tracks_plot:
                 self.tracks_list[i+1].margin_above=max(self.tracks_list[i+1].margin_above,0.3)
 
 
-    def draw(self,output_config=None):
+    def draw(self,output_config=None,warnings=[]):
         if output_config is not None: self.output = output_config
-        if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise Exception("Must specify the output file")
+        if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise KnownException("Please provide an output file.")
+        if not os.path.isdir(os.path.dirname(self.output["file"])): 
+            try: os.makedirs(os.path.dirname(self.output["file"]))
+            except: raise KnownException("The directory for the output file does not exist ("+os.path.dirname(self.output["file"])+") and could not be created. Please make sure that you have write permissions.")
 
-        if len(self.regions)==0: raise Exception("Must include at least one region.")
+        if len(self.regions)==0: raise KnownException("Please include at least one region.")
 
         if self.figure_layout=="horizontal": 
-            self.draw_horizontal(**self.output)
+            self.draw_horizontal(**self.output,warnings=warnings)
         elif self.figure_layout=="stacked":
-            self.draw_stacked(**self.output)
+            self.draw_stacked(**self.output,warnings=warnings)
         elif self.figure_layout=="symmetrical":
-            self.draw_symmetrical(**self.output)
+            self.draw_symmetrical(**self.output,warnings=warnings)
         elif self.figure_layout=="circular":
-            self.draw_circular(**self.output)
+            self.draw_circular(**self.output,warnings=warnings)
         else:
-            raise Exception("Unknown figure layout: "+self.figure_layout)
+            raise KnownException("Unknown figure layout: "+self.figure_layout+". Please select one from horizontal, symmetrical, circular or stacked.")
 
-    def draw_horizontal(self,file,width=183,dpi=150,transparent=False):
+    def draw_horizontal(self,file,width=183,dpi=150,transparent=False,warnings=[]):
         width=float(width)
         self.update_total_width(width)
         self.update_regions_width()
@@ -269,7 +321,7 @@ class tracks_plot:
             #vmargin=1.5
             hmargin=1.5
             box={"ax":ax,"bottom":current_height,"top":current_height+t.height,"left":current_left,"right":current_left+total_width}
-            t.draw(regions=self.regions,box=box,hmargin=hmargin)
+            t.draw(regions=self.regions,box=box,hmargin=hmargin,warnings=warnings)
             current_height+=t.height+t.margin_above
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
@@ -279,7 +331,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
     
-    def draw_stacked(self,file,width=183,dpi=150,transparent=False):
+    def draw_stacked(self,file,width=183,dpi=150,transparent=False,warnings=[]):
         width=float(width)
         self.update_total_width(width)
         self.update_regions_width_stacked()
@@ -306,7 +358,7 @@ class tracks_plot:
             #vmargin=1.5
             hmargin=1.5
             box={"ax":ax,"bottom":current_height,"top":current_height+t.height,"left":current_left,"right":current_left+width,"total_height":total_height}
-            t.draw(regions=self.regions,box=box,hmargin=hmargin)
+            t.draw(regions=self.regions,box=box,hmargin=hmargin,warnings=warnings)
             current_height+=t.height+t.margin_above
         plt.axis('off')
         #fig.savefig(outfile,bbox_inches="tight",pad_inches=0.0,dpi=dpi)
@@ -316,7 +368,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-    def draw_symmetrical(self,file,width=183,dpi=150,transparent=False):
+    def draw_symmetrical(self,file,width=183,dpi=150,transparent=False,warnings=[]):
         width=float(width)
         self.update_total_width(width)
         self.update_regions_width_symmetrical()
@@ -352,7 +404,7 @@ class tracks_plot:
             hmargin=1.5
             box={"ax":ax,"bottom":current_height,"top":current_height+t.height,"left":current_left,"right":current_left+self.total_width,
                  "bottom2":-current_height-t.height,"top2":-current_height}
-            t.draw(regions=self.regions,box=box,hmargin=hmargin)
+            t.draw(regions=self.regions,box=box,hmargin=hmargin,warnings=warnings)
 
             current_height+=t.height
         plt.axis('off')
@@ -362,7 +414,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-    def draw_circular(self,file,width=183,dpi=150,transparent=False):
+    def draw_circular(self,file,width=183,dpi=150,transparent=False,warnings=[]):
         width=float(width)
         self.update_total_width(width)
         self.update_regions_width()
@@ -398,7 +450,7 @@ class tracks_plot:
         for t in self.tracks_list:
             hmargin=1.5
             box={"ax":ax,"bottom":current_r,"top":current_r+t.height,"left":5*np.pi/2,"right":np.pi/2,"projection":"polar"}
-            t.draw(regions=self.regions,box=box,hmargin=hmargin)
+            t.draw(regions=self.regions,box=box,hmargin=hmargin,warnings=warnings)
             current_r+=t.height+t.margin_above
         plt.axis('off')
         ax.set_rmin(0)
@@ -409,7 +461,7 @@ class tracks_plot:
         plt.clf() 
         plt.close('all')
 
-def figeno_make(config=None,config_file=None):
+def figeno_make(config=None,config_file=None,warnings=[]):
     if config is None and config_file is None: raise Exception("ERROR: a config or a config_file is required for figeno_make.")
     tp = tracks_plot(config=config,config_file=config_file)
-    tp.draw()
+    tp.draw(warnings=warnings)

@@ -6,8 +6,10 @@ export function GeneSelector({ updateRegion,setGeneSelectorActive, generalParams
     const popover = useRef();
     useClickOutside(popover, ()=>setGeneSelectorActive(false));
     const [errorMessage,setErrorMessage]=useState("");
+    const [status,setStatus]=useState("");
     const [genename,setGenename]=useState("");
     function handleButton(){
+      setStatus("")
         setErrorMessage("");
         setGeneSelectorActive(false);
     }
@@ -17,12 +19,13 @@ export function GeneSelector({ updateRegion,setGeneSelectorActive, generalParams
         if (generalParams.hasOwnProperty("genes_file")) genes_file=generalParams.genes_file;
         fetch("/find_gene",{headers: {'Content-Type': 'application/json'}, body: JSON.stringify({gene_name:genename,reference:generalParams.reference,genes_file:genes_file}),
         method:"POST"}).then(res => res.json()).then((data)=>{
-          if (data.success){
+          if (data.status=="success"){
             updateRegion(data.chr,data.start,data.end);
             setGeneSelectorActive(false);
           }
           else{
-            setErrorMessage(data.error);
+            setStatus(data.status)
+            setErrorMessage(data.message);
           }
         });
     }
@@ -38,11 +41,18 @@ export function GeneSelector({ updateRegion,setGeneSelectorActive, generalParams
         
         
 
-
-        {(errorMessage!=="")? (
+        {(status=="known_error")? (
             <>
-            <div >An error has occured:</div>
-            <div style={{overflowY: "scroll", maxHeight:"400px"}}>
+            <div style={{fontSize:"1.2em", marginTop:"10px"}} >An error has occured:</div>
+            <div style={{overflowY: "auto", maxHeight:"400px"}}>
+            <p style={{textAlign:"left",whiteSpace:"pre-wrap",backgroundColor:"white"}}>{errorMessage}</p>
+            </div>
+            </>
+        ):""}
+        {(status=="unknown_error")? (
+            <>
+            <div style={{fontSize:"1.2em", marginTop:"10px"}}>An error has occured:</div>
+            <div style={{overflowY: "auto", maxHeight:"400px"}}>
             <p style={{textAlign:"left",whiteSpace:"pre-wrap",backgroundColor:"white"}}>{errorMessage}</p>
             </div>
             </>

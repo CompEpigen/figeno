@@ -1,16 +1,27 @@
+import os
 import pysam
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 import pandas as pd
 
-from figeno.utils import correct_region_chr, split_box, draw_bounding_box
+from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box
 from figeno.vcf import read_phased_vcf
 
 class coverage_track:
     def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",upside_down=False,label="",label_rotate=False,fontscale=1,
                            vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=False,height=10,margin_above=1.5):
-        self.samfile = pysam.AlignmentFile(file, "rb")
+        if file=="" or file is None:
+            raise KnownException("Please provide a bam file for the coverage track.")
+        if not os.path.isfile(file):
+            raise KnownException("The following bam file does not exist (in coverage track): "+file)
+        try:
+            self.samfile =pysam.AlignmentFile(file, "rb")
+        except: 
+            raise KnownException("Failed to open bam file (in coverage track): "+str(file))
+        if not self.samfile.has_index():
+            raise KnownException("Missing index file for bam file (in coverage track): "+str(file)+". Such an index (ending in .bai) is required and can be generated with samtools index.")
+        self.filename=file
         self.n_bins = int(n_bins)
         self.color=color
         self.label=label
@@ -29,7 +40,9 @@ class coverage_track:
         self.height = height
         self.margin_above=margin_above
 
-    def draw(self, regions, box ,hmargin):
+        self.atleast_one_region_has_coverage=False
+
+    def draw(self, regions, box ,hmargin,warnings=[]):
         if self.scale=="auto": self.scale_max = self.compute_max_regions(regions)
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
@@ -37,28 +50,19 @@ class coverage_track:
             self.draw_region(regions[i][0],boxes[i],show_scale_inside=show_scale_inside)
         self.draw_title(box)
 
+        if not self.atleast_one_region_has_coverage: warnings.append("The coverage was null for all displayed regions in the bam file "+self.filename+".")
+
     def draw_region(self,region,box,show_scale_inside):
         region = correct_region_chr(region,self.samfile.references)
         if self.bounding_box: draw_bounding_box(box)
-        #if region.end-region.start<5000000:
         coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
         coverage=np.nan_to_num(coverage,0)
         n_bins = min(self.n_bins,len(coverage))
         n_bases_per_bin = (region.end-region.start) / n_bins
         coverage_bin = [np.mean(coverage[int(i*n_bases_per_bin):int((i+1)*n_bases_per_bin)]) for i in range(n_bins)]
-
-        #else:
-        #    n_bins = self.n_bins
-        #    coverage_bin=[]
-        #    for i in range(n_bins):
-        #        start = region.start + i* (region.end-region.start)/n_bins
-        #        end = start + (region.end-region.start)/n_bins
-        #        cov = self.samfile.count(region.chr,start,end)
-        #        coverage_bin.append(cov)
-
-
         
         max_coverage = np.max(coverage_bin) * 1.1
+        if max_coverage>=1: self.atleast_one_region_has_coverage=True
         if max_coverage<1 or max_coverage!=max_coverage: max_coverage=1
         if self.scale=="auto per region": self.scale_max=max_coverage
         rect_width = (box["right"] - box["left"]) / len(coverage_bin)

@@ -10,17 +10,18 @@ import matplotlib.patches as patches
 
 #from figeno.genes import draw_genes, draw_genes_transcript
 #from figeno.plot_ase import draw_chr_axis
-from figeno.utils import correct_region_chr, split_box,draw_bounding_box
+from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
     def __init__(self,style="lines",smooth=4,gap_frac=0.1,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
         self.style=style
-        self.smooth=int(smooth) # if set to a value x>0, will have at each position the methylation values at this position, and at the next and previous x positions. If set to 0, does not perform any smoothing
+        self.smooth=int(smooth) # if set to a value x>0, will have average at each position the methylation values at this position, and at the next and previous x positions. If set to 0, does not perform any smoothing.
         if self.style=="dots": self.smooth=0
         self.gap_frac=float(gap_frac)
         self.bams = bams
         self.bedmethyls = bedmethyls
+        if len(bams)==0 and len(bedmethyls)==0: raise KnownException("Please include at least one file in the basemod_freq track.")
 
         self.label=label
         self.label_rotate=label_rotate
@@ -30,11 +31,15 @@ class basemodfreq_track:
         self.height = height
         self.margin_above=margin_above
 
-    def draw(self, regions, box ,hmargin):
+        self.is_empty=True
+
+    def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i])
         self.draw_title(box)
+        if self.is_empty:
+            warnings.append("No data was found in the displayed regions for the basemod_freq track.")
 
     def draw_region(self,region,box):
         margin_y = (box["top"]-box["bottom"]) * 0.03
@@ -64,6 +69,18 @@ class basemodfreq_track:
         linewidth=float(linewidth)
         opacity=float(opacity)
         margin_y = (box["top"]-box["bottom"]) * 0.03
+
+        if file=="" or file is None:
+            raise KnownException("No bam file was provided in the basemod_freq track.")
+        if not os.path.isfile(file):
+            raise KnownException("The following bam file does not exist (in basemod_freq track): "+file)
+        try:
+            samfile =pysam.AlignmentFile(file, "rb")
+        except: 
+            raise KnownException("Failed to open bam file: "+str(file))
+        if not samfile.has_index():
+            raise KnownException("Missing index file for bam file: "+str(file)+". Such an index (ending in .bai) can be generated with samtools index.")
+
         samfile = pysam.AlignmentFile(file, "rb")
         region = correct_region_chr(region,samfile.references)
 
@@ -87,7 +104,7 @@ class basemodfreq_track:
             df = df.loc[df["coverage"]>=min_coverage,:]
             x = [transform_coord(pos) for pos in df["pos"]]
             y = [box["bottom"] + margin_y + val/100 * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
-
+            if df.shape[0]>0: self.is_empty=False
             boundaries=[0]
             for i in range(len(x)-1):
                 if abs(x[i+1]-x[i])> abs(box["right"]-box["left"]) / 10:
@@ -106,6 +123,12 @@ class basemodfreq_track:
 
     def draw_region_bedmethyl(self,region,box,file,mod,min_coverage=5,linewidth=3,opacity=1,label="",color="#27ae60"):
         # bedmethyl or tsv format. tsv format is chr pos percentage
+
+        if file=="" or file is None:
+            raise KnownException("No file was provided in the basemod_freq track.")
+        if not os.path.isfile(file):
+            raise KnownException("The following file does not exist (in basemod_freq track): "+file)
+        
         min_coverage=int(min_coverage)
         linewidth=float(linewidth)
         opacity=float(opacity)
@@ -134,13 +157,13 @@ class basemodfreq_track:
                 df = pd.read_csv(file,sep="\t",header=None,names=["chr","pos","end","metPercentage"],dtype={"chr":str})
             elif len(firstlinesplit)==3:
                 df = pd.read_csv(file,sep="\t",header=None,names=["chr","pos","metPercentage"],dtype={"chr":str})
-            else: raise Exception("File "+file+" has only "+str(len(firstlinesplit))+" columns, but at least 3 columns are required: chr pos BaseModPercentage.")
+            else: raise KnownException("File "+file+" (in basemod_freq track) has only "+str(len(firstlinesplit))+" columns, but at least 3 columns are required (without header): chr pos BaseModPercentage.")
             contigs=set([str(x) for x in df["chr"]])
             region = correct_region_chr(region,contigs)
             df = df.loc[(df["chr"]==region.chr) & (df["pos"]>=region.start) & (df["pos"]<=region.end),:]
             df = smooth_methylation(df,w=self.smooth,start=region.start,end=region.end)
 
-        
+        if df.shape[0]>0: self.is_empty=False
         x = [transform_coord(pos) for pos in df["pos"]]
         y = [box["bottom"] + margin_y + val/100 * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
 
@@ -251,31 +274,37 @@ def create_basemod_table_bam(reads,base,mod,chr,start,end,samfile=None,fix_hardc
     df = pd.DataFrame(d)
     return df
 
-def add_entry_bedmethyl(entry,d,mod,chr,start,end,min_coverage):
+def add_entry_bedmethyl(entry,d,mod,chr,start,end,min_coverage,filename=""):
     entry_split = entry.split("\t")
-    pos = int(entry_split[1])
-    cov=int(entry_split[4])
+    if len(entry_split)<9: raise KnownException("Wrong format for bedmethyl file "+filename+" (expected at least 10 columns; or 4 columns for bedgraph format, or 3 for simple tsv.).")
+    try: pos = int(entry_split[1])
+    except: raise KnownException("Wrong format for bedmethyl file "+filename+". In entry "+str(entry)+", the second value "+entry_split[1]+" should be an integer (position).")
+    try: cov=int(entry_split[4])
+    except: raise KnownException("Wrong format for bedmethyl file "+filename+". In entry "+str(entry)+", the fifth value "+entry_split[4]+" should be an integer (coverage).")
     if entry_split[0].lstrip("chr")==chr and pos>=start and pos<=end and entry_split[3]==mod and cov>=min_coverage:
         d["chr"].append(chr)
         d["pos"].append(pos)
         values = entry_split[9].split(" ")
-        d["metPercentage"].append(float(values[1]))
+        try: d["metPercentage"].append(float(values[1]))
+        except: raise KnownException("Wrong format for bedmethyl file "+filename+". The methylation percentage could not be converted to float ("+values[1]+").")
         d["coverage"].append(cov)
 
 def create_basemod_table_bedmethyl(mod,region,file,min_coverage=5):
     d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
 
     if os.path.isfile(file+".tbi") or os.path.isfile(file+".csi"):
-        tabixfile = pysam.TabixFile(file)
+        try:
+            tabixfile = pysam.TabixFile(file)
+        except: raise KnownException("Failed to open bedmethyl file "+str(file))
         region = correct_region_chr(region,tabixfile.contigs)
         for entry in tabixfile.fetch(region.chr,region.start,region.end):
-            add_entry_bedmethyl(entry,d,mod,region.chr,region.start,region.end,min_coverage)
+            add_entry_bedmethyl(entry,d,mod,region.chr,region.start,region.end,min_coverage,filename=file)
     else:
         print("Warning: bedmethyl file "+file+ " is not indexed. Index it with tabix to speed up the figure generation.")
         if file.endswith(".gz"): f=gzip.open(file,"rt")
         else: f=open(file)
         for line in f:
-            add_entry_bedmethyl(line.rstrip("\n"),d,mod,region.chr,region.start,region.end,min_coverage)
+            add_entry_bedmethyl(line.rstrip("\n"),d,mod,region.chr,region.start,region.end,min_coverage,filename=file)
         f.close()
 
     df = pd.DataFrame(d)

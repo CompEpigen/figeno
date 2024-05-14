@@ -4,7 +4,7 @@ import numpy as np
 import importlib_resources as resources
 import figeno.data
 from figeno.genes import read_transcripts
-from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
+from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 
 class genes_track:
@@ -24,7 +24,7 @@ class genes_track:
         self.label=label
         self.label_rotate=label_rotate
 
-    def draw(self, regions, box ,hmargin=0):
+    def draw(self, regions, box ,hmargin=0,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         self.margin_between_genes = 1.5*np.sum([abs(r[0].end-r[0].start) for r in regions]) / abs(box["right"]-box["left"]) # in bp
         lines_regions = self.read_transcripts_lines_regions(regions)
@@ -71,7 +71,8 @@ class genes_track:
                 if region.end-region.start < 4000000: 
                     if "projection" in box and box["projection"]=="polar":
                         angle_text,halign,valign = compute_rotation_text((start_coord+end_coord)/2)
-                        box["ax"].text((start_coord+end_coord)/2,y+height_exon*0.6,transcript.name,rotation=angle_text,horizontalalignment=halign,verticalalignment=valign,fontsize=fontsize)
+                        box["ax"].text((start_coord+end_coord)/2,y+height_exon*1.4,transcript.name,rotation=angle_text,horizontalalignment="center",verticalalignment="center",fontsize=fontsize)
+                        #box["ax"].text((start_coord+end_coord)/2,y+height_exon*0.6,transcript.name,rotation=angle_text,horizontalalignment=halign,verticalalignment=valign,fontsize=fontsize)
                     else:
                         box["ax"].text((start_coord+end_coord)/2,y+height_exon*0.6,transcript.name,horizontalalignment="center",verticalalignment="bottom",fontsize=fontsize)
                 # Exons
@@ -174,7 +175,7 @@ class genes_track:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,region.chr,region.start,region.end,self.genes,collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
                 else:
-                    raise Exception("Must provide a gene file.")
+                    raise KnownException("When using a custom reference genome, you have to provide a genes file if you want to display a genes track. See https://figeno.readthedocs.io/en/latest/content/describe_figure.html#general for the format of this file.")
             else:
                 transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.genes,
                                                collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)

@@ -7,7 +7,7 @@ import matplotlib
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.collections import PatchCollection
 
-from figeno.utils import correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
+from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices
 
 class hic_track:
     def __init__(self,file,max_dist=700,color_map="red",scale_max_percentile=95,interactions_across_regions=True,double_interactions_across_regions=True,
@@ -37,7 +37,8 @@ class hic_track:
         self.margin_above=margin_above
         
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings=[]):
+        if "projection" in box and box["projection"]=="polar": raise KnownException("The circular layout does not support hic tracks.")
         self.draw_title(box)
         boxes = split_box(box,regions,hmargin)
         if self.bounding_box:
@@ -47,8 +48,13 @@ class hic_track:
 
         regions= [reg[0] for reg in regions]
 
-
-        c=cooler.Cooler(self.file)
+        if self.file=="" or self.file is None:
+            raise KnownException("Please provide a file for the hic track. This file must be in .cool format.")
+        try:
+            c=cooler.Cooler(self.file)
+        except: 
+            raise KnownException("Failed to open file for the hic track: "+self.file+".\nThis file must be in .cool format.\nIf you have data in .hic format,"\
+                                 "please convert it to .cool format first. See https://hicexplorer.readthedocs.io/en/latest/content/tools/hicConvertFormat.html.")
         resolution = c.binsize
         total_dist = np.sum([(region.end-region.start) for region in regions])
         self.max_dist=min(self.max_dist,total_dist)
