@@ -60,7 +60,7 @@
 		{
 			"type": "basemod_freq",
 			"height": 15,
-			"margin_above": 1.5,
+			"margin_above": 2.5,
 			"bounding_box": true,
 			"fontscale": 0.9,
 			"label": "Methylation freq",

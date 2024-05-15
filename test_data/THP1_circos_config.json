@@ -5,7 +5,7 @@
 	},
 	"output": {
 		"dpi": 400,
-		"file": "THP1_figure_circos.svg",
+		"file": "THP1_circos_figure.svg",
 		"width": 180
 	},
 	"regions": [
