@@ -9,7 +9,7 @@ for GENOmics
 With figeno, you can plot various types of sequencing data along genomic coordinates.
 
 ![figeno](docs/content/images/figeno.png)
-Example figures generated with figeno. Left: allele-specific methylation with nanopore data. Right: HiC data across a structural rearrangement. See more examples [here]()
+Example figures generated with figeno. Left: allele-specific methylation with nanopore data. Right: HiC data across a structural rearrangement. See more examples [here](https://figeno.readthedocs.io/en/latest/content/examples.html)
 
 ## Features
 - Large collection of tracks (bigwig, HiC, alignments with base modifications, WGS with copy numbers and SV…)
