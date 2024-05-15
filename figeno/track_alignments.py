@@ -104,6 +104,7 @@ class alignments_track:
         self.draw_title(box)
 
     def draw_region(self,region,box,group_piles):
+        if abs(region.end-region.start)>1e6: print("WARNING: you are using an alignments track for a region larger than 1Mb. This might be very slow; the alignments track is intended for regions < 100kb.")
         if self.bounding_box:
             draw_bounding_box(box)
 
