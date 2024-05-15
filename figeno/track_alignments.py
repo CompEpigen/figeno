@@ -9,7 +9,7 @@ import pandas as pd
 
 from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
 from figeno.vcf import read_phased_vcf
-from figeno.bam import read_read_groups, decode_read_basemods, find_splitreads, add_reads_to_piles, read2query_start_end
+from figeno.bam import decode_read_basemods, find_splitreads, add_reads_to_piles, read2query_start_end
 
 from collections import namedtuple
 Breakpoint = namedtuple('Breakpoint', 'chr1 pos1 orientation1 chr2 pos2 orientation2 color')

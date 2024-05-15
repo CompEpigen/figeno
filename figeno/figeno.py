@@ -41,7 +41,7 @@ class tracks_plot:
         self.genes_file=""
         if config is None and config_file is None: raise KnownException("Please provide a config_file (.json) or a config as a python dictionary.")
         if config_file is not None:
-            old_config=config # allow the config to overwrite some parameters of the config_file
+            old_config=config # allow config to overwrite some parameters of config_file
             with open(config_file, 'r') as f:
                 config = json.load(f)
             if old_config is not None:

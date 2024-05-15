@@ -156,6 +156,7 @@ def find_splitreads(samfile,regions,keep_unphased=True,min_splitreads_breakpoint
     for region_index,region in enumerate(regions):
         for read in samfile.fetch(region.chr,region.start,region.end):
             if (not keep_unphased) and (not read.has_tag("HP")): continue
+            if read.is_secondary: continue
             if read.has_tag("SA"): 
                 qstart,qend = read2query_start_end(read)
                 read2 = Read(read,qstart,qend,region_index)
@@ -265,6 +266,7 @@ def add_reads_to_piles(samfile,piles_list,regions,splitreads={},margin=10,only_s
         for region_index,region in enumerate(regions):
             for read in samfile.fetch(region.chr,region.start,region.end):
                 if read.query_name in splitreads: continue
+                if read.is_secondary: continue
                 group_index=0
                 if len(piles_list[region_index])>1:
                     if read.has_tag("HP"):
@@ -407,6 +409,7 @@ def decode_read_basemods(read,basemods,samfile,fix_hardclip_basemod=True):
     ML=read.get_tag("ML")
     ML_index=0
     seq=read.get_forward_sequence()
+    if seq is None: return []
     d={} # reference position to color of base modification
     for MM in MMs:
         MM = MM.split(",")
