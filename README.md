@@ -1,16 +1,21 @@
 # figeno
 
-Tool for making genomics figures.
+```
+  FIGENO is a
+  FIGure
+    GENerator
+for GENOmics
+```
+With figeno, you can plot various types of sequencing data along genomic coordinates.
 
 ![figeno](docs/content/images/figeno.png)
-Example figures generated with figeno. Left: allele-specific methylation with nanopore data. Right: HiC data across a structural rearrangement.
+Example figures generated with figeno. Left: allele-specific methylation with nanopore data. Right: HiC data across a structural rearrangement. See more examples [here]()
 
 ## Features
-- Large collection of tracks (bigwig, HiC, alignments, copy number, SV…)
-- Graphical user interface
+- Large collection of tracks (bigwig, HiC, alignments with base modifications, WGS with copy numbers and SV…)
 - Multi-region figures with interactions across regions
-- Highlight regions of interest
-- Output figures in svg, pdf, eps or png
+- Graphical user interface, command line interface and python API
+- Output figures in vector graphics (svg, pdf) or bitmap (png)
 
 ## Quick start
 ### Linux, MacOS
@@ -31,11 +36,11 @@ https://figeno.readthedocs.io/en/latest/
 ## Test data
 Example input files to test figeno are provided in [test_data](https://github.com/CompEpigen/figeno/tree/main/test_data).
 
-## Bugs and improvements
-If you encounter a bug or would like to have a new feature added, please do not hesitate to [raise an issue](https://github.com/CompEpigen/figeno/issues/new) or to [contact me directly](https://www.dkfz.de/en/CanEpi/staff/kontakt/Sollier_Etienne.php).
+## Feedback
+If you encounter a bug or would like to have a new feature added, please do not hesitate to [raise an issue](https://github.com/CompEpigen/figeno/issues/new) or to [contact me directly](https://www.dkfz.de/en/CanEpi/staff/kontakt/Sollier_Etienne.php). You can also provide feedback by completing this [anonymous form](https://forms.gle/xb9Ygk6zsJCJUQYm9), which would help me improve figeno!
 
 ## Citation
 If you use figeno in your research, we would appreciate it if you would cite the manuscript describing figeno:
 
-Etienne Sollier, Jessica Heilmanm, Clarissa Gerhauser, Michael Scherer, Christoph Plass, Pavlo Lutsik. Figeno: multi-region genomic figures with long-read support. [doi:10.1101/2024.04.22.590500](https://doi.org/10.1101/2024.04.22.590500).
+Etienne Sollier, Jessica Heilmann, Clarissa Gerhauser, Michael Scherer, Christoph Plass, Pavlo Lutsik. Figeno: multi-region genomic figures with long-read support. [doi:10.1101/2024.04.22.590500](https://doi.org/10.1101/2024.04.22.590500).
 
