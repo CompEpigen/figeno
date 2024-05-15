@@ -351,7 +351,6 @@ def decode_read_basemods2(read,basemods):
     for x in sorted(d.keys()):
         l.append((x,x+1,d[x]))
     return l
-    return l
 """
 
 def reverse_complement(seq):
@@ -362,6 +361,7 @@ def reverse_complement(seq):
         elif x=="G": l+="C"
         elif x=="T": l+="A"
         else: l+=x
+    return l
 
 def fix_hardclipped_read(read,samfile):
     # It is not possible to get methylation information (MM/ML tags) for hardclipped alignments, because part of the sequence information is missing.
