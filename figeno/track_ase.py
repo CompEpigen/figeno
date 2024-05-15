@@ -26,11 +26,11 @@ class ase_track:
         self.grid=grid
         self.labels=labels
         self.labels_rotate=labels_rotate
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
     
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
 
         self.box_DNA=None
         self.box_RNA=None

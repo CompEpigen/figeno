@@ -44,10 +44,11 @@ class copynumber_track:
         self.chr_lengths=chr_lengths
         self.label=label
         self.label_rotate=label_rotate
-        self.fontscale=fontscale
-        self.height = height
+        self.fontscale=float(fontscale)
+        self.height = float(height)
+        self.margin_above= float(margin_above)
         self.bounding_box=bounding_box
-        self.margin_above=margin_above
+        
 
         self.df_ratios=None
         if self.freec_ratios is not None:

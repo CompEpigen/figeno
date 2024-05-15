@@ -57,10 +57,10 @@ class alignments_track:
         self.rasterize=rasterize
         self.is_rna=is_rna
  
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above=float(margin_above)
 
         self.width_color_group=4
 

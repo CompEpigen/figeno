@@ -26,10 +26,10 @@ class basemodfreq_track:
         self.label=label
         self.label_rotate=label_rotate
         self.show_legend = show_legend
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
 
         self.is_empty=True
         self.kwargs=kwargs

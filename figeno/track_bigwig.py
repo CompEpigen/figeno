@@ -26,10 +26,10 @@ class bigwig_track:
         if self.scale_max is not None: self.scale_max=float(self.scale_max)
         self.scale_pos = scale_pos
         if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
         self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings=[]):

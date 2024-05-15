@@ -13,10 +13,10 @@ class bed_track:
         self.label=label
         self.label_rotate=label_rotate
         self.show_names = show_names
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
         self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings):

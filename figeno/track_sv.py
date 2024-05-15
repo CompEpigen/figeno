@@ -25,10 +25,10 @@ class sv_track:
         self.color_trans=color_trans
         self.lw=float(lw)
 
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above=float(margin_above)
         self.kwargs=kwargs
 
         if self.df_SVs is None:
@@ -45,7 +45,7 @@ class sv_track:
     def draw(self, regions, box ,hmargin,warnings=[]):
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the sv track because it is not one of the accepted parameters.")
-            
+
         if "projection" in box and box["projection"]=="polar":
             self.draw_circle(regions,box,hmargin)
             return

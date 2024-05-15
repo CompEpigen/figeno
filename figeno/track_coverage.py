@@ -25,7 +25,7 @@ class coverage_track:
         self.color=color
         self.label=label
         self.label_rotate=label_rotate
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.scale = scale
         self.scale_max = scale_max
         if self.scale_max is not None: self.scale_max=float(self.scale_max)
@@ -36,8 +36,8 @@ class coverage_track:
         self.SNP_colors=SNP_colors
         self.exchange_haplotypes = exchange_haplotypes
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
         self.kwargs=kwargs
 
         self.atleast_one_region_has_coverage=False
