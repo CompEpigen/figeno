@@ -5,7 +5,13 @@ from figeno.utils import KnownException
 
 def main(args):
     try:
-        figeno_make(config_file=args.config)
+        warnings=[]
+        figeno_make(config_file=args.config,warnings=warnings)
+        warning="\n".join(warnings)
+        if warning!="":
+            print("The figure was successfully generated, but with the following warnings:")
+            print(warning)
+            
     except KnownException as e:
         print("An error occured:")
         print(str(e))

@@ -324,7 +324,10 @@ class tracks_plot:
         
         # Tracks
         current_height=0
-        for t in self.tracks_list[::-1]:
+        for i,t in enumerate(self.tracks_list[::-1]):
+            if i==len(self.tracks_list)-1 and i!=0 and isinstance(t,chr_track) and t.ticklabels_pos=="below":
+                warnings.append("In the chr_axis track, you might want to change the ticklabels_pos parameter to \"above\" instead of \"below\" for better results, since you put this axis at the top of the figure. "\
+                                 "The \"below\" option is intended for when the chr_axis is at the bottom of the figure.")
             current_left=0
             #vmargin=1.5
             hmargin=1.5
