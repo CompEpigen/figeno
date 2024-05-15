@@ -27,7 +27,7 @@ def split_box(box,regions,hmargin):
     current_left=box["left"]
     additional_width = hmargin/len(regions) # compensate the last margin
     if "projection" in box and box["projection"]=="polar":
-        total_width = np.sum(x[1] for x in regions) + hmargin * (len(regions)-1)
+        total_width = np.sum([x[1] for x in regions]) + hmargin * (len(regions)-1)
         for region in regions:
             width = region[1]
             width_angle = (box["right"] +0.25 - box["left"]) * width / total_width 
