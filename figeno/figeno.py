@@ -39,9 +39,17 @@ class tracks_plot:
         self.total_width=None
         self.reference="custom"
         self.genes_file=""
+        if config is None and config_file is None: raise KnownException("Please provide a config_file (.json) or a config as a python dictionary.")
         if config_file is not None:
+            old_config=config # allow the config to overwrite some parameters of the config_file
             with open(config_file, 'r') as f:
                 config = json.load(f)
+            if old_config is not None:
+                for k in old_config:
+                    if not k in config: config[k]=old_config[k]
+                    else:
+                        for k2 in old_config[k]:
+                            config[k][k2]=old_config[k][k2]
 
         # Reference
         self.reference=reference
@@ -268,7 +276,7 @@ class tracks_plot:
     def draw(self,output_config=None,warnings=[]):
         if output_config is not None: self.output = output_config
         if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise KnownException("Please provide an output file.")
-        if not os.path.isdir(os.path.dirname(self.output["file"])): 
+        if os.path.dirname(self.output["file"])!="" and not os.path.isdir(os.path.dirname(self.output["file"])): 
             try: os.makedirs(os.path.dirname(self.output["file"]))
             except: raise KnownException("The directory for the output file does not exist ("+os.path.dirname(self.output["file"])+") and could not be created. Please make sure that you have write permissions.")
 
