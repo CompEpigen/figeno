@@ -9,18 +9,21 @@ import figeno.data
 from figeno.utils import KnownException, split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="custom",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,no_margin=False,reference="custom",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False,**kwargs):
         self.style=style
         self.unit=unit
         self.ticklabels_pos=ticklabels_pos
         self.ticks_interval = ticks_interval
+        self.ticks_angle=float(ticks_angle)
+        while self.ticks_angle<-180: self.ticks_angle+=360
+        while self.ticks_angle>180: self.ticks_angle-=360
         self.no_margin=no_margin
         self.reference=reference
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above=float(margin_above)
         self.label=label
         self.label_rotate=label_rotate
         self.kwargs=kwargs
@@ -114,19 +117,27 @@ class chr_track:
                 box["ax"].add_patch(rect)
 
                 # x ticks
-                #box["ax"].plot([pos_transformed],[y],marker="|",markersize=100,color="black")
                 pos_text = pos_transformed
+                halign="center"
+                rotation_mode="default"
+                if self.ticks_angle>10 and self.ticks_angle<80: 
+                    halign="right"
+                    rotation_mode="anchor"
+                elif self.ticks_angle<-10 and self.ticks_angle<-80: 
+                    halign="left"
+                    rotation_mode="anchor"
+
                 if abs(pos_transformed-box["left"])<5: 
                     halign="left"
                     pos_text = box["left"]
                 elif abs(pos_transformed-box["right"])<5: 
                     halign="right"
                     pos_text=box["right"]
-                else: halign="center"
+
                 if self.ticklabels_pos=="below" and (not "upside_down" in box):
-                    box["ax"].text(pos_text,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale)
+                    box["ax"].text(pos_text,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
                 else:
-                    box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale)
+                    box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
         # Chr label
         if self.ticklabels_pos!="none":
             if self.ticklabels_pos=="below" and (not "upside_down" in box):

@@ -17,6 +17,7 @@ export const defaultTrackValues={
         unit:"kb",
         ticklabels_pos:"below",
         ticks_interval:"auto",
+        ticks_angle:0
     },
     "genes":{
         height:"10",
@@ -29,7 +30,8 @@ export const defaultTrackValues={
         collapsed:true,
         only_protein_coding:true,
         exon_color:"#2980b9",
-        genes:"auto"
+        genes:"auto",
+        show_gene_names:true
     },
     "bed":{
         height:"10",

@@ -79,7 +79,7 @@ def run():
             warnings=[]
             figeno_make(data,warnings=warnings)
             warning="\n\n".join(warnings)
-            print(warning)
+            if warning!="": print(warning)
             return jsonify({"status":"success","message":data["output"]["file"],"warning":warning})
         except KnownException as e:
             print(str(e))

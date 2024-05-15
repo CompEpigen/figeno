@@ -144,6 +144,10 @@ function ChrTrack({track,set_value}){
                 <label htmlFor={"ticks_interval"+track.id}>Ticks interval (bp):</label>
                 <input id={"ticks_interval"+track.id} style={{width:"4em"}} value={track.ticks_interval}  onChange={(e)=>set_value("ticks_interval",e.target.value)} ></input>
             </div>
+            <div className='formItem'>
+                <label htmlFor={"ticks_angle"+track.id}>Ticks angle (°):</label>
+                <input id={"ticks_angle"+track.id} style={{width:"3em"}} value={track.ticks_angle}  onChange={(e)=>set_value("ticks_angle",e.target.value)} ></input>
+            </div>
         </div>
         
         </>
@@ -177,9 +181,17 @@ function GenesTrack({track,set_value,openColorPanel}){
                 <ColorButton id={"exon_color"+track.id} color={track.exon_color} setColor={(c)=>set_value("exon_color",c)} openColorPanel={openColorPanel}/>
             </div>
 
+            
+        </div>
+        <div className="optionGroup">
             <div className='formItem'>
                 <label htmlFor={"genes"+track.id}>Genes:</label>
                 <input id={"genes"+track.id} value={track.genes}  onChange={(e) => set_value("genes",e.target.value)} ></input>
+            </div>
+
+            <div className='formItem'>
+                <label htmlFor={"show_gene_names"+track.id}>Show gene names:</label>
+                <input type="checkbox" id={"show_gene_names"+track.id} checked={track.show_gene_names} onChange={() => set_value("show_gene_names",!track.show_gene_names)} ></input>
             </div>
         </div>
 

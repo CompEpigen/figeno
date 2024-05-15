@@ -8,7 +8,7 @@ from figeno.utils import KnownException, correct_region_chr, split_box, draw_bou
 
 
 class genes_track:
-    def __init__(self,reference="custom",genes_file="",style="default",collapsed=True,only_protein_coding=True,genes="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5,
+    def __init__(self,reference="custom",genes_file="",style="default",collapsed=True,only_protein_coding=True,genes="auto",show_gene_names=True,exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5,
                  label="",label_rotate=False,**kwargs):
         self.reference=reference
         self.genes_file = genes_file
@@ -16,11 +16,12 @@ class genes_track:
         self.collapsed=collapsed
         self.only_protein_coding=only_protein_coding
         self.genes=genes
+        self.show_gene_names=show_gene_names
         self.exon_color=exon_color
-        self.fontscale=fontscale
+        self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
-        self.height = height
-        self.margin_above=margin_above
+        self.height = float(height)
+        self.margin_above= float(margin_above)
         self.label=label
         self.label_rotate=label_rotate
         self.kwargs=kwargs
@@ -72,7 +73,7 @@ class genes_track:
                 box["ax"].add_patch(polygon)
    
                 fontsize = 8*self.fontscale if n_lines<=1 else 6*self.fontscale
-                if region.end-region.start < 4000000: 
+                if self.show_gene_names: 
                     if "projection" in box and box["projection"]=="polar":
                         angle_text,halign,valign = compute_rotation_text((start_coord+end_coord)/2)
                         box["ax"].text((start_coord+end_coord)/2,y+height_exon*1.4,transcript.name,rotation=angle_text,horizontalalignment="center",verticalalignment="center",fontsize=fontsize)
