@@ -87,6 +87,9 @@ Parameters:
 
 * ``ticklabels_pos``: The default is "below" meaning the text is below the axis, which is best suited when the axis is at the bottom of the plot. Alternatively, it can be set to "above" if the axis is at the top of the figure, or "none" to remove the ticks.
   
+* ``ticks_interval``: Number of base pairs between ticks. The default is "auto", which will automatically choose this value depending on the size of the regions and the figure width, but you can also set this to a custom value, e.g. 5000 if you want ticks every 5kb.
+
+* ``ticks_angle``: Angle in degrees at which the ticks are written. The default (0) results in horizontal ticks, but you can also tilt them by increasing this value to e.g. 30. Rotating the ticks might result in them overlapping with the chromosome name, so you might want to post-process the figure in a vector graphics editor by manualling moving the chromosome name in case of overlap.
 
 
 genes
@@ -112,6 +115,10 @@ Parameters:
 
 * ``genes``: "auto" by default, meaning that all genes found in the region will be shown. Alternatively, you can specify a comma-separated list of gene names that you want to show, eg: ETV6,BCL2L14,LRP6
 
+* ``show_gene_names``: if True (default), show the gene names. You may want to remove gene names when you display large regions with many genes.
+
+.. warning::
+  The gene names might overlap. If this is the case, you can try to increase the height of the figure (if the genes are split over several rows), to only show the names of specific genes (with the genes paramater), to remove gene names, or to save the figure in vector graphics format (svg or pdf) and post-process it by manually moving the gene names.
 
 bed
 ^^^^^^^^
