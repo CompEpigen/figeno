@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box, interpolate_polar_vertices , polar2cartesian, cartesian2polar
-from figeno.vcf import read_phased_vcf
 from figeno.bam import decode_read_basemods, find_splitreads, add_reads_to_piles, read2query_start_end
 
 from collections import namedtuple
@@ -21,7 +20,7 @@ class alignments_track:
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
                  link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, hgap_bp=100, vgap_frac=0.3,
-                 is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5):
+                 is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5,**kwargs):
         if file=="" or file is None:
             raise KnownException("Please provide a bam file for the alignments track.")
         if not os.path.isfile(file):
@@ -79,6 +78,7 @@ class alignments_track:
         self.query_qpos_breakpoints = {} # self.query_qpos_breakpoints[query][qpos] is the breakpoint corresponding to the query position qpos for the read query
         self.bp_counts ={} # map breakpoint to its count
         self.splitreads_coords={}
+        self.kwargs=kwargs
        
 
     def draw(self, regions, box ,hmargin,warnings=[]):
@@ -102,6 +102,9 @@ class alignments_track:
         if self.link_splitreads:
             self.draw_splitread_lines(box)
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the alignments track because it is not one of the accepted parameters.")
 
     def draw_region(self,region,box,group_piles):
         if abs(region.end-region.start)>1e6: print("WARNING: you are using an alignments track for a region larger than 1Mb. This might be very slow; the alignments track is intended for regions < 100kb.")
@@ -146,24 +149,6 @@ class alignments_track:
                 else:
                     box["ax"].plot(np.linspace(box["left"],box["right"],300),[y_loc]*300,linewidth=0.7,color="black",zorder=4)
             
-        if False and self.show_SNPs:
-            if self.phased_vcf is None: raise Exception("phased_vcf must be provided in order to show SNPs.")
-            selected_SNPs=None
-            if self.asereadcounter_file is not None: selected_SNPs = read_selected_SNPs(self.asereadcounter_file,region.chr,region.start,region.end)
-            SNPs = read_phased_vcf(self.phased_vcf,region.chr,region.start,region.end,selected_SNPs=selected_SNPs)
-            read2SNPs={}
-            for pos,base1,base2 in SNPs:
-                for pileupcolumn in self.samfile.pileup(region.chr,pos,pos+1,truncate=True):
-                    query_names=pileupcolumn.get_query_names()
-                    c=0
-                    for pileupread in pileupcolumn.pileups:
-                        if pileupread.query_position is not None:
-                            base = pileupread.alignment.query_sequence[pileupread.query_position]
-                            query_name = query_names[c]
-                            if not query_name in read2SNPs: read2SNPs[query_name] = []
-                            if base==base1: read2SNPs[query_name].append((pos,0))
-                            elif base==base2: read2SNPs[query_name].append((pos,1))
-                        c+=1
         patches_methyl=[]
         for g in range(len(group_piles)):
             for y in range(len(group_piles[g])):

@@ -8,7 +8,7 @@ from figeno.utils import KnownException, correct_region_chr, split_box,draw_boun
 
 class bigwig_track:
     def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,label="",label_rotate=False,fontscale=1,
-                 bounding_box=False,height=10,margin_above=1.5):
+                 bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None: raise KnownException("Please provide a file for the bigwig track.")
         if not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
         try:
@@ -30,6 +30,7 @@ class bigwig_track:
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         # Assign bins to regions depending on their sizes
@@ -50,6 +51,11 @@ class bigwig_track:
                 self.scale_max = scale_max_regions[i]
             self.draw_region(regions[i][0],boxes[i],nbins=bins_regions[i],show_scale_inside=show_scale_inside)
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the bigwig track because it is not one of the accepted parameters.")
+
+
 
     def draw_region(self,region,box,nbins,show_scale_inside):
         if self.bounding_box: draw_bounding_box(box)

@@ -14,7 +14,7 @@ from figeno.utils import KnownException, correct_region_chr, split_box,draw_boun
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
-    def __init__(self,style="lines",smooth=4,gap_frac=0.1,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5):
+    def __init__(self,style="lines",smooth=4,gap_frac=0.1,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5,**kwargs):
         self.style=style
         self.smooth=int(smooth) # if set to a value x>0, will have average at each position the methylation values at this position, and at the next and previous x positions. If set to 0, does not perform any smoothing.
         if self.style=="dots": self.smooth=0
@@ -32,6 +32,7 @@ class basemodfreq_track:
         self.margin_above=margin_above
 
         self.is_empty=True
+        self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
@@ -40,6 +41,9 @@ class basemodfreq_track:
         self.draw_title(box)
         if self.is_empty:
             warnings.append("No data was found in the displayed regions for the basemod_freq track.")
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the basemod_freq track because it is not one of the accepted parameters.")
 
     def draw_region(self,region,box):
         margin_y = (box["top"]-box["bottom"]) * 0.03

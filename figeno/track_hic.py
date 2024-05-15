@@ -12,7 +12,7 @@ from figeno.utils import KnownException, correct_region_chr, split_box, draw_bou
 class hic_track:
     def __init__(self,file,max_dist=700,color_map="red",scale_max_percentile=95,interactions_across_regions=True,double_interactions_across_regions=True,
                  extend=True,upside_down=False,pixel_border=False,show_colorbar=False,scale="auto",scale_min=1.0,scale_max=1.12,
-                 rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5):
+                 rasterize=True,label="",label_rotate=False,fontscale=1,bounding_box=True,height=50,margin_above=1.5,**kwargs):
         self.file = file # must be in cool format
         self.max_dist = int(float(max_dist) *1000)
         self.color_map=color_map
@@ -35,6 +35,7 @@ class hic_track:
         self.bounding_box=bounding_box
         self.height=height
         self.margin_above=margin_above
+        self.kwargs=kwargs
         
 
     def draw(self, regions, box ,hmargin,warnings=[]):
@@ -208,6 +209,9 @@ class hic_track:
                         patches_list.append(polygon)
         patches_coll = PatchCollection(patches_list,rasterized=self.rasterize,match_original=True)
         box1["ax"].add_collection(patches_coll)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the hic track because it is not one of the accepted parameters.")
 
     def get_min_max_values(self,regions,low_percentile,high_percentile):
         c=cooler.Cooler(self.file)

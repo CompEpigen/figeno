@@ -10,7 +10,7 @@ from figeno.utils import KnownException, split_box, draw_bounding_box , interpol
 
 class chr_track:
     def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",no_margin=False,reference="custom",cytobands_file="",
-                 fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False):
+                 fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False,**kwargs):
         self.style=style
         self.unit=unit
         self.ticklabels_pos=ticklabels_pos
@@ -23,6 +23,7 @@ class chr_track:
         self.margin_above=margin_above
         self.label=label
         self.label_rotate=label_rotate
+        self.kwargs=kwargs
 
         if self.style=="ideogram":
             if cytobands_file is None or cytobands_file=="":
@@ -59,6 +60,9 @@ class chr_track:
             else: # default
                 self.draw_region(regions[i][0],boxes[i]) 
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the chr_axis track because it is not one of the accepted parameters.")
                 
 
     def draw_region(self,region,box):

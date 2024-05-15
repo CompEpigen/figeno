@@ -13,7 +13,7 @@ import figeno.data
 
 class ase_track:
     def __init__(self,reference="hg19",genes_file=None,ase_file=None,vcf_DNA=None,min_depth=6,color1="#e55039",color2="#4a69bd",bar_width=0.7,only_exonic=False,grid=False,labels=["RNA","DNA"],labels_rotate=True,fontscale=1,
-                bounding_box=False,height=10,margin_above=1.5):
+                bounding_box=False,height=10,margin_above=1.5,**kwargs):
         self.reference=reference
         self.genes_file = genes_file
         self.ase_file=ase_file
@@ -34,6 +34,7 @@ class ase_track:
 
         self.box_DNA=None
         self.box_RNA=None
+        self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
@@ -44,6 +45,9 @@ class ase_track:
         self.draw_title(self.box_RNA,self.labels[0])
         if self.use_DNA:
             self.draw_title(self.box_DNA,self.labels[1])
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the ase track because it is not one of the accepted parameters.")
 
     def draw_region(self,region,box):
         if self.bounding_box: draw_bounding_box(box)

@@ -6,11 +6,10 @@ import numpy as np
 import pandas as pd
 
 from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box
-from figeno.vcf import read_phased_vcf
 
 class coverage_track:
     def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",upside_down=False,label="",label_rotate=False,fontscale=1,
-                           vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=False,height=10,margin_above=1.5):
+                           vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None:
             raise KnownException("Please provide a bam file for the coverage track.")
         if not os.path.isfile(file):
@@ -39,8 +38,10 @@ class coverage_track:
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.kwargs=kwargs
 
         self.atleast_one_region_has_coverage=False
+        
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         if self.scale=="auto": self.scale_max = self.compute_max_regions(regions)
@@ -49,6 +50,9 @@ class coverage_track:
             show_scale_inside = self.scale_pos=="corner all" or (self.scale_pos=="corner" and i==0)
             self.draw_region(regions[i][0],boxes[i],show_scale_inside=show_scale_inside)
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the coverage track because it is not one of the accepted parameters.")
 
         if not self.atleast_one_region_has_coverage: warnings.append("The coverage was null for all displayed regions in the bam file "+self.filename+".")
 
@@ -67,22 +71,6 @@ class coverage_track:
         if self.scale=="auto per region": self.scale_max=max_coverage
         rect_width = (box["right"] - box["left"]) / len(coverage_bin)
 
-        #SNPs=[]
-        #if self.vcf is not None:
-        #    SNPs = read_phased_vcf(self.vcf,region.chr,region.start,region.end)
-        #if self.SNP_colors=="auto": self.SNP_colors = ["#1a7242","#e67e22"]
-        #bin2vaf={}
-        #nuc_to_index = {"A":0,"C":1,"G":2,"T":3}
-        #for i in range(len(SNPs)):
-        #    pos,nuc1,nuc2 = SNPs[i]
-        #    if nuc1 in nuc_to_index and nuc2 in nuc_to_index:
-        #        if self.exchange_haplotypes: nuc1, nuc2 = nuc2, nuc1
-        #        coverage_SNP=self.samfile.count_coverage(region.chr,pos,pos+1)
-        #        cov1=coverage_SNP[nuc_to_index[nuc1]][0]
-        #        cov2=coverage_SNP[nuc_to_index[nuc2]][0]
-        #        total_cov = np.sum(coverage_SNP) 
-        #       if total_cov>=5:
-        #           bin2vaf[(pos-region.start)//n_bases_per_bin] = (cov1/total_cov,cov2/total_cov)
 
         # Draw rectangles for each bin
         if not self.upside_down:

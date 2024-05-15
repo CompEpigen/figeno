@@ -12,7 +12,7 @@ from figeno.utils import KnownException, split_box,draw_bounding_box , polar2car
 class copynumber_track:
     def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
                  marker_size=0.7,color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes=[],reference="hg19",genes_file="",chr_lengths={},
-                 label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5):
+                 label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5, **kwargs):
         self.freec_ratios = freec_ratios
         if self.freec_ratios=="": self.freec_ratios=None
         self.freec_CNAs = freec_CNAs
@@ -63,6 +63,8 @@ class copynumber_track:
                 raise KnownException("Please provide either copy number ratios, CN segments or CNAs for a copynumber track.")
             else:
                 self.df_segments = read_cnsegments_CNAs(self.CNAs,round_cn=self.round_cn, chr_lengths=self.chr_lengths, ploidy=self.ploidy)
+
+        self.kwargs=kwargs
         
 
     def draw(self, regions, box ,hmargin,warnings=[]):
@@ -90,10 +92,8 @@ class copynumber_track:
         if "bottom2" in box:
             self.draw_title({"ax":box["ax"],"left":box["left"],"right":box["right"],"top":box["top2"],"bottom":box["bottom2"]})
 
-        #import matplotlib.path as mpath
-        #Path = mpath.Path
-        #pp1 = patches.PathPatch(mpath.Path([(boxes[0]["left"], boxes[0]["bottom"]),(0, 0),  (boxes[1]["right"], boxes[0]["bottom"]) ],[Path.MOVETO, Path.CURVE3, Path.CURVE3]),facecolor="none",edgecolor="red")
-        #boxes[0]["ax"].add_patch(pp1)
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the copynumber track because it is not one of the accepted parameters.")
 
     def draw_region_ratios(self,region,box):
         if self.bounding_box: draw_bounding_box(box)

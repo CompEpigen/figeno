@@ -9,7 +9,7 @@ from figeno.utils import KnownException, correct_region_chr, split_box, draw_bou
 
 class genes_track:
     def __init__(self,reference="custom",genes_file="",style="default",collapsed=True,only_protein_coding=True,genes="auto",exon_color="#4a69bd",fontscale=1,bounding_box=False,height=12,margin_above=1.5,
-                 label="",label_rotate=False):
+                 label="",label_rotate=False,**kwargs):
         self.reference=reference
         self.genes_file = genes_file
         self.style=style
@@ -23,6 +23,7 @@ class genes_track:
         self.margin_above=margin_above
         self.label=label
         self.label_rotate=label_rotate
+        self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin=0,warnings=[]):
         boxes = split_box(box,regions,hmargin)
@@ -31,6 +32,9 @@ class genes_track:
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i],lines_regions[i])
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the genes track because it is not one of the accepted parameters.")
 
     def draw_region(self,region,box,lines,xy_scale=1):
         if self.bounding_box: draw_bounding_box(box)

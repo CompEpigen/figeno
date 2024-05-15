@@ -11,7 +11,7 @@ from figeno.utils import KnownException,correct_region_chr, split_box,draw_bound
 class sv_track:
     def __init__(self,file=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
                  color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,
-                 fontscale=1,bounding_box=True,height=10,margin_above=1.5):
+                 fontscale=1,bounding_box=True,height=10,margin_above=1.5,**kwargs):
         self.file=file
         self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a file (for use with python API).
         self.sv_across_regions=sv_across_regions
@@ -29,6 +29,7 @@ class sv_track:
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.kwargs=kwargs
 
         if self.df_SVs is None:
             if self.file is None or self.file=="":
@@ -42,6 +43,9 @@ class sv_track:
             self.add_SV_color()
 
     def draw(self, regions, box ,hmargin,warnings=[]):
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the sv track because it is not one of the accepted parameters.")
+            
         if "projection" in box and box["projection"]=="polar":
             self.draw_circle(regions,box,hmargin)
             return

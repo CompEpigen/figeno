@@ -7,7 +7,7 @@ from figeno.utils import split_box, draw_bounding_box, KnownException
 
 
 class bed_track:
-    def __init__(self,file,color="#051650",label="",label_rotate=False,show_names=False,fontscale=1,bounding_box=False,height=6,margin_above=1.5):
+    def __init__(self,file,color="#051650",label="",label_rotate=False,show_names=False,fontscale=1,bounding_box=False,height=6,margin_above=1.5,**kwargs):
         self.file = file
         self.color=color
         self.label=label
@@ -17,8 +17,9 @@ class bed_track:
         self.bounding_box=bounding_box
         self.height = height
         self.margin_above=margin_above
+        self.kwargs=kwargs
 
-    def draw(self, regions, box ,hmargin):
+    def draw(self, regions, box ,hmargin,warnings):
         # Check that the bed file exists
         if self.file=="" or self.file is None:
             raise KnownException("Please provide a file for the bed track.")
@@ -30,6 +31,9 @@ class bed_track:
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i])
         self.draw_title(box)
+
+        for x in self.kwargs:
+            warnings.append(x+" parameter was ignored in the bed track because it is not one of the accepted parameters.")
 
     def draw_region(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
