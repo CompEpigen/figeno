@@ -23,7 +23,7 @@ class sv_track:
         self.color_h2h=color_h2h
         self.color_t2t=color_t2t
         self.color_trans=color_trans
-        self.lw=lw
+        self.lw=float(lw)
 
         self.fontscale=fontscale
         self.bounding_box=bounding_box
