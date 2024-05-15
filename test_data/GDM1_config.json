@@ -27,7 +27,7 @@
 			"label": "",
 			"label_rotate": false,
 			"hgap_bp": 30,
-			"vgap_frac": 0.3,
+			"vgap_frac": 0.1,
 			"read_color": "#cccccc",
 			"splitread_color": "#999999",
 			"link_splitreads": false,
