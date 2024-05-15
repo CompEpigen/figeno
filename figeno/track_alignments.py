@@ -239,13 +239,6 @@ class alignments_track:
                         if (not "projection" in box) or box["projection"]!="polar":
                             box["ax"].add_collection(PatchCollection(patches_methyl,match_original=True,rasterized=self.rasterize))
         
-        
-                    if False and self.show_SNPs:
-                        if read.query_name in read2SNPs:
-                            for pos,idx in read2SNPs[read.query_name]:
-                                circle = patches.Ellipse((convert_x(pos),y_converted+height/2),width=0.01,height= height*1.3,color=self.colors[idx],zorder=3)
-                                box["ax"].add_patch(circle)
-        
         if "projection" in box and box["projection"]=="polar":
             box["ax"].add_collection(PatchCollection(patches_methyl,match_original=True,rasterized=self.rasterize))
 
