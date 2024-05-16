@@ -18,9 +18,9 @@ class hic_track:
         self.color_map=color_map
         self.scale_max_percentile = float(scale_max_percentile)
         self.interactions_across_regions=interactions_across_regions
-        if isinstance(interactions_across_regions,str): interactions_across_regions= (interactions_across_regions.lower()=="true")
+        if isinstance(interactions_across_regions,str): self.interactions_across_regions= (interactions_across_regions.lower()=="true")
         self.double_interactions_across_regions=double_interactions_across_regions
-        if isinstance(double_interactions_across_regions,str): double_interactions_across_regions= (double_interactions_across_regions.lower()=="true")
+        if isinstance(double_interactions_across_regions,str): self.double_interactions_across_regions= (double_interactions_across_regions.lower()=="true")
         self.extend=extend
         self.upside_down=upside_down
         self.pixel_border=pixel_border
