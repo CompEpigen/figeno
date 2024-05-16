@@ -221,7 +221,7 @@ class hic_track:
         for a in range(len(regions)):
             for b in range(a,len(regions)):
                 if (not self.interactions_across_regions) and a!=b: continue
-                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames)
+                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames,file=self.file)
                 mat = c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end),
                                                 region2.chr+":"+str(region2.start)+"-"+str(region2.end))
                 mat[np.isnan(mat)]=0
@@ -236,9 +236,15 @@ class hic_track:
         min_angle=100
         if boxes[0]["left"]>boxes[0]["right"]: min_angle=-100
         for a in range(len(regions)):
-            region1 = correct_region_chr(regions[a],c.chromnames)
+            region1 = correct_region_chr(regions[a],c.chromnames,file=self.file)
             box1 = boxes[a]
-            mat = 1+c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end))
+            try:
+                mat = 1+c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end))
+            except ValueError:
+                raise KnownException("Could not retrieve region "+region1.chr+":"+str(region1.start)+"-"+str(region1.end)+" in file "+self.file+"."\
+                                     " Make sure that the region that you specified does not extend beyond the chromosome length, and that you did not subset your .cool file.")
+            except Exception as e:
+                raise e
             width = (box1["right"]-box1["left"]) / mat.shape[0]
             height = (box1["top"]-box1["bottom"]) / max_bindist
             angle = height / width

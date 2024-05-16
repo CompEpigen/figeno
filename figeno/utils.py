@@ -17,7 +17,7 @@ def correct_region_chr(region,chromosomes,file=""):
     elif region.chr.lstrip("chr") in chromosomes:
         return Region(region.chr.lstrip("chr"),region.start,region.end,region.orientation,region.color)
     else: 
-        error_message="Could not find chromosome: "+region.chr
+        error_message="Could not find chromosome "+region.chr
         if file!="": error_message+=" in file "+file+"."
         else: error_message+="."
         raise KnownException(error_message)
