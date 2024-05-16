@@ -18,7 +18,9 @@ class hic_track:
         self.color_map=color_map
         self.scale_max_percentile = float(scale_max_percentile)
         self.interactions_across_regions=interactions_across_regions
+        if isinstance(interactions_across_regions,str): interactions_across_regions= (interactions_across_regions.lower()=="true")
         self.double_interactions_across_regions=double_interactions_across_regions
+        if isinstance(double_interactions_across_regions,str): double_interactions_across_regions= (double_interactions_across_regions.lower()=="true")
         self.extend=extend
         self.upside_down=upside_down
         self.pixel_border=pixel_border
@@ -96,7 +98,7 @@ class hic_track:
         for a in range(n):
             for b in range(a,n):
                 if (not self.interactions_across_regions) and a!=b: continue
-                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames)
+                region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames,file=self.file)
                 box1,box2 = boxes[a],boxes[b]
                 start1,end1 = region1.start, region1.end
                 start2,end2 = region2.start, region2.end
