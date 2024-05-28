@@ -389,14 +389,23 @@ function AlignmentsTrack({track,set_value,openColorPanel, setFileDialogData,setF
                     <input type="checkbox" id={"lonly_show_splitreads"+track.id} checked={track.only_show_splitreads} onChange={() => set_value("only_show_splitreads",!track.only_show_splitreads)} ></input>
                 </div>
                 <div className='formItem' >
-                <label htmlFor={"splitread_color"+track.id}>Splitread color:</label>
-                <ColorButton id={"splitread_color"+track.id} color={track.splitread_color} setColor={(c)=>set_value("splitread_color",c)} openColorPanel={openColorPanel}/>
-            </div>
+                    <label htmlFor={"splitread_color"+track.id}>Splitread color:</label>
+                    <ColorButton id={"splitread_color"+track.id} color={track.splitread_color} setColor={(c)=>set_value("splitread_color",c)} openColorPanel={openColorPanel}/>
+                </div>
+                <div className='formItem' >
+                    <label htmlFor={"link_color"+track.id}>Link color:</label>
+                    <ColorButton id={"link_color"+track.id} color={track.link_color} setColor={(c)=>set_value("link_color",c)} openColorPanel={openColorPanel}/>
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"link_lw"+track.id}>Link lw: </label>
+                    <input id={"link_lw"+track.id} style={{width:"2.1em"}} value={track.link_lw}  onChange={(e)=>set_value("link_lw",e.target.value)} />
+                </div>
 
-            <div className='formItem'>
-                <label className="withTooltip" htmlFor={"min_splitreads_breakpoints"+track.id}>Min SR: <span className="tooltip">Minimum number of split reads spanning a breakpoint for this breakpoint to be shown.</span></label>
-                <input id={"min_splitreads_breakpoints"+track.id} style={{width:"1em"}} value={track.min_splitreads_breakpoints}  onChange={(e)=>set_value("min_splitreads_breakpoints",e.target.value)} />
-            </div>
+                <div className='formItem'>
+                    <label className="withTooltip" htmlFor={"min_splitreads_breakpoints"+track.id}>Min SR: <span className="tooltip">Minimum number of split reads spanning a breakpoint for this breakpoint to be shown.</span></label>
+                    <input id={"min_splitreads_breakpoints"+track.id} style={{width:"1em"}} value={track.min_splitreads_breakpoints}  onChange={(e)=>set_value("min_splitreads_breakpoints",e.target.value)} />
+                </div>
+                
             </>):""}
 
             

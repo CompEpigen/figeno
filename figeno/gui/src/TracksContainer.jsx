@@ -85,9 +85,12 @@ export const defaultTrackValues={
         vgap_frac:0.3,
         read_color:"#cccccc",
         splitread_color:"#999999",
+        link_color:"#999999",
+        link_lw:0.2,
         link_splitreads:false,
         only_show_splitreads:false,
         min_splitreads_breakpoints:2,
+        
 
         group_by:"none",
         show_unphased:true,

@@ -16,10 +16,10 @@ Breakpoint = namedtuple('Breakpoint', 'chr1 pos1 orientation1 chr2 pos2 orientat
 
 
 class alignments_track:
-    def __init__(self,file,label="",label_rotate=False,read_color="#cccccc",splitread_color="#999999",breakpoints_file=None,
+    def __init__(self,file,label="",label_rotate=False,read_color="#cccccc",splitread_color="#999999",link_color="#999999",breakpoints_file=None,
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
-                 link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, hgap_bp=100, vgap_frac=0.3,
+                 link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, link_lw=0.2,hgap_bp=100, vgap_frac=0.3,
                  is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5,**kwargs):
         if file=="" or file is None:
             raise KnownException("Please provide a bam file for the alignments track.")
@@ -37,10 +37,12 @@ class alignments_track:
         self.label_rotate=label_rotate
         self.read_color=read_color
         self.splitread_color=splitread_color
+        self.link_color=link_color
         self.link_splitreads=link_splitreads
         self.min_splitreads_breakpoints = min_splitreads_breakpoints # minimum number of reads supporting a breakpoint for this breakpoint to be shown
         self.only_show_splitreads=only_show_splitreads
         self.only_one_splitread_per_row = only_one_splitread_per_row
+        self.link_lw = float(link_lw)
         self.hgap_bp= int(hgap_bp)
         self.vgap_frac = float(vgap_frac)
         self.group_by = group_by
@@ -390,9 +392,9 @@ class alignments_track:
                     x2 = breakend2[0]
 
 
-                    if abs(x1-x2)<2 and breakend1[2]==breakend2[2]:
-                        if breakend1[2]=="right":xc = max(x1,x2)+0.5
-                        else: xc=min(x1,x2)-0.5
+                    if abs(x1-x2)<20 and breakend1[2]==breakend2[2]:
+                        if breakend1[2]=="right":xc = max(x1,x2)+1.0
+                        else: xc=min(x1,x2)-1.0
                         verts=[(x1,breakend1[1]) , (xc,breakend1[1]) , (xc,breakend2[1]) , (x2,breakend2[1]) ]
                         codes=[path.Path.MOVETO,path.Path.CURVE4,path.Path.CURVE4,path.Path.CURVE4]
                     else:
@@ -421,7 +423,7 @@ class alignments_track:
 
                         verts+=[((x1+x2)/2,y1) , ((x1+x2)/2,y2) , (x2,y2)] + verts_right
                         codes+=[path.Path.CURVE4,path.Path.CURVE4,path.Path.CURVE4] + codes_right
-                    patch = patches.PathPatch(path.Path(verts,codes), facecolor='none', edgecolor=self.splitread_color,lw=0.2,ls="--")
+                    patch = patches.PathPatch(path.Path(verts,codes), facecolor='none', edgecolor=self.link_color,lw=self.link_lw,ls=(0,(4,1)))
                     box["ax"].add_patch(patch)
                         #else:
                         #    box["ax"].plot([l[1][0],l[2][0]],[l[1][1],l[2][1]],color="#333333",lw=0.2)

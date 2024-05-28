@@ -126,6 +126,28 @@ export default function App() {
           delete t.scale_max_percentile;
         }
       }
+      else if (t.type=="alignments"){
+        if (t.group_by=="none"){
+          delete t.show_unphased;
+          delete t.exchange_haplotypes;
+          delete t.show_haplotype_colors;
+          delete t.haplotype_colors;
+          delete t.haplotype_labels;
+        }
+        if (t.color_by=="none"){
+          delete t.color_unmodified;
+          delete t.basemods;
+          delete t.fix_hardclip_basemod;
+        }
+        if (!t.link_splitreads){
+          delete t.splitread_color;
+          delete t.link_color;
+          delete t.link_lw;
+          delete t.only_show_splitreads;
+          delete t.min_splitreads_breakpoints;
+        }
+        
+      }
       delete t.id;
       tracks_out.push(t);
     }
