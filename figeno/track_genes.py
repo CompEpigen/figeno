@@ -30,9 +30,14 @@ class genes_track:
         boxes = split_box(box,regions,hmargin)
         self.margin_between_genes = 1.5*np.sum([abs(r[0].end-r[0].start) for r in regions]) / abs(box["right"]-box["left"]) # in bp
         lines_regions = self.read_transcripts_lines_regions(regions)
+        max_region_size=0
         for i in range(len(regions)):
+            max_region_size=max(max_region_size,abs(regions[i][0].end-regions[i][0].start))
             self.draw_region(regions[i][0],boxes[i],lines_regions[i])
         self.draw_title(box)
+
+        if max_region_size>1e7:
+            warnings.append("The genes track is intended for rather small regions (<2Mb), but here you used very large regions.")
 
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the genes track because it is not one of the accepted parameters.")
