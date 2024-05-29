@@ -108,7 +108,15 @@ export default function App() {
     const tracks_out=[];
     for (const track of tracksList){
       const t = {...track,height:parseFloat(track.height),margin_above:parseFloat(track.margin_above),fontscale:parseFloat(track.fontscale)};
-      if (t.type=="basemod_freq"){
+      
+      if (t.type=="chr_axis"){
+        if (t.ticklabels_pos=="none"){
+          delete t.unit;
+          delete t.ticks_interval;
+          delete t.ticks_angle;
+        }
+      }
+      else if (t.type=="basemod_freq"){
         t.bams = t.bams.map((b)=>{const newBam={...b};delete newBam.id; return newBam;})
         t.bedmethyls = t.bedmethyls.map((b)=>{const newBed={...b};delete newBed.id; return newBed;})
       }

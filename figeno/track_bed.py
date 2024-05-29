@@ -29,17 +29,22 @@ class bed_track:
         
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
-            self.draw_region(regions[i][0],boxes[i])
+            self.draw_region(regions[i][0],boxes[i],warnings)
         self.draw_title(box)
 
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the bed track because it is not one of the accepted parameters.")
 
-    def draw_region(self,region,box):
+    def draw_region(self,region,box,warnings):
         if self.bounding_box: draw_bounding_box(box)
 
-        rect_height = (box["top"]-box["bottom"]) * 0.7
-        rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.15
+        
+        if self.show_names: 
+            rect_height = (box["top"]-box["bottom"]) * 0.4
+            rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.08
+        else:
+            rect_height = (box["top"]-box["bottom"]) * 0.7
+            rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.15
 
         with open(self.file,"r") as infile:
             for line in infile:
@@ -63,9 +68,12 @@ class bed_track:
                         rect = patches.Rectangle((converted_start,rect_bottom),converted_end-converted_start,rect_height,color=self.color)
                         box["ax"].add_patch(rect)
 
-                        if self.show_names and len(linesplit)>2:
-                            box["ax"].text((converted_start+converted_end)/2,(rect_bottom+rect_height/2),linesplit[2],
-                                           horizontalalignment="center",verticalalignment="center",fontsize=8*self.fontscale)
+                        if self.show_names:
+                            if len(linesplit)>3:
+                                box["ax"].text((converted_start+converted_end)/2,(rect_bottom+rect_height+1),linesplit[3],
+                                           horizontalalignment="center",verticalalignment="bottom",fontsize=8*self.fontscale)
+                            else: 
+                                warnings.append("For the bed file "+self.file+", you ticked the show_names option, but no names were found for line "+line +" (should be the 4th column).")
     def draw_title(self,box):
         if len(self.label)>0:
             rotation = 90 if self.label_rotate else 0

@@ -9,13 +9,14 @@ import figeno.data
 from figeno.utils import KnownException, split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,no_margin=False,reference="custom",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,lw_scale=0.5,no_margin=False,reference="custom",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False,**kwargs):
         self.style=style
         self.unit=unit
         self.ticklabels_pos=ticklabels_pos
         self.ticks_interval = ticks_interval
         self.ticks_angle=float(ticks_angle)
+        self.lw_scale= float(lw_scale)
         while self.ticks_angle<-180: self.ticks_angle+=360
         while self.ticks_angle>180: self.ticks_angle-=360
         self.no_margin=no_margin
@@ -70,8 +71,8 @@ class chr_track:
 
     def draw_region(self,region,box):
         if self.bounding_box: draw_bounding_box(box)
-        tick_width = 0.3
-        tick_height = 1.6
+        tick_width = 0.3*self.lw_scale
+        tick_height = 1.6*self.lw_scale
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
             if self.no_margin: y=box["top"]
             else: y = box["top"] - tick_height/2
@@ -80,7 +81,7 @@ class chr_track:
             else: y = box["bottom"] + tick_height/2
 
         if not self.no_margin:
-            box["ax"].add_patch(patches.Rectangle((box["left"],y-0.7/2),width=box["right"]-box["left"],height=0.7,lw=0,color="#000000"))
+            box["ax"].add_patch(patches.Rectangle((box["left"],y-0.7*self.lw_scale/2),width=box["right"]-box["left"],height=0.7*self.lw_scale,lw=0,color="#000000"))
 
         #ticks
         if self.scale < 1.2 * 1e8:
@@ -146,7 +147,7 @@ class chr_track:
                 box["ax"].text((box["left"]+box["right"])/2,box["top"],"chr"+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
     
     def draw_region_arrow(self,region,box):
-        arrow_height = (box["top"]-box['bottom']) * 0.5
+        arrow_height = (box["top"]-box['bottom']) * 0.5 *self.lw_scale
         line_height = arrow_height*0.5
         arrow_width = arrow_height
         if arrow_width>abs(box["right"]-box["left"])*0.7: arrow_width = abs(box["right"]-box["left"])*0.5
@@ -192,7 +193,7 @@ class chr_track:
                            fontsize=10*self.fontscale)
             
     def draw_region_ideogram(self,region,box):
-        height = (box["top"]-box["bottom"]) * 0.5
+        height = (box["top"]-box["bottom"]) * 0.5 *self.lw_scale
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
             y = box["bottom"] + (box["top"]-box["bottom"]) * 0.75
             if self.fontscale>0:

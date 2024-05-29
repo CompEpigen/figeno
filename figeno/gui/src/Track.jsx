@@ -98,8 +98,6 @@ export function Track({track, set_value, change_track_type, copy_track, delete_t
 
                 ):""}
 
-                
-                
                 {optionTrack()}
                 
             </div>
@@ -114,7 +112,7 @@ function ChrTrack({track,set_value}){
     return (
         <>
         <div className="optionGroup">
-        <div className='formItem'>
+            <div className='formItem'>
                 <label htmlFor={"style"+track.id}>Style:</label>
                 <select id={"style"+track.id} value={track.style} onChange={(e) =>{set_value("style",e.target.value)}}> 
                             <option className="dropDownOption" key="default" value="default">default</option>
@@ -122,16 +120,13 @@ function ChrTrack({track,set_value}){
                             <option className="dropDownOption" key="ideogram"  value="ideogram">ideogram</option>
                 </select>
             </div>
-
             <div className='formItem'>
-                <label htmlFor={"unit"+track.id}>Unit:</label>
-                <select id={"unit"+track.id} value={track.unit} onChange={(e) =>{set_value("unit",e.target.value)}}> 
-                            <option className="dropDownOption" key="bp" value="bp">bp</option>
-                            <option className="dropDownOption" key="kb" value="kb">kb</option>
-                            <option className="dropDownOption" key="Mb"  value="Mb">Mb</option>
-                </select>
+                <label htmlFor={"lw_scale"+track.id}>lw_scale:</label>
+                <input id={"lw_scale"+track.id} style={{width:"3em"}} value={track.lw_scale}  onChange={(e)=>set_value("lw_scale",e.target.value)} ></input>
             </div>
+        </div>
 
+        <div className="optionGroup">
             <div className='formItem'>
                 <label htmlFor={"ticklabels_pos"+track.id}>Tick labels position:</label>
                 <select id={"ticklabels_pos"+track.id} value={track.ticklabels_pos} onChange={(e) =>{set_value("ticklabels_pos",e.target.value)}}> 
@@ -140,6 +135,17 @@ function ChrTrack({track,set_value}){
                             <option className="dropDownOption" key="none"  value="none">none</option>
                 </select>
             </div>
+            {(track.ticklabels_pos!="none")?(
+            <>
+            <div className='formItem'>
+                <label htmlFor={"unit"+track.id}>Unit:</label>
+                <select id={"unit"+track.id} value={track.unit} onChange={(e) =>{set_value("unit",e.target.value)}}> 
+                            <option className="dropDownOption" key="bp" value="bp">bp</option>
+                            <option className="dropDownOption" key="kb" value="kb">kb</option>
+                            <option className="dropDownOption" key="Mb"  value="Mb">Mb</option>
+                </select>
+            </div>
+            
             <div className='formItem'>
                 <label htmlFor={"ticks_interval"+track.id}>Ticks interval (bp):</label>
                 <input id={"ticks_interval"+track.id} style={{width:"4em"}} value={track.ticks_interval}  onChange={(e)=>set_value("ticks_interval",e.target.value)} ></input>
@@ -147,7 +153,8 @@ function ChrTrack({track,set_value}){
             <div className='formItem'>
                 <label htmlFor={"ticks_angle"+track.id}>Ticks angle (°):</label>
                 <input id={"ticks_angle"+track.id} style={{width:"3em"}} value={track.ticks_angle}  onChange={(e)=>set_value("ticks_angle",e.target.value)} ></input>
-            </div>
+            </div> 
+            </>):""}
         </div>
         
         </>
@@ -209,6 +216,10 @@ function BedTrack({track,set_value,openColorPanel, setFileDialogData,setFileDial
             <div className='formItem' >
                 <label htmlFor={"color"+track.id} >Color:</label>
                 <ColorButton id={"color"+track.id} color={track.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}></ColorButton>
+            </div>
+            <div className='formItem'>
+                <label htmlFor={"show_names"+track.id}>Show names:</label>
+                <input type="checkbox" id={"show_names"+track.id} checked={track.show_names} onChange={() => set_value("show_names",!track.show_names)} ></input>
             </div>
 
         </div>

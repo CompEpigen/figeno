@@ -14,8 +14,9 @@ export const defaultTrackValues={
         label:"",
         label_rotate:false,
         style:"default",
-        unit:"kb",
+        lw_scale:"1.0",
         ticklabels_pos:"below",
+        unit:"kb",
         ticks_interval:"auto",
         ticks_angle:0
     },
@@ -40,6 +41,7 @@ export const defaultTrackValues={
         fontscale:1.0,
         file:"",
         color:"#444444",
+        show_names:false,
         label:"",
         label_rotate:false
     },
@@ -84,10 +86,10 @@ export const defaultTrackValues={
         hgap_bp:30,
         vgap_frac:0.3,
         read_color:"#cccccc",
+        link_splitreads:false,
         splitread_color:"#999999",
         link_color:"#999999",
         link_lw:0.2,
-        link_splitreads:false,
         only_show_splitreads:false,
         min_splitreads_breakpoints:2,
         
