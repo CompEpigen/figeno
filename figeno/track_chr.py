@@ -9,7 +9,7 @@ import figeno.data
 from figeno.utils import KnownException, split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,lw_scale=0.5,no_margin=False,reference="custom",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,lw_scale=1.0,no_margin=False,reference="custom",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False,**kwargs):
         self.style=style
         self.unit=unit
