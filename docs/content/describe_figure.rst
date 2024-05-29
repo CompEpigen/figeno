@@ -82,10 +82,12 @@ Parameters:
   * ``arrow``: draw an arrow, colored according to the color of the region. Only the start and end of the region will be shown, no intermediate ticks.
   
   * ``ideogram``: draw an ideogram for the whole chromosome, and highlight in red the position of the region within the chromosome
-  
-* ``unit``: bp, kb or Mb (default: kb). 
 
+* ``lw_scale``: Scale for the linewidth of the chromosome axis, or for the height of the arrow/ideogram (default: 1.0).
+  
 * ``ticklabels_pos``: The default is "below" meaning the text is below the axis, which is best suited when the axis is at the bottom of the plot. Alternatively, it can be set to "above" if the axis is at the top of the figure, or "none" to remove the ticks.
+
+* ``unit``: bp, kb or Mb (default: kb). 
   
 * ``ticks_interval``: Number of base pairs between ticks. The default is "auto", which will automatically choose this value depending on the size of the regions and the figure width, but you can also set this to a custom value, e.g. 5000 if you want ticks every 5kb.
 
@@ -130,6 +132,8 @@ Parameters:
 * ``file``: path to the bed file.
 
 * ``color``: color for the rectangles.
+
+* ``show_names``: if True, will display the name of each region above the corresponding rectangle. This requires that the bed file contains a fourth column indicating the name of each region.
 
 bigwig
 ^^^^^^^^
@@ -256,6 +260,10 @@ Parameters:
   * ``only_show_splitreads``: if True and link_splitreads is True, will only show splitreads. Otherwise, show all reads.
   
   * ``splitread_color``: if link_splitreads is True, the color for splitreads.
+
+  * ``link_color``: if link_splitreads is True, the color for the dashed line representing the link between two alignments of a splitread.
+
+  * ``link_lw``: if link_splitreads is True, the linewidth for the dashed line representing the link between two alignments of a splitread (default: 0.2).
   
   * ``min_splitreads_breakpoints``: if link_splitreads is True, will only consider splitreads which correspond to a breakpoint supported by at least this number of splitreads (default: 2). This is used to filter splitreads not corresponding to an actual breakpoint.
   
