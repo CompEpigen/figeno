@@ -224,7 +224,8 @@ class tracks_plot:
         self.total_width = total_width
     def update_regions_width(self):
         if self.total_width is not None:
-            total_length= np.sum([(reg.end-reg.start) for reg,_ in self.regions])
+            total_length=0
+            for x in [(reg.end-reg.start) for reg,_ in self.regions]: total_length+=x
             new_regions=[]
             for reg,_ in self.regions:
                 new_regions.append((reg,self.total_width * (reg.end-reg.start) / total_length))
@@ -238,7 +239,8 @@ class tracks_plot:
             self.regions = new_regions
     def update_regions_width_symmetrical(self):
         if self.total_width is not None:
-            total_length= np.sum([(reg.end-reg.start) for reg,_ in self.regions])
+            total_length=0
+            for x in [(reg.end-reg.start) for reg,_ in self.regions]: total_length+=x
             # Assign regions to rows
             i=0
             current_length=0
@@ -252,8 +254,11 @@ class tracks_plot:
                 last_row1 = i-1
             if last_row1<0: last_row1=0
             
-            longest_length = max( np.sum([(reg.end-reg.start) for reg,_ in self.regions[:last_row1+1]]) , 
-                                  np.sum([(reg.end-reg.start) for reg,_ in self.regions[last_row1+1:]]))
+            length1=0
+            for x in [(reg.end-reg.start) for reg,_ in self.regions[:last_row1+1]]: length1+=x
+            length2=0
+            for x in [(reg.end-reg.start) for reg,_ in self.regions[last_row1+1:]]: length2+=x
+            longest_length = max(length1,length2)
             
             new_regions = []
             for i in range(len(self.regions)):
@@ -276,11 +281,30 @@ class tracks_plot:
     def draw(self,output_config=None,warnings=[]):
         if output_config is not None: self.output = output_config
         if self.output is None or (not "file" in self.output) or (self.output["file"]==""): raise KnownException("Please provide an output file.")
+        
         if os.path.dirname(self.output["file"])!="" and not os.path.isdir(os.path.dirname(self.output["file"])): 
             try: os.makedirs(os.path.dirname(self.output["file"]))
             except: raise KnownException("The directory for the output file does not exist ("+os.path.dirname(self.output["file"])+") and could not be created. Please make sure that you have write permissions.")
 
         if len(self.regions)==0: raise KnownException("Please include at least one region.")
+
+        if not "." in self.output["file"]:
+            warnings.append("No file extension was included for the output file. This was automatically set to .png.")
+            self.output["file"]+=".png"
+        
+        #Ensure that all regions have similar sizes, otherwise print a warning
+        min_size=-1
+        max_size=-1
+        for r,_ in self.regions:
+            size=abs(r.end-r.start)
+            if min_size==-1:
+                min_size=size
+                max_size=size
+            else:
+                min_size=min(size,min_size)
+                max_size=max(size,max_size)
+        if max_size>100*min_size:
+            warnings.append("You used regions with very different sizes, so the smaller regions may not be visible.")
 
         if self.figure_layout=="horizontal": 
             self.draw_horizontal(**self.output,warnings=warnings)
