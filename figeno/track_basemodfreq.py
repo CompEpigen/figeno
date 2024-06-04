@@ -37,7 +37,7 @@ class basemodfreq_track:
     def draw(self, regions, box ,hmargin,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
-            self.draw_region(regions[i][0],boxes[i])
+            self.draw_region(regions[i][0],boxes[i],warnings=warnings)
         self.draw_title(box)
         if self.is_empty:
             warnings.append("No data was found in the displayed regions for the basemod_freq track.")
@@ -45,14 +45,14 @@ class basemodfreq_track:
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the basemod_freq track because it is not one of the accepted parameters.")
 
-    def draw_region(self,region,box):
+    def draw_region(self,region,box,warnings=[]):
         margin_y = (box["top"]-box["bottom"]) * 0.03
 
         if self.bounding_box:
             draw_bounding_box(box)
 
         for bam_params in self.bams:
-            self.draw_region_bam(region,box,**bam_params)
+            self.draw_region_bam(region,box,**bam_params,warnings=warnings)
 
         for bedmethyl_params in self.bedmethyls:
             self.draw_region_bedmethyl(region,box,**bedmethyl_params)
@@ -68,7 +68,7 @@ class basemodfreq_track:
                 box["ax"].add_patch(rect)
                 box["ax"].text(legend_x+legend_width*1.1,legend_y - hp*legend_height*3.0,"Haplotype "+str(hp+1),horizontalalignment="left",verticalalignment="center")
 
-    def draw_region_bam(self,region,box,file,base,mod,min_coverage=5,linewidth=3,opacity=1,fix_hardclip=False,split_by_haplotype=False,labels=[""],colors=["#27ae60"]):
+    def draw_region_bam(self,region,box,file,base,mod,min_coverage=5,linewidth=3,opacity=1,fix_hardclip=False,split_by_haplotype=False,labels=[""],colors=["#27ae60"],warnings=[]):
         min_coverage=int(min_coverage)
         linewidth=float(linewidth)
         opacity=float(opacity)
@@ -97,11 +97,11 @@ class basemodfreq_track:
         # Read methylation
         reads_HP1,reads_HP2,reads_unphased,reads_all = read_read_groups(samfile,region)
         if split_by_haplotype:
-            df_met1 = smooth_methylation(create_basemod_table_bam(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)
-            df_met2 = smooth_methylation(create_basemod_table_bam(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)
+            df_met1 = smooth_methylation(create_basemod_table_bam(reads_HP1,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip,warnings=warnings),w=self.smooth,start=region.start,end=region.end)
+            df_met2 = smooth_methylation(create_basemod_table_bam(reads_HP2,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip,warnings=warnings),w=self.smooth,start=region.start,end=region.end)
             dfs = [df_met1,df_met2]
         else:
-            dfs = [smooth_methylation(create_basemod_table_bam(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip),w=self.smooth,start=region.start,end=region.end)]
+            dfs = [smooth_methylation(create_basemod_table_bam(reads_all,base,mod,region.chr,region.start-200,region.end+200,min_coverage=min(4,min_coverage),samfile=samfile,fix_hardclip=fix_hardclip,warnings=warnings),w=self.smooth,start=region.start,end=region.end)]
 
         for j in range(len(dfs)):
             df = dfs[j]
@@ -251,14 +251,14 @@ def smooth_methylation(df,w=2,start=None,end=None):
     if end is not None: df = df.loc[df["pos"]<=end,:]
     return df
 
-def create_basemod_table_bam(reads,base,mod,chr,start,end,samfile=None,fix_hardclip=False,min_coverage=5):
+def create_basemod_table_bam(reads,base,mod,chr,start,end,samfile=None,fix_hardclip=False,min_coverage=5,warnings=[]):
     d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
 
     pos2methylated={}
     pos2unmethylated={}
     for x in reads:
         for read in x:
-            methyl = decode_read_basemods(read,[(base,mod,1)],samfile,fix_hardclip)
+            methyl = decode_read_basemods(read,[(base,mod,1)],samfile,fix_hardclip,warnings=warnings)
             for pos,end2,state in methyl:
                 if base=="C" and (read.flag&16)!=0:
                     pos-=1 # if reverse strand, consider the position of the C in the CpG in the forward orientation.

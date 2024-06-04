@@ -100,7 +100,7 @@ class alignments_track:
         #self.update_group_sizes(regions,box) # Compute group sizes so that the same borders can be used for all regions
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
-            self.draw_region(regions[i][0],boxes[i],self.region_group_piles[i])
+            self.draw_region(regions[i][0],boxes[i],self.region_group_piles[i],warnings=warnings)
         if self.link_splitreads:
             self.draw_splitread_lines(box)
         self.draw_title(box)
@@ -108,7 +108,7 @@ class alignments_track:
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the alignments track because it is not one of the accepted parameters.")
 
-    def draw_region(self,region,box,group_piles):
+    def draw_region(self,region,box,group_piles,warnings=[]):
         if abs(region.end-region.start)>1e6: print("WARNING: you are using an alignments track for a region larger than 1Mb. This might be very slow; the alignments track is intended for regions < 100kb.")
         if self.bounding_box:
             draw_bounding_box(box)
@@ -226,7 +226,7 @@ class alignments_track:
                     if self.color_by=="basemod":
                         if (not "projection" in box) or box["projection"]!="polar": patches_methyl=[]
                         #methyl = decode_read_basemod(read,"C","m")[0]
-                        basemods = decode_read_basemods(read,self.basemods,self.samfile,fix_hardclip_basemod=self.fix_hardclip_basemod)
+                        basemods = decode_read_basemods(read,self.basemods,self.samfile,fix_hardclip_basemod=self.fix_hardclip_basemod,warnings=warnings)
                         #methyl = decode_read_m_hm(read)[0]
                         methyl_merged = merge_methylation_rectangles(basemods,int(region.end-region.start)/1000)
                         for rect_start,rect_end,color in methyl_merged:
