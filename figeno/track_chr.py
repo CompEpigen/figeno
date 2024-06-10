@@ -62,14 +62,14 @@ class chr_track:
             elif self.style=="ideogram":
                 self.draw_region_ideogram(regions[i][0],boxes[i]) 
             else: # default
-                self.draw_region(regions[i][0],boxes[i]) 
+                self.draw_region(regions[i][0],boxes[i],len(regions)==1) 
         self.draw_title(box)
 
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the chr_axis track because it is not one of the accepted parameters.")
                 
 
-    def draw_region(self,region,box):
+    def draw_region(self,region,box,single_region=False):
         if self.bounding_box: draw_bounding_box(box)
         tick_width = 0.3*self.lw_scale
         tick_height = 1.6*self.lw_scale
@@ -118,6 +118,7 @@ class chr_track:
                 box["ax"].add_patch(rect)
 
                 # x ticks
+                tick_text=self.tick_text(pos,pos_transformed==rightmost_tick)
                 pos_text = pos_transformed
                 halign="center"
                 rotation_mode="default"
@@ -128,17 +129,23 @@ class chr_track:
                     halign="left"
                     rotation_mode="anchor"
 
-                if abs(pos_transformed-box["left"])<5: 
+                if abs(pos_transformed-box["left"])<5*self.fontscale: # Avoid the ticks going out of the box, except for the first and last region.
                     halign="left"
-                    pos_text = box["left"]
-                elif abs(pos_transformed-box["right"])<5: 
+                    if single_region:
+                        if abs(pos_transformed-box["left"])<3*self.fontscale:
+                            if len(tick_text)>3: pos_text=box["left"]-3*self.fontscale
+                            else: pos_text=box["left"]-(0.3+len(tick_text)*0.6)*self.fontscale
+                        else: pos_text=box["left"]-1*self.fontscale
+                    else: pos_text = box["left"]
+                elif abs(pos_transformed-box["right"])<5*self.fontscale: 
                     halign="right"
-                    pos_text=box["right"]
+                    if single_region: pos_text=box["right"]+3.6*self.fontscale
+                    else: pos_text=box["right"]
 
                 if self.ticklabels_pos=="below" and (not "upside_down" in box):
-                    box["ax"].text(pos_text,y-tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
+                    box["ax"].text(pos_text,y-tick_height*0.7,tick_text,horizontalalignment=halign,verticalalignment="top",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
                 else:
-                    box["ax"].text(pos_text,y+tick_height*0.7,self.tick_text(pos,pos_transformed==rightmost_tick),horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
+                    box["ax"].text(pos_text,y+tick_height*0.7,tick_text,horizontalalignment=halign,verticalalignment="bottom",fontsize=7*self.fontscale,rotation=self.ticks_angle,rotation_mode=rotation_mode)
         # Chr label
         if self.ticklabels_pos!="none":
             if self.ticklabels_pos=="below" and (not "upside_down" in box):
