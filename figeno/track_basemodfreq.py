@@ -213,28 +213,6 @@ class basemodfreq_track:
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"]-tick_width*6,(box["bottom"]+box["top"])/2,self.label,rotation=rotation,verticalalignment="center",horizontalalignment="right",fontsize=8*self.fontscale)
 
-
-def read_metbed(filename,chr,start,end):
-    if filename.endswith("gz"):
-        f=gzip.open(filename,'rt')
-    else:
-        f=open(filename,"r")
-
-    d={"chr":[],"pos":[],"metPercentage":[],"coverage":[]}
-    for line in f:
-        linesplit = line.split("\t")
-        if linesplit[0]==chr and int(linesplit[1])>=start and int(linesplit[1])<=end and linesplit[3]=="m":
-            details = linesplit[9].split(" ")
-            coverage = int(details[0])
-            if coverage>5:
-                d["chr"].append(chr)
-                d["pos"].append(int(linesplit[1]))
-                d["metPercentage"].append(float(details[1]))
-                d["coverage"].append(coverage)
-    df = pd.DataFrame(d)
-    f.close()
-    return df
-
 def smooth_methylation(df,w=2,start=None,end=None):
     df = df.copy(deep=True)
     smoothed_values = []
@@ -288,9 +266,20 @@ def add_entry_bedmethyl(entry,d,mod,chr,start,end,min_coverage,filename=""):
     if entry_split[0].lstrip("chr")==chr and pos>=start and pos<=end and entry_split[3]==mod and cov>=min_coverage:
         d["chr"].append(chr)
         d["pos"].append(pos)
-        values = entry_split[9].split(" ")
-        try: d["metPercentage"].append(float(values[1]))
-        except: raise KnownException("Wrong format for bedmethyl file "+filename+". The methylation percentage could not be converted to float ("+values[1]+").")
+        if len(entry_split)==10:
+            values = entry_split[9].split(" ")
+            if len(values)>1:
+                try: d["metPercentage"].append(float(values[1]))
+                except: raise KnownException("Wrong format for bedmethyl file "+filename+". The methylation percentage could not be converted to float ("+values[1]+").")
+            else:
+                raise KnownException("Wrong format for bedmethyl file "+filename+".")
+        else:
+            if len(entry_split)>=11:
+                try: d["metPercentage"].append(float(entry_split[10]))
+                except: raise KnownException("Wrong format for bedmethyl file "+filename+". The methylation percentage could not be converted to float ("+entry_split[10]+").")
+            else:
+                raise KnownException("Wrong format for bedmethyl file "+filename+".")
+
         d["coverage"].append(cov)
 
 def create_basemod_table_bedmethyl(mod,region,file,min_coverage=5):
