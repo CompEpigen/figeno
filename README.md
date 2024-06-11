@@ -42,5 +42,5 @@ If you encounter a bug or would like to have a new feature added, please do not 
 ## Citation
 If you use figeno in your research, please consider citing:
 
-Etienne Sollier, Jessica Heilmann, Clarissa Gerhauser, Michael Scherer, Christoph Plass, Pavlo Lutsik. Figeno: multi-region genomic figures with long-read support, Bioinformatics 2024. [https://doi.org/10.1093/bioadv/vbae031](https://doi.org/10.1093/bioadv/vbae031)
+Etienne Sollier, Jessica Heilmann, Clarissa Gerhauser, Michael Scherer, Christoph Plass, Pavlo Lutsik. Figeno: multi-region genomic figures with long-read support, Bioinformatics 2024. [https://doi.org/10.1093/bioinformatics/btae354](https://doi.org/10.1093/bioinformatics/btae354)
 
