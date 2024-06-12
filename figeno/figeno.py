@@ -68,7 +68,8 @@ class tracks_plot:
                     if line.startswith("#"): continue
                     linesplit = line.rstrip("\n").split("\t")
                     chr = linesplit[0].lstrip("chr")
-                    end=int(linesplit[2])
+                    if self.cytobands_file.endswith(".fai"): end=int(linesplit[1])
+                    else: end=int(linesplit[2])
                     if not chr in self.chr_lengths: self.chr_lengths[chr]=end
                     else: self.chr_lengths[chr]=max(end,self.chr_lengths[chr])
         elif self.reference in ["hg19","hg38","mm10"]:
@@ -193,7 +194,7 @@ class tracks_plot:
                         if "style" in t and t["style"]=="ideogram" and "general" in config:
                             if "reference" in config["general"]:
                                 t["reference"]=config["general"]["reference"]
-                            if "cytobands_file" in config["general"]:
+                            if "cytobands_file" in config["general"] and (not config["general"]["cytobands_file"].endswith(".fai")):
                                 t["cytobands_file"] = config["general"]["cytobands_file"]
                         self.tracks_list.append(chr_track(**t))
                     elif track_type=="copynumber":

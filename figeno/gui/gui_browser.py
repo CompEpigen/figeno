@@ -8,8 +8,19 @@ from flask import Flask, jsonify, request
 import json
 import filedialpy
 from figeno import figeno_make
-from figeno.genes import find_genecoord_refseq_wrapper
+from figeno.genes import find_genecoord_wrapper
 from figeno.utils import KnownException
+
+
+cli = sys.modules['flask.cli']
+cli.show_server_banner = lambda *x: None
+
+if not os.path.isdir(os.path.dirname(__file__)+"/build"):
+    print("Error: the React app for the gui has not been built, probably because you installed directly from the source code of the GitHub repository. "\
+                    "The easiest way to install figeno is to install it from PyPI by running: 'pip install figeno'. "\
+                    "If you want to build the gui from source, you must first go to the figeno/gui subdirectory, then run 'npm install' and 'npm run build' "\
+                    "(this requires nodejs to be installed). You can then go back to the root directory and run 'pip install .'. ")
+    exit()
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 
 if sys.platform=="win32":
@@ -130,7 +141,7 @@ def find_gene():
     if request.is_json:
         data = request.get_json()
         try:
-            chr,start,end=find_genecoord_refseq_wrapper(data["gene_name"],data["reference"],data["genes_file"])
+            chr,start,end=find_genecoord_wrapper(data["gene_name"],data["reference"],data["genes_file"])
             if chr=="": return jsonify({"status":"known_error","message":"Could not find gene: "+data["gene_name"]})
             else: return jsonify({"status":"success","chr":chr,"start":start,"end":end})
         except KnownException as e:
@@ -139,6 +150,31 @@ def find_gene():
         except Exception as e:
             print(traceback.format_exc())
             return jsonify({"status":"unknown_error","message":traceback.format_exc()})
+        
+@app.route('/get_all_chromosomes', methods = ['POST'])
+def get_all_chromosomes():
+    if request.is_json:
+        data = request.get_json()
+        try:
+            chromosomes=[]
+            if "cytobands_file" in data and data["cytobands_file"]!="":
+                if not os.path.isfile(data["cytobands_file"]): raise KnownException("The cytobands file could not be found: "+str(data["cytobands_file"]+". Will use the human chromosomes by default."))
+                with open(data["cytobands_file"],"r") as infile:
+                    for line in infile:
+                        if line.startswith("#"): continue
+                        linesplit = line.rstrip("\n").split("\t")
+                        chr = linesplit[0].lstrip("chr")
+                        if not chr in chromosomes: chromosomes.append(chr)
+                return jsonify({"status":"success","chromosomes":chromosomes})
+            else:
+                return jsonify({"status":"known_error","message":"No cytobands (or .fai) file was provided, so by default all human chromosomes were added. Please provide a cytobands (or .fai) file if you want to add the chromosomes present in your reference.","chromosomes":[]})
+        except KnownException as e:
+            print(str(e))
+            return jsonify({"status":"known_error","message":str(e),"chromosomes":[]})
+        except Exception as e:
+            print(traceback.format_exc())
+            return jsonify({"status":"unknown_error","message":traceback.format_exc(),"chromosomes":[]})
+
 
 
 @app.route('/')
@@ -154,7 +190,7 @@ def main(args=None):
     if args is not None: port = args.port
     if sys.platform=="darwin": web_address="http://127.0.0.1:"+str(port)+"/"
     else:  web_address="http://localhost:"+str(port)+"/"
-    print("Starting local server on "+web_address)
+    print("Starting the figeno GUI at "+web_address)
     webbrowser.open_new_tab(web_address)
     app.run(debug=debug,port=port)
 

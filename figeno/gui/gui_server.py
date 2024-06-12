@@ -7,7 +7,7 @@ import subprocess
 from flask import Flask, jsonify, request
 import json
 from figeno import figeno_make
-from figeno.genes import find_genecoord_refseq_wrapper
+from figeno.genes import find_genecoord_wrapper
 from figeno.utils import KnownException
 
 app = Flask(__name__, static_folder='./build', static_url_path='/')
@@ -117,7 +117,7 @@ def find_gene():
     if request.is_json:
         data = request.get_json()
         try:
-            chr,start,end=find_genecoord_refseq_wrapper(data["gene_name"],data["reference"],data["genes_file"])
+            chr,start,end=find_genecoord_wrapper(data["gene_name"],data["reference"],data["genes_file"])
             if chr=="": return jsonify({"status":"known_error","message":"Could not find gene: "+data["gene_name"]})
             else: return jsonify({"status":"success","chr":chr,"start":start,"end":end})
         except KnownException as e:
@@ -126,6 +126,30 @@ def find_gene():
         except Exception as e:
             print(traceback.format_exc())
             return jsonify({"status":"unknown_error","message":traceback.format_exc()})
+        
+@app.route('/get_all_chromosomes', methods = ['POST'])
+def get_all_chromosomes():
+    if request.is_json:
+        data = request.get_json()
+        try:
+            chromosomes=[]
+            if "cytobands_file" in data and data["cytobands_file"]!="":
+                if not os.path.isfile(data["cytobands_file"]): raise KnownException("The cytobands file could not be found: "+str(data["cytobands_file"]+". Will use the human chromosomes by default."))
+                with open(data["cytobands_file"],"r") as infile:
+                    for line in infile:
+                        if line.startswith("#"): continue
+                        linesplit = line.rstrip("\n").split("\t")
+                        chr = linesplit[0].lstrip("chr")
+                        if not chr in chromosomes: chromosomes.append(chr)
+                return jsonify({"status":"success","chromosomes":chromosomes})
+            else:
+                return jsonify({"status":"known_error","message":"No cytobands (or .fai) file was provided, so by default all human chromosomes were added. Please provide a cytobands (or .fai) file if you want to add the chromosomes present in your reference.","chromosomes":[]})
+        except KnownException as e:
+            print(str(e))
+            return jsonify({"status":"known_error","message":str(e),"chromosomes":[]})
+        except Exception as e:
+            print(traceback.format_exc())
+            return jsonify({"status":"unknown_error","message":traceback.format_exc(),"chromosomes":[]})
 
 
 @app.route('/')

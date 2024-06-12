@@ -73,6 +73,43 @@ export default function App() {
     setGeneSelectorActive(true);
   }
 
+
+  function set_regions_chromosomes(chromosomes){
+    const regions=[];
+      const colors=["#98671F","#65661B","#969833","#CE151D","#FF1A25","#FF0BC8","#FFCBCC","#FF9931","#FFCC3A","#FCFF44","#C4FF40","#00FF3B",
+        "#2F7F1E","#2800C6","#6A96FA","#98CAFC","#00FEFD","#C9FFFE","#9D00C6","#D232FA","#956DB5","#5D5D5D","#989898","#CBCBCB"];
+        for (let i = 0; i < chromosomes.length; i++) {
+            regions.push({id:uuid4(),"chr":chromosomes[i].toString(),"start":"","end":"",color:colors[(i-1)%colors.length]});
+        }
+      setRegionsList(regions);
+  }
+  function add_all_chromosomes(){
+    if (generalParams.reference==="hg19" || generalParams.reference==="hg38" || generalParams.reference==="mm10"){
+      const n = (generalParams.reference==="mm10")?20:23;
+      const chromosomes=[];
+      for (let i = 1; i < n; i++) chromosomes.push(i.toString());
+      chromosomes.push("X");
+      chromosomes.push("Y");
+      set_regions_chromosomes(chromosomes);
+      
+    }
+    else{
+      fetch("/get_all_chromosomes",{headers: {'Content-Type': 'application/json'}, body: JSON.stringify(generalParams),
+        method:"POST"}).then(res => res.json()).then((data)=>{
+          if (data.status!="success"){
+            alert(data.message);
+            const chromosomes=[];
+            for (let i = 1; i < 23; i++) chromosomes.push(i.toString());
+            chromosomes.push("X");
+            chromosomes.push("Y");
+            set_regions_chromosomes(chromosomes);
+          }
+          else set_regions_chromosomes(data.chromosomes);
+        });
+    }
+    
+  }
+
   function get_config(){
     const regions_out=[];
     for (const region of regionsList){
@@ -320,7 +357,7 @@ export default function App() {
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(520px,1fr))", width:"100%", gap:"10px"}}>
-      <RegionsContainer key="regions" regionsList={regionsList} setRegionsList={setRegionsList} openColorPanel={openColorPanel} openGeneSelector={openGeneSelector} show_regions_color={show_regions_color}/>
+      <RegionsContainer key="regions" regionsList={regionsList} setRegionsList={setRegionsList} openColorPanel={openColorPanel} openGeneSelector={openGeneSelector} add_all_chromosomes={add_all_chromosomes} show_regions_color={show_regions_color}/>
       <HighlightsContainer key="highlights" regionsList={highlightsList} setRegionsList={setHighlightsList} openColorPanel={openColorPanel}/>
       </div>
 

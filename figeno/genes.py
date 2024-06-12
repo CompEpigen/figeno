@@ -180,12 +180,19 @@ def read_transcripts_names(file,gene_names):
       
 
 def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True,only_protein_coding=True):
-    """Wrapper depending on the file type and whether a region or gene_names are provided"""
-    if gene_names =="auto": gene_names = None
+    """Wrapper depending on the file type"""
+    if gene_names =="auto" or gene_names=="": gene_names = None
+    if gene_names is not None: 
+        if not isinstance(gene_names,str): raise KnownException("gene_names should be a string of comma-separated gene names.")
+
     if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath) or file.endswith("txt.gz") or file.endswith(".txt"):
         return read_genes_refseq(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding)
-    else:
+    elif file.endswith("gff3") or file.endswith("gff3.gz"):
+        return read_genes_gff3(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding) 
+    elif file.endswith("gtf") or file.endswith("gtf.gz"):
         return read_genes_gtf(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding) 
+    else:
+        raise KnownException("The extension for genes file "+str(file)+" was not recognized. The filename must end with .txt(.gz) for RefSeq format, .gtf(.gz) for gtf or .gff3(.gz) for gff3.")
         
 
 def add_exon(exons,exon):
@@ -212,6 +219,7 @@ def merge_transcripts(transcript1,transcript2):
 
 # Consider all exons of all transcripts for a given gene.
 def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
+    if gene_names is not None: gene_names=gene_names.upper()
     transcripts={}
 
     if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath):
@@ -232,7 +240,7 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
 
         # Filter based on gene name
         gene_name=linesplit[12]
-        if (gene_names is not None) and (not gene_name in gene_names):continue
+        if (gene_names is not None) and (not gene_name.upper() in gene_names):continue
 
         # Filter based on protein coding
         if only_protein_coding and linesplit[13] in ["none","unk"]: continue
@@ -260,6 +268,7 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
 
 
 def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
+    if gene_names is not None: gene_names=gene_names.upper()
     transcripts={}
     name2exons={}
 
@@ -268,6 +277,7 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
     for line in infile:
         if line.startswith("#"): continue 
         linesplit = line.split("\t")
+        if len(linesplit)<9: raise KnownException("Wrong format for the genes file (there should be at least 9 columns per line).")
         
         if chr is not None and linesplit[0].lstrip("chr") != chr.lstrip("chr"): continue
         elif linesplit[2]=="transcript":
@@ -284,7 +294,7 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                 elif x.startswith(" transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
-            if (gene_names is not None) and (not gene_name in gene_names): continue
+            if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
             if only_protein_coding and (not "protein_coding" in linesplit[8]): continue
             if collapsed: name = gene_name
             else: name=transcript_name
@@ -318,8 +328,100 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                                  transcripts[x].strand,exons))
     return result
 
+def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
+    if gene_names is not None: gene_names=gene_names.upper()
+    transcriptID2transcript={}
+    transcriptID2exons={}
+    geneID2transcriptIDs={}
+    geneID2gene_name={}
 
-def find_genecoord_refseq_wrapper(gene_name,reference,genes_file=None):
+    if gff3_file.endswith(".gz") : infile = gzip.open(gff3_file,"rt")
+    else: infile =open(gff3_file,"r")
+    for line in infile:
+        if line.startswith("#"): continue 
+        linesplit = line.split("\t")
+        if len(linesplit)<9: raise KnownException("Wrong format for the genes file (there should be at least 9 columns per line).")
+        
+        if chr is not None and linesplit[0].lstrip("chr") != chr.lstrip("chr"): continue
+        elif linesplit[2] in ["transcript","mRNA","rRNA","miRNA"]:
+            transcript_end=int(linesplit[4]) 
+            transcript_start = int(linesplit[3])
+            if start is not None and end is not None and (transcript_start>end or transcript_end < start):continue
+            transcript_orientation = linesplit[6]
+            # Find transcript and gene names 
+            gene_id,transcript_id, transcript_name = "","",""
+            for x in linesplit[8].split(";"):
+                if x.startswith("Parent"):
+                    gene_id = x[x.find(":")+1:]
+                elif x.startswith("Name"):
+                    transcript_name = x[x.find("=")+1:]
+                elif x.startswith("ID"):
+                    transcript_id = x[x.find(":")+1:]
+            transcript={"id":transcript_id,"name":transcript_name,"chr":linesplit[0].lstrip("chr"),"start":transcript_start,"end":transcript_end,"orientation":transcript_orientation}
+            transcriptID2transcript[transcript_id]=transcript
+            if not gene_id in geneID2transcriptIDs: geneID2transcriptIDs[gene_id]=[]
+            geneID2transcriptIDs[gene_id].append(transcript_id)
+
+        elif linesplit[2]=="exon":
+            exon_end=int(linesplit[4]) 
+            exon_start = int(linesplit[3])
+            if (start is not None) and (end is not None) and (exon_start>end or exon_end < start):continue
+            transcript_id = ""
+            for x in linesplit[8].split(";"):
+                if x.startswith("Parent"):
+                    transcript_id = x[x.find(":")+1:]
+            if not transcript_id in transcriptID2exons: transcriptID2exons[transcript_id]=[]
+            add_exon(transcriptID2exons[transcript_id],(exon_start,exon_end))
+
+        elif linesplit[2] in ["gene", "miRNA_gene","rRNA_gene"]:
+            if chr is not None and linesplit[0].lstrip("chr") != chr.lstrip("chr"): continue
+            gene_end=int(linesplit[4]) 
+            gene_start = int(linesplit[3])
+            if start is not None and end is not None and (gene_start>end or gene_end < start):continue
+            if only_protein_coding:
+                if "biotype" in linesplit[8]:
+                    if not "biotype=protein_coding" in linesplit[8]: continue
+                else:
+                    if linesplit[2]!="gene": continue
+            gene_id,gene_name="",""
+            for x in linesplit[8].split(";"):
+                if x.startswith("ID"):
+                    gene_id = x[x.find(":")+1:]
+                elif x.startswith("Name"):
+                    gene_name = x[x.find("=")+1:]
+            geneID2gene_name[gene_id]=gene_name
+    infile.close()
+
+    result=[]
+    for gene_id in geneID2gene_name:
+        if gene_id in geneID2transcriptIDs:
+            gene_name=geneID2gene_name[gene_id]
+            if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
+            if collapsed:
+                transcripts_chr=""
+                transcripts_start=10000000000
+                transcripts_end=0
+                transcripts_orientation=""
+                exons=[]
+                for transcript_id in geneID2transcriptIDs[gene_id]:
+                    transcript=transcriptID2transcript[transcript_id]
+                    transcripts_start= min(transcripts_start,transcript["start"])
+                    transcripts_end=max(transcripts_end,transcript["end"])
+                    transcripts_orientation=transcript["orientation"]
+                    transcripts_chr=transcript["chr"]
+                    for exon in transcriptID2exons[transcript_id]:
+                        add_exon(exons,exon)
+                result.append(Transcript(gene_name,transcripts_chr,transcripts_start,transcripts_end,transcripts_orientation,exons))
+            else:
+                for transcript_id in geneID2transcriptIDs[gene_id]:
+                    transcript=transcriptID2transcript[transcript_id]
+                    result.append(Transcript(transcript["name"],transcript["chr"],transcript["start"],transcript["end"],transcript["orientation"],transcriptID2exons[transcript_id]))
+    return result
+                
+
+
+
+def find_genecoord_wrapper(gene_name,reference,genes_file=None):
     
     if genes_file is None or genes_file=="":
         if reference in ["hg19","hg38","mm10"]:
@@ -342,7 +444,13 @@ def find_genecoord_refseq_wrapper(gene_name,reference,genes_file=None):
             raise KnownException("You are using a custom reference genome, but did not provide a genes file. See https://figeno.readthedocs.io/en/latest/content/describe_figure.html#general for the format of a genes file.")
     else:
         if not os.path.isfile(genes_file): raise KnownException("The provided genes file does not exist: "+str(genes_file)+".")
-        return find_genecoord_refseq(gene_name,genes_file)
+        
+        if genes_file.endswith(".gtf.gz") or genes_file.endswith(".gtf"):
+            return find_genecoord_gtf(gene_name,genes_file)
+        elif genes_file.endswith(".gff3.gz") or genes_file.endswith(".gff3"):
+            return find_genecoord_gff3(gene_name,genes_file)
+        else:
+            return find_genecoord_refseq(gene_name,genes_file)
 
 def find_genecoord_refseq(gene_name,file=None):
     chr=""
@@ -370,6 +478,54 @@ def find_genecoord_refseq(gene_name,file=None):
 
     if min_coord<=0: min_coord=0
     return (chr,min_coord,max_coord)
+
+def find_genecoord_gtf(gene_name,file):
+    if file.endswith(".gz") : infile = gzip.open(file,"rt")
+    else: infile =open(file,"r")
+
+    for line in infile:
+        if line.startswith("#"): continue 
+        linesplit = line.split("\t")
+        if linesplit[2] in ["gene","miRNA_gene","rRNA_gene"]:
+            for x in linesplit[8].split(";"):
+                if x.startswith(" gene_name"):
+                    x = x[x.find("\"")+1:]
+                    name = x[:x.find("\"")]
+                    if gene_name.upper()==name.upper():
+                        chr=linesplit[0].lstrip("chr")
+                        start=int(linesplit[3])
+                        end=int(linesplit[4])
+                        length=end-start
+                        start-=max(10,int(0.05*length))
+                        end+=max(10,int(0.05*length))
+                        if start<=0: start=0
+                        return (chr,start,end)
+                    else: break
+    return ("",0,1)
+
+def find_genecoord_gff3(gene_name,file):
+    if file.endswith(".gz") : infile = gzip.open(file,"rt")
+    else: infile =open(file,"r")
+
+    for line in infile:
+        if line.startswith("#"): continue 
+        linesplit = line.split("\t")
+        if linesplit[2] in ["gene","miRNA_gene","rRNA_gene"]:
+            for x in linesplit[8].split(";"):
+                if x.startswith("Name"):
+                    name=x[x.find("=")+1:]
+                    if gene_name.upper()==name.upper():
+                        chr=linesplit[0].lstrip("chr")
+                        start=int(linesplit[3])
+                        end=int(linesplit[4])
+                        length=end-start
+                        start-=max(10,int(0.05*length))
+                        end+=max(10,int(0.05*length))
+                        if start<=0: start=0
+                        return (chr,start,end)
+                    else: break
+    return ("",0,1)
+
 
 
 
