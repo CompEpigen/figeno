@@ -10,7 +10,9 @@ class bigwig_track:
     def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,label="",label_rotate=False,fontscale=1,
                  bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None: raise KnownException("Please provide a file for the bigwig track.")
-        if not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
+        if (not file.startswith("http")) and not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
+        if (file.startswith("http")) and pyBigWig.remote==0: raise KnownException("You are tring to use a remote bigwig file, but your installation of pyBigWig does not support remote files. "\
+                                                                                  "Try running 'pip install --upgrade --force pybigwig --no-binary pybigwig'. This requires curl to be installed on your system.")
         try:
             self.bw = pyBigWig.open(file)
         except:
