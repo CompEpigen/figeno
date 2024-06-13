@@ -1,4 +1,4 @@
-import pyBigWig
+import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
@@ -71,7 +71,9 @@ class copynumber_track:
         self.df_ratios=None
         if self.input_type=="freec":
             if self.freec_ratios is not None:
-                self.df_ratios = pd.read_csv(self.freec_ratios,sep="\t",dtype={"Chromosome":str,"Start":float})
+                try:
+                    self.df_ratios = pd.read_csv(self.freec_ratios,sep="\t",dtype={"Chromosome":str,"Start":float})
+                except: raise KnownException("Failed to open file "+str(self.freec_ratios))
                 if (not "Chromosome" in self.df_ratios.columns) or (not "Start" in self.df_ratios.columns) or (not "Ratio" in self.df_ratios.columns):
                     raise KnownException("Invalid format for the freec ratios file. Must be tab-separated with 3 columns (with header): "\
                                         "Chromosome, Start, Ratio.")
@@ -95,7 +97,10 @@ class copynumber_track:
             
         elif self.input_type=="delly":
             if self.delly_cn is not None:
-                self.df_ratios = pd.read_csv(self.delly_cn,sep="\t",dtype={"chr":str,"start":int,"end":int})
+                try:
+                    self.df_ratios = pd.read_csv(self.delly_cn,sep="\t",dtype={"chr":str,"start":int,"end":int})
+                except:
+                    raise KnownException("Failed to open file "+str(self.delly_cn))
                 if len(self.df_ratios.columns)!=6: raise KnownException("Expected 6 columns for the delly copy number file, but found "+str(len(self.df_ratios.columns))+".")
                 self.df_ratios=self.df_ratios.iloc[:,[0,1,5]]
                 self.df_ratios.columns=["Chromosome","Start","Ratio"]
@@ -341,6 +346,7 @@ class copynumber_track:
 
 def read_cna_freec(cna_freec_filename):
     CNAs={}
+    if not os.path.exists(cna_freec_filename): raise KnownException("CNA file does not exist: "+str(cna_freec_filename))
     with open(cna_freec_filename,"r") as infile:
         for line in infile:
             linesplit = line.rstrip("\n").split("\t")
@@ -354,6 +360,7 @@ def read_cna_freec(cna_freec_filename):
 
 def read_cna_delly(cna_delly_filename):
     CNAs={}
+    if not os.path.exists(cna_delly_filename): raise KnownException("CNA file does not exist: "+str(cna_delly_filename))
     with open(cna_delly_filename,"r") as infile:
         for line in infile:
             linesplit = line.rstrip("\n").split("\t")
