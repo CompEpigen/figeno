@@ -150,6 +150,8 @@ class sv_track:
     def read_SVs_tsv(self):
         try: df_SVs = pd.read_csv(self.file,sep="\t",dtype={"chr1":str,"chr2":str})
         except: raise KnownException("Failed to open tsv file for sv track: "+str(self.file))
+        if (not "chr1" in df_SVs.columns): raise KnownException("Missing column chr1 for tsv file in sv track: "+self.file)
+        if (not "chr2" in df_SVs.columns): raise KnownException("Missing column chr2 for tsv file in sv track: "+self.file)
         if (not "pos1" in df_SVs.columns): raise KnownException("Missing column pos1 for tsv file in sv track: "+self.file)
         if (not "pos2" in df_SVs.columns): raise KnownException("Missing column pos2 for tsv file in sv track: "+self.file)
         if not "color" in df_SVs.columns:
@@ -170,7 +172,13 @@ class sv_track:
                 df_SVs["color"] = colors
             else:
                 df_SVs["color"]=["black" for i in df_SVs.index]
-
+        SVs=[]
+        for x in df_SVs.index:
+            SV1=(df_SVs.loc[x,"chr1"],df_SVs.loc[x,"pos1"],df_SVs.loc[x,"chr2"],df_SVs.loc[x,"pos2"],df_SVs.loc[x,"color"])
+            if not SV1 in SVs: SVs.append(SV1)
+            SV2=(df_SVs.loc[x,"chr2"],df_SVs.loc[x,"pos2"],df_SVs.loc[x,"chr1"],df_SVs.loc[x,"pos1"],df_SVs.loc[x,"color"])
+            if not SV2 in SVs: SVs.append(SV2)
+        df_SVs = pd.DataFrame(SVs,columns=["chr1","pos1","chr2","pos2","color"])
         return df_SVs
 
 
@@ -195,6 +203,7 @@ class sv_track:
                 color = self.color_dup
             elif record.INFO["SVTYPE"] =="INV":
                 color = self.color_h2h # TODO
+            elif record.INFO["SVTYPE"]=="INS": continue
             else:  #BND
                 if record.CHROM != record.ALT[0].mate_chrom:
                     color = self.color_trans

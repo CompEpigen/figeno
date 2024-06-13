@@ -275,8 +275,7 @@ class tracks_plot:
                     self.tracks_list[i].no_margin=True
                 elif i<len(self.tracks_list)-1 and self.tracks_list[i].ticklabels_pos=="above" and self.tracks_list[i+1].margin_above==0:
                     self.tracks_list[i].no_margin=True
-            if isinstance(self.tracks_list[i],sv_track) and i<len(self.tracks_list)-1 and isinstance(self.tracks_list[i+1],copynumber_track):
-                self.tracks_list[i+1].margin_above=max(self.tracks_list[i+1].margin_above,0.3)
+        if self.figure_layout=="circular" and isinstance(self.tracks_list[-1],chr_track): self.tracks_list[-1].margin_above=max(0.3,self.tracks_list[-1].margin_above)
 
 
     def draw(self,output_config=None,warnings=[]):
@@ -292,6 +291,16 @@ class tracks_plot:
         if not "." in self.output["file"]:
             warnings.append("No file extension was included for the output file. This was automatically set to .png.")
             self.output["file"]+=".png"
+
+        # Show warnings if some margin between chr_axis and copynumber, or between copynumber and sv.
+        for i in range(1,len(self.tracks_list)):
+            if self.figure_layout!="circular" and isinstance(self.tracks_list[i],chr_track) and isinstance(self.tracks_list[i-1],copynumber_track) and self.tracks_list[i].margin_above>0:
+                warnings.append("You might want to set the 'margin_above' parameter of the chr_axis track to 0 when it is below a copynumber track.")
+            if isinstance(self.tracks_list[i],copynumber_track) and isinstance(self.tracks_list[i-1],sv_track) and self.tracks_list[i].margin_above>0:
+                warnings.append("You might want to set the 'margin_above' parameter of the copynumber track to 0 when it is below a sv track.")
+            if self.figure_layout=="circular" and isinstance(self.tracks_list[i],sv_track):
+                warnings.append("For circular layouts, the sv track is generally expected to be placed at the top, which is not the case here.")
+
         
         #Ensure that all regions have similar sizes, otherwise print a warning
         min_size=-1
@@ -485,9 +494,10 @@ class tracks_plot:
         # Tracks
         for t in self.tracks_list:
             hmargin=1.5
+            current_r+=t.margin_above
             box={"ax":ax,"bottom":current_r,"top":current_r+t.height,"left":5*np.pi/2,"right":np.pi/2,"projection":"polar"}
             t.draw(regions=self.regions,box=box,hmargin=hmargin,warnings=warnings)
-            current_r+=t.height+t.margin_above
+            current_r+=t.height 
         plt.axis('off')
         ax.set_rmin(0)
         ax.set_rmax(current_r)
