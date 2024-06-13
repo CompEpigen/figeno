@@ -643,7 +643,7 @@ function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialo
 
 
 function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
-    const fileClass= (track.freec_ratios!=="" || track.freec_CNAs!=="" || track.purple_cn!=="")? "":"unsetPath"; 
+    const fileClass= ((track.input_type=="freec" && track.freec_ratios!="") ||(track.input_type=="purple" && track.purple_cn!="") ||(track.input_type=="delly" && track.delly_cn!=""))? "":"unsetPath"; 
     return (
         <>
         <div className="optionGroup">
@@ -658,7 +658,7 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
             {(track.input_type=="freec")?(
                 <>
                 <PathEntry id={"freec_ratios"+track.id} label="Ratios file:" value={track.freec_ratios} set_value={(val) => set_value("freec_ratios",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-                <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
                 </>
             ):""}
             {(track.input_type=="purple")?(
@@ -667,7 +667,7 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
             {(track.input_type=="delly")?(
                 <>
                 <PathEntry id={"delly_cn"+track.id} label="CN file:" value={track.delly_cn} set_value={(val) => set_value("delly_cn",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-                <PathEntry id={"delly_CNAs"+track.id} label="CNAs file:" value={track.delly_CNAs} set_value={(val) => set_value("delly_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <PathEntry id={"delly_CNAs"+track.id} label="CNAs file:" value={track.delly_CNAs} set_value={(val) => set_value("delly_CNAs",val)} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
                 </>
             ):""}
         </div>
