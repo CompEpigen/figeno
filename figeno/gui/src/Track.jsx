@@ -11,11 +11,6 @@ const track_types=["","chr_axis", "genes","bed","bigwig","coverage","alignments"
 
 export function Track({track, set_value, change_track_type, copy_track, delete_track, className, openColorPanel, openTrackTypePanel, setFileDialogData, setFileDialogActive}) {
 
-    function handleTypeChange(e){
-        if (e.target.value!=track.type){
-            set_value("type",e.target.value)
-        }
-    }
     function optionTrack(){
         if (track.type=="chr_axis"){
             return ChrTrack({"track":track,"set_value":set_value});
@@ -642,9 +637,6 @@ function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialo
 
         </div>
             
-            
-            
-
         </>
     )
 }
@@ -655,15 +647,32 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
     return (
         <>
         <div className="optionGroup">
-            <PathEntry id={"freec_ratios"+track.id} label="Ratios file:" value={track.freec_ratios} set_value={(val) => set_value("freec_ratios",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-            <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-            <PathEntry id={"purple_cn"+track.id} label="Purple CN file:" value={track.purple_cn} set_value={(val) => set_value("purple_cn",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-
             <div className='formItem'>
-                <label htmlFor={"genes"+track.id}>Genes:</label>
-                <input id={"genes"+track.id} value={track.genes}  onChange={(e) => set_value("genes",e.target.value)} />
+                <label htmlFor={"input_type"+track.id}>Input type:</label>
+                <select id={"input_type"+track.id} value={track.input_type} onChange={(e) =>{set_value("input_type",e.target.value)}}> 
+                            <option className="dropDownOption" key="freec" value="freec">freec</option>
+                            <option className="dropDownOption" key="purple" value="purple">purple</option>
+                            <option className="dropDownOption" key="delly"  value="delly">delly</option>
+                </select>
             </div>
+            {(track.input_type=="freec")?(
+                <>
+                <PathEntry id={"freec_ratios"+track.id} label="Ratios file:" value={track.freec_ratios} set_value={(val) => set_value("freec_ratios",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <PathEntry id={"freec_CNAs"+track.id} label="CNAs file:" value={track.freec_CNAs} set_value={(val) => set_value("freec_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                </>
+            ):""}
+            {(track.input_type=="purple")?(
+                <PathEntry id={"purple_cn"+track.id} label="CN file:" value={track.purple_cn} set_value={(val) => set_value("purple_cn",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+            ):""}
+            {(track.input_type=="delly")?(
+                <>
+                <PathEntry id={"delly_cn"+track.id} label="CN file:" value={track.delly_cn} set_value={(val) => set_value("delly_cn",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <PathEntry id={"delly_CNAs"+track.id} label="CNAs file:" value={track.delly_CNAs} set_value={(val) => set_value("delly_CNAs",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                </>
+            ):""}
+        </div>
 
+        <div className="optionGroup">
             <div className='formItem'>
                 <label htmlFor={"ploidy"+track.id}>Ploidy:</label>
                 <input id={"ploidy"+track.id} style={{width:"2em"}} value={track.ploidy}  onChange={(e) => set_value("ploidy",e.target.value)}/>
@@ -678,6 +687,11 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
                 <label htmlFor={"max_cn"+track.id}>Max CN:</label>
                 <input id={"max_cn"+track.id} style={{width:"2em"}} value={track.max_cn}  onChange={(e) => set_value("max_cn",e.target.value)}/>
             </div>
+            <div className='formItem'>
+                <label htmlFor={"genes"+track.id}>Genes:</label>
+                <input id={"genes"+track.id} style={{width:"7em"}} value={track.genes}  onChange={(e) => set_value("genes",e.target.value)} />
+            </div>
+
         </div>
 
         <div className="optionGroup">
@@ -698,10 +712,11 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
                 <label htmlFor={"color_gain"+track.id}>Gain:</label>
                 <ColorButton id={"color_gain"+track.id} color={track.color_gain} setColor={(c)=>set_value("color_gain",c)} openColorPanel={openColorPanel}/>
             </div>
+            {(track.input_type=="purple")?(
             <div className='formItem'>
                 <label htmlFor={"color_cnloh"+track.id}>CNLOH:</label>
                 <ColorButton id={"color_cnloh"+track.id} color={track.color_cnloh} setColor={(c)=>set_value("color_cnloh",c)} openColorPanel={openColorPanel}/>
-            </div>
+            </div>):""}
         </div>
 
         <div className="optionGroup">

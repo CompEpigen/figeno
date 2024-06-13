@@ -10,17 +10,27 @@ from figeno.genes import read_transcripts
 from figeno.utils import KnownException, split_box,draw_bounding_box , polar2cartesian, cartesian2polar, interpolate_polar_vertices
 
 class copynumber_track:
-    def __init__(self,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
+    def __init__(self,input_type=None,freec_ratios=None,freec_CNAs=None,CNAs=None,purple_cn=None,delly_cn=None,delly_CNAs=None,
+                 ploidy=2,grid=True,grid_major=True,grid_minor=True,grid_cn=True, min_cn=None,max_cn=None,round_cn=False,
                  marker_size=0.7,color_normal="#000000",color_loss="#4a69bd",color_gain="#e55039",color_cnloh="#f6b93b", genes=[],reference="hg19",genes_file="",chr_lengths={},
                  label="CN",label_rotate=True,fontscale=1,bounding_box=True,height=20,margin_above=1.5, **kwargs):
+        self.input_type=input_type
         self.freec_ratios = freec_ratios
         if self.freec_ratios=="": self.freec_ratios=None
         self.freec_CNAs = freec_CNAs
         if self.freec_CNAs=="": self.freec_CNAs=None
         self.CNAs=CNAs # Already provide a dict: chr-> list of CNAs , instead of providing freec_CNAs
-        self.ploidy= float(ploidy)
         self.purple_cn=purple_cn
         if self.purple_cn=="": self.purple_cn=None
+        self.delly_cn=delly_cn
+        if self.delly_cn=="": self.delly_cn=None
+        self.delly_CNAs=delly_CNAs
+        if self.delly_CNAs=="": self.delly_CNAs=None
+
+        try:
+            self.ploidy= float(ploidy)
+        except: raise KnownException("Ploidy must be a number (for copynumber track).")
+        if self.ploidy<=0: raise KnownException("Ploidy must be >0.")
         self.grid=grid # True for showing a grid for the axes
         self.grid_major = grid_major # vertical lines for major ticks
         self.grid_minor=grid_minor # vertical line for minor ticks
@@ -48,22 +58,57 @@ class copynumber_track:
         self.height = float(height)
         self.margin_above= float(margin_above)
         self.bounding_box=bounding_box
-        
+
+        if self.input_type is None:
+            if self.freec_ratios is not None: self.input_type="freec"
+            elif self.purple_cn is not None: self.input_type="purple"
+            elif self.freec_CNAs is not None: self.input_type="freec"
+            elif self.CNAs is not None: self.input_type="freec"
+            elif self.delly_cn is not None: self.input_type="delly"
+            elif self.delly_CNAs is not None: self.input_type="delly"
+            else: raise KnownException("Please provide an input file for the copynumber track.")
 
         self.df_ratios=None
-        if self.freec_ratios is not None:
-            self.df_ratios = pd.read_csv(self.freec_ratios,sep="\t",dtype={"Chromosome":str,"Start":float})
-            self.df_ratios["Chromosome"] = [x.lstrip("chr") for x in self.df_ratios["Chromosome"]]
-            self.df_ratios = self.df_ratios.loc[self.df_ratios["Ratio"]>=0,:]
-        if self.CNAs is None and (self.freec_CNAs is not None):
-            self.CNAs = read_cna_freec(self.freec_CNAs)
-        if self.purple_cn is not None:
-            self.df_segments = read_cnsegments_purple(self.purple_cn)
-        if self.df_ratios is None and self.purple_cn is None:
-            if self.CNAs is None:
-                raise KnownException("Please provide either copy number ratios, CN segments or CNAs for a copynumber track.")
+        if self.input_type=="freec":
+            if self.freec_ratios is not None:
+                self.df_ratios = pd.read_csv(self.freec_ratios,sep="\t",dtype={"Chromosome":str,"Start":float})
+                if (not "Chromosome" in self.df_ratios.columns) or (not "Start" in self.df_ratios.columns) or (not "Ratio" in self.df_ratios.columns):
+                    raise KnownException("Invalid format for the freec ratios file. Must be tab-separated with 3 columns (with header): "\
+                                        "Chromosome, Start, Ratio.")
+                self.df_ratios["Chromosome"] = [x.lstrip("chr") for x in self.df_ratios["Chromosome"]]
+                self.df_ratios = self.df_ratios.loc[self.df_ratios["Ratio"]>=0,:]
+
+            if self.CNAs is None and (self.freec_CNAs is not None):
+                self.CNAs = read_cna_freec(self.freec_CNAs)
+
+            if self.df_ratios is None:
+                if self.CNAs is None:
+                    raise KnownException("Please provide input files for the copynumber track.") 
+                else:
+                    self.df_segments = read_cnsegments_CNAs(self.CNAs,round_cn=self.round_cn, chr_lengths=self.chr_lengths, ploidy=self.ploidy)
+        
+        elif self.input_type=="purple":
+            if self.purple_cn is not None:
+                self.df_segments = read_cnsegments_purple(self.purple_cn)
             else:
-                self.df_segments = read_cnsegments_CNAs(self.CNAs,round_cn=self.round_cn, chr_lengths=self.chr_lengths, ploidy=self.ploidy)
+                raise KnownException("Please provide a copy number file for the copynumber track.")
+            
+        elif self.input_type=="delly":
+            if self.delly_cn is not None:
+                self.df_ratios = pd.read_csv(self.delly_cn,sep="\t",dtype={"chr":str,"start":int,"end":int})
+                if len(self.df_ratios.columns)!=6: raise KnownException("Expected 6 columns for the delly copy number file, but found "+str(len(self.df_ratios.columns))+".")
+                self.df_ratios=self.df_ratios.iloc[:,[0,1,5]]
+                self.df_ratios.columns=["Chromosome","Start","Ratio"]
+                self.df_ratios["Chromosome"] = [x.lstrip("chr") for x in self.df_ratios["Chromosome"]]
+                self.df_ratios["Ratio"]= self.df_ratios["Ratio"]/self.ploidy
+            if self.delly_CNAs is not None:
+                self.CNAs=read_cna_delly(self.delly_CNAs)
+            
+            if self.df_ratios is None:
+                if self.CNAs is None:
+                    raise KnownException("Please provide input files for the copynumber track.")
+                else:
+                    self.df_segments = read_cnsegments_CNAs(self.CNAs,round_cn=self.round_cn, chr_lengths=self.chr_lengths, ploidy=self.ploidy)
 
         self.kwargs=kwargs
         
@@ -82,6 +127,15 @@ class copynumber_track:
             else: self.yticks_freq*=2
         self.yticks_freq=int(self.yticks_freq)
 
+        if self.df_ratios is None:
+            if self.input_type=="freec":
+                warnings.append("Only a CNA file was provided for the copynumber track. Figeno will plot segments corresponding to CNAs, and assume "\
+                                "that all other positions have a copy number equal to the ploidy. It is recommended to also provide a ratios file, "\
+                                "which indicates the copy number of each bin, whether it is in a CNA or not.")
+            elif self.input_type=="delly":
+                warnings.append("Only a CNA file was provided for the copynumber track. Figeno will plot segments corresponding to CNAs, and assume "\
+                                "that all other positions have a copy number equal to the ploidy. It is recommended to also provide a copy number file, "\
+                                "which indicates the copy number of each bin, whether it is in a CNA or not.")
 
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
@@ -106,10 +160,11 @@ class copynumber_track:
         x_converted=[]
         y_converted=[]
         for i in df_ratios_reg.index:
-            cn = bin2CNV_freec(self.CNAs,region.chr,df_ratios_reg.loc[i,"Start"],ploidy=self.ploidy)
-            if cn>self.ploidy:
+            if self.CNAs is not None: cn = bin2CNV_freec(self.CNAs,region.chr,df_ratios_reg.loc[i,"Start"],ploidy=self.ploidy)
+            else: cn=df_ratios_reg.loc[i,"Ratio"]*self.ploidy
+            if cn>=self.ploidy+0.5:
                 colors.append(self.color_gain)
-            elif cn<self.ploidy:
+            elif cn<=self.ploidy-0.5:
                 colors.append(self.color_loss)
             else:
                 colors.append(self.color_normal)
@@ -132,7 +187,7 @@ class copynumber_track:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:
-                    raise Exception("Must provide a gene file.")
+                    raise KnownException("Please provide a genes file, if you want to higlight genes in the copy number track (this genes file is only required if you use a custom reference).")
             else:
                 transcripts = read_transcripts(self.genes_file,gene_names=self.genes)
             for transcript in transcripts:
@@ -172,10 +227,22 @@ class copynumber_track:
             else:
                 start = box["right"] - (box["right"]-box["left"]) * (df_segments_reg.loc[x,"start"]-region.start) / (region.end-region.start)
                 end = box["right"] - (box["right"]-box["left"]) * (df_segments_reg.loc[x,"end"]-region.start) / (region.end-region.start)
-            if end-start<0.5:
-                s = 0.5-end+start
-                start = start-s/2
-                end = end+s/2
+
+            # Ensure the segments are not too narrow
+            width=abs(end-start)
+            if "projection" in box and box["projection"]=="polar":
+                min_width=3.14/300
+                if width<min_width:
+                    s=min_width-width
+                    start= start - s*(1-2*(region.orientation=="-"))
+                    end= end+s*(1-2*(region.orientation=="-"))
+            else:
+                min_width=0.5
+                if width<min_width:
+                    s=min_width-width
+                    start= start - s*(1-2*(region.orientation=="-"))
+                    end= end+s*(1-2*(region.orientation=="-"))
+
             if box["left"]<box["right"]:
                 start = min(box["right"],max(box["left"],start))
                 end = min(box["right"],max(box["left"],end))
@@ -184,7 +251,7 @@ class copynumber_track:
                 end = max(box["right"],min(box["left"],end))
             cn = df_segments_reg.loc[x,"copyNumber"]
             y = box["bottom"] + (box["top"]-box["bottom"]) * (cn-self.min_cn) / (self.max_cn-self.min_cn)
-            rect_width = min(10,(box["top"]-box["bottom"]) /10 /  (self.max_cn-self.min_cn))
+            rect_width = min(10,(box["top"]-box["bottom"]) * self.marker_size/0.7 /10 /  (self.max_cn-self.min_cn))
             if self.round_cn: cn = round(cn)
             vertices = [(start,y-rect_width) , (start,y+rect_width) , (end,y+rect_width) , (end, y-rect_width)]
             if "projection" in box and box["projection"]=="polar":
@@ -199,7 +266,7 @@ class copynumber_track:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
                         transcripts = read_transcripts(infile,gene_names=self.genes)
                 else:
-                    raise Exception("Must provide a gene file.")
+                    raise KnownException("Please provide a genes file, if you want to higlight genes in the copy number track (this genes file is only required if you use a custom reference).")
             else:
                 transcripts = read_transcripts(self.genes_file,gene_names=self.genes)
             for transcript in transcripts:
@@ -272,17 +339,32 @@ class copynumber_track:
                 max_cn = max(max_cn,np.max(df_segments_reg["copyNumber"]))
         return (min_cn-0.2,max_cn*1.05+0.2)
 
-def read_cna_freec(cna_freec_filename,return_type=False):
+def read_cna_freec(cna_freec_filename):
     CNAs={}
     with open(cna_freec_filename,"r") as infile:
         for line in infile:
             linesplit = line.rstrip("\n").split("\t")
+            if len(linesplit)<4: raise KnownException("Invalid format for freec CNA file "+cna_freec_filename+". "\
+                                                      "Must be tab-separated with at least 4 columns (without header): "\
+                                                      "chr, start, end, copy_number.")
             chr = linesplit[0].lstrip("chr")
             if not chr in CNAs: CNAs[chr] = []
-            if return_type:
-                CNAs[chr].append((int(linesplit[1]),int(linesplit[2]),linesplit[4]))
-            else:
-                CNAs[chr].append((int(linesplit[1]),int(linesplit[2]),int(linesplit[3])))
+            CNAs[chr].append((int(linesplit[1]),int(linesplit[2]),float(linesplit[3])))
+    return CNAs
+
+def read_cna_delly(cna_delly_filename):
+    CNAs={}
+    with open(cna_delly_filename,"r") as infile:
+        for line in infile:
+            linesplit = line.rstrip("\n").split("\t")
+            if len(linesplit)<4: raise KnownException("Invalid format for delly CNA file "+cna_delly_filename+". "\
+                                                      "Must be tab-separated with 4 or 5 columns (without header): "\
+                                                      "chr, start, end, ID (optional), copy_number.")
+            chr = linesplit[0].lstrip("chr")
+            if not chr in CNAs: CNAs[chr] = []
+            if len(linesplit)==4: cn=float(linesplit[3])
+            else: cn=float(linesplit[4])
+            CNAs[chr].append((int(linesplit[1]),int(linesplit[2]),cn))
     return CNAs
 
 def bin2CNV_freec(CNAs,chr,start,ploidy):
@@ -297,6 +379,10 @@ def bin2CNV_freec(CNAs,chr,start,ploidy):
 def read_cnsegments_purple(purple_cn_filename):
     df_segments_cn = pd.read_csv(purple_cn_filename,sep="\t",dtype={"chromosome":str})
     df_segments_cn["chromosome"] = [x.lstrip("chr") for x in df_segments_cn["chromosome"] ]
+    if (not "chromosome" in df_segments_cn.columns) or (not "start" in df_segments_cn.columns) or (not "end" in df_segments_cn.columns) \
+    or (not "copyNumber" in df_segments_cn.columns):
+        raise KnownException("Invalid format for purple copy number file: "+str(purple_cn_filename)+". Must be a tsv file, with at least the following columns: "\
+                             "chromosome, start, end, copyNumber (and optionally baf and bafCount to show CNLOH).")
     return df_segments_cn
 
 def read_cnsegments_CNAs(CNAs,round_cn=False,chr_lengths={},ploidy=2):

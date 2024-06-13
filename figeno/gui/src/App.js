@@ -79,7 +79,7 @@ export default function App() {
       const colors=["#98671F","#65661B","#969833","#CE151D","#FF1A25","#FF0BC8","#FFCBCC","#FF9931","#FFCC3A","#FCFF44","#C4FF40","#00FF3B",
         "#2F7F1E","#2800C6","#6A96FA","#98CAFC","#00FEFD","#C9FFFE","#9D00C6","#D232FA","#956DB5","#5D5D5D","#989898","#CBCBCB"];
         for (let i = 0; i < chromosomes.length; i++) {
-            regions.push({id:uuid4(),"chr":chromosomes[i].toString(),"start":"","end":"",color:colors[(i-1)%colors.length]});
+            regions.push({id:uuid4(),"chr":chromosomes[i].toString(),"start":"","end":"",color:colors[i%colors.length]});
         }
       setRegionsList(regions);
   }
@@ -192,6 +192,20 @@ export default function App() {
           delete t.min_splitreads_breakpoints;
         }
         
+      }
+      else if (t.type=="copynumber"){
+        if (t.input_type!="freec"){
+          if (t.hasOwnProperty("freec_ratios")) delete t.freec_ratios;
+          if (t.hasOwnProperty("freec_CNAs")) delete t.freec_CNAs;
+        }
+        if (t.input_type!="purple"){
+          if (t.hasOwnProperty("purple_cn")) delete t.purple_cn;
+          if (t.hasOwnProperty("color_cnloh")) delete t.color_cnloh;
+        }
+        if (t.input_type!="delly"){
+          if (t.hasOwnProperty("delly_cn")) delete t.delly_ratios;
+          if (t.hasOwnProperty("delly_CNAs")) delete t.delly_CNAs;
+        }
       }
       delete t.id;
       tracks_out.push(t);
