@@ -64,6 +64,11 @@ class hic_track:
         max_bindist=self.max_dist//resolution /2
         n = len(regions)
 
+        self.balanced= "weight" in c.bins()[:].columns
+        if not self.balanced:
+            warnings.append("No balancing weights were found for file "+self.file+". Figeno will show the raw, unnormalized data. If you want to show normalized data, please run: \"cooler balance "+self.file+"\" and re-generate the figure."\
+                            " See https://cooler.readthedocs.io/en/latest/cli.html#cooler-balance for more information and options.")
+
         angle = self.find_angle(regions,boxes,max_bindist)
         
 
@@ -125,7 +130,7 @@ class hic_track:
                             start2 = region2.start - right_offset *resolution
 
                 #start1,end1,left_offset = region1.start, region1.end,0
-                mat = c.matrix(balance=True).fetch(region1.chr+":"+str(start1)+"-"+str(end1),
+                mat = c.matrix(balance=self.balanced).fetch(region1.chr+":"+str(start1)+"-"+str(end1),
                                                 region2.chr+":"+str(start2)+"-"+str(end2))
                 mat[np.isnan(mat)]=0
                 if region1.orientation=="-": mat = mat[::-1,:]
@@ -222,7 +227,7 @@ class hic_track:
             for b in range(a,len(regions)):
                 if (not self.interactions_across_regions) and a!=b: continue
                 region1,region2 = correct_region_chr(regions[a],c.chromnames), correct_region_chr(regions[b],c.chromnames,file=self.file)
-                mat = c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end),
+                mat = c.matrix(balance=self.balanced).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end),
                                                 region2.chr+":"+str(region2.start)+"-"+str(region2.end))
                 mat[np.isnan(mat)]=0
                 if a!=b and self.double_interactions_across_regions: mat = 1+2*mat
@@ -237,9 +242,11 @@ class hic_track:
         if boxes[0]["left"]>boxes[0]["right"]: min_angle=-100
         for a in range(len(regions)):
             region1 = correct_region_chr(regions[a],c.chromnames,file=self.file)
+            if not region1.chr in c.chromnames: raise KnownException("Could not find chromosome "+region1.chr+" in the .cool file. Please make sure that you specified the correct chromosome name (the chr prefix can be omitted). "\
+                                                                     "Only the following chromosome names were found in the .cool file: "+", ".join(c.chromnames))
             box1 = boxes[a]
             try:
-                mat = 1+c.matrix(balance=True).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end))
+                mat = 1+c.matrix(balance=self.balanced).fetch(region1.chr+":"+str(region1.start)+"-"+str(region1.end))
             except ValueError:
                 raise KnownException("Could not retrieve region "+region1.chr+":"+str(region1.start)+"-"+str(region1.end)+" in file "+self.file+"."\
                                      " Make sure that the region that you specified does not extend beyond the chromosome length, and that you did not subset your .cool file.")

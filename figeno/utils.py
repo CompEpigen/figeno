@@ -14,6 +14,8 @@ def correct_region_chr(region,chromosomes,file=""):
         return region
     elif "chr"+region.chr in chromosomes:
         return Region("chr"+region.chr,region.start,region.end,region.orientation,region.color)
+    elif "Chr"+region.chr in chromosomes:
+        return Region("Chr"+region.chr,region.start,region.end,region.orientation,region.color)
     elif region.chr.lstrip("chr") in chromosomes:
         return Region(region.chr.lstrip("chr"),region.start,region.end,region.orientation,region.color)
     else: 

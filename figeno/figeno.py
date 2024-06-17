@@ -89,7 +89,7 @@ class tracks_plot:
                 for s in config["regions"]:
                     if not "chr" in s: raise KnownException("Please provide at least the chromosome for each region (and optionally the start and end coordinates, otherwise figeno will assume than the region spans the whole chromosome).")
                     if s["chr"]=="" or s["chr"]=="chr" or s["chr"] is None: raise KnownException("Please provide at least the chromosome for each region (and optionally the start and end coordinates, otherwise figeno will assume than the region spans the whole chromosome).")
-                    chr = str(s["chr"]).lstrip("chr")
+                    chr = str(s["chr"]).lstrip("chr").lstrip("Chr")
                     orientation = s["orientation"] if "orientation" in s else "+"
 
                     if "start" in s and (s["start"] is not None) and (s["start"]!=""): 
