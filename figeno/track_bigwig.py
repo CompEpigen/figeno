@@ -7,7 +7,7 @@ import pandas as pd
 from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
-    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,group=None,label="",label_rotate=False,fontscale=1,
                  bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None: raise KnownException("Please provide a file for the bigwig track.")
         if (not file.startswith("http")) and not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
@@ -24,10 +24,9 @@ class bigwig_track:
         self.label_rotate=label_rotate
         self.scale = scale
         self.scale_max= scale_max
+        self.group=group
         self.upside_down=upside_down
-        if self.scale_max is not None: self.scale_max=float(self.scale_max)
         self.scale_pos = scale_pos
-        if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
         self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
         self.height = float(height)
@@ -36,22 +35,24 @@ class bigwig_track:
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         # Assign bins to regions depending on their sizes
-        total_length_regions = np.sum([abs(reg[0].end-reg[0].start) for reg in regions])
-        bins_regions = [max(1,int(self.n_bins/total_length_regions * abs(reg[0].end-reg[0].start))) for reg in regions]
+        bins_regions = self.compute_bins(regions)
         # Autoscale across all regions
-        if self.scale=="auto": self.scale_max = self.compute_max_regions(regions,bins_regions)
+        #if self.scale=="auto": self.scale_max = self.compute_max_regions(regions,bins_regions)
 
-        if self.scale=="custom" and isinstance(self.scale_max,str) and "," in self.scale_max:
-            scale_max_regions = [float(x) for x in self.scale_max.split(",")]
-        else:
-            scale_max_regions=None
+        #if self.scale=="custom" and isinstance(self.scale_max,str) and "," in self.scale_max:
+        #    scale_max_regions = [float(x) for x in self.scale_max.split(",")]
+        #else:
+        #    scale_max_regions=None
 
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             show_scale_inside = self.scale_pos=="corner all" or (self.scale_pos=="corner" and i==0)
-            if scale_max_regions is not None:
-                self.scale_max = scale_max_regions[i]
-            self.draw_region(regions[i][0],boxes[i],nbins=bins_regions[i],show_scale_inside=show_scale_inside)
+            if i<len(self.scale_max): scale_max_region=self.scale_max[i]
+            else: 
+                scale_max_region=self.scale_max[0]
+                if len(self.scale_max)>1: warnings.append("You provided only "+str(len(self.scale_max))+" values for scale_max, even though "+str(len(regions))+" were used. "\
+                                                            "The first scale_max parameter will be used for all regions for which no scale_max value was provided.")
+            self.draw_region(regions[i][0],boxes[i],scale_max=scale_max_region,nbins=bins_regions[i],show_scale_inside=show_scale_inside)
         self.draw_title(box)
 
         for x in self.kwargs:
@@ -59,7 +60,7 @@ class bigwig_track:
 
 
 
-    def draw_region(self,region,box,nbins,show_scale_inside):
+    def draw_region(self,region,box,scale_max,nbins,show_scale_inside):
         if self.bounding_box: draw_bounding_box(box)
 
         region = correct_region_chr(region,self.bw.chroms())
@@ -70,9 +71,8 @@ class bigwig_track:
         
         rect_width = (box["right"] - box["left"]) / nbins
 
-        if self.scale=="auto per region": self.scale_max = np.max(values_binned) * 1.1
-        if self.scale_max<=0: self.scale_max=0.001
-        values_binned = [max(min(self.scale_max,x),0) for x in values_binned]
+        if scale_max<=0: scale_max=0.001
+        values_binned = [max(min(scale_max,x),0) for x in values_binned]
         
         if not self.upside_down:
             polygon_vertices=[(box["right"],box["bottom"]) , (box["left"],box["bottom"])]
@@ -81,9 +81,9 @@ class bigwig_track:
         for i in range(nbins):
             x=box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
             if not self.upside_down:
-                y= box["bottom"] + values_binned[i]/self.scale_max * (box["top"]-box["bottom"])
+                y= box["bottom"] + values_binned[i]/scale_max * (box["top"]-box["bottom"])
             else:
-                y= box["top"] - values_binned[i]/self.scale_max * (box["top"]-box["bottom"])
+                y= box["top"] - values_binned[i]/scale_max * (box["top"]-box["bottom"])
             polygon_vertices.append((x,y))
         if "projection" in box and box["projection"]=="polar":
             polygon_vertices = interpolate_polar_vertices(polygon_vertices)
@@ -92,7 +92,7 @@ class bigwig_track:
 
 
         if show_scale_inside and ((not "projection" in box) or box["projection"]!="polar"):
-            upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+            upperlimit_string = "{:.1f}".format(scale_max) if scale_max>=1 else "{:.2f}".format(scale_max)
             lowerlimit_string = "0" 
             label="["+lowerlimit_string+"-"+upperlimit_string+"]"
             box["ax"].text(box["left"]+0.05,box["top"]-0.02,label,horizontalalignment="left",verticalalignment="top",fontsize=6*self.fontscale)
@@ -109,10 +109,10 @@ class bigwig_track:
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=10*self.fontscale)
             if self.scale_pos=="left":
                 if not self.upside_down:
-                    upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                    upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
                     lowerlimit_string = "0" 
                 else:
-                    lowerlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                    lowerlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
                     upperlimit_string = "0" 
                 x,y= polar2cartesian((box["left"],box["top"]))
                 theta,r = cartesian2polar((x-0.2,y))
@@ -130,7 +130,7 @@ class bigwig_track:
                 box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             if self.scale_pos=="left":
-                upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
                 lowerlimit_string = "0" 
                 if not self.upside_down:
                     box["ax"].text(box["left"] - 0.5,box["top"],
@@ -143,14 +143,24 @@ class bigwig_track:
                     box["ax"].text(box["left"] - 0.5,box["bottom"],
                                 upperlimit_string,horizontalalignment="right",verticalalignment="bottom",fontsize=6*self.fontscale)
     
-    def compute_max_regions(self,regions,bins):
+    
+    def compute_bins(self,regions):
+        total_length_regions = np.sum([abs(reg[0].end-reg[0].start) for reg in regions])
+        return [max(1,int(self.n_bins/total_length_regions * abs(reg[0].end-reg[0].start))) for reg in regions]
+
+    def compute_max(self,regions,per_region=False):
+        bins = self.compute_bins(regions)
+        l=[]
         m=0
         for i in range(len(regions)):
+            if per_region: m=0
             reg = regions[i][0]
             region = correct_region_chr(reg,self.bw.chroms())
             if region.end>self.bw.chroms()[region.chr]:
                 raise KnownException("The region "+region.chr+":"+str(region.start)+"-"+str(region.end)+" has coordinates greater than the chromosome length ("+str(self.bw.chroms()[region.chr])+") in the bigwig file "+self.filename)
             values_binned=self.bw.stats(region.chr,region.start,region.end,nBins=bins[i],exact=True,type="mean")
             values_binned = [x if x is not None else 0 for x in values_binned]
-            m=max(m,np.max(values_binned)*1.1)
-        return m
+            m = max(m,np.max(values_binned)*1.1)
+            if per_region: l.append(m)
+        if not per_region: l.append(m)
+        return l

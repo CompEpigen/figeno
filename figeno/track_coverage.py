@@ -8,7 +8,7 @@ import pandas as pd
 from figeno.utils import KnownException, correct_region_chr, split_box, draw_bounding_box
 
 class coverage_track:
-    def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",upside_down=False,label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,color="gray",scale="auto",scale_max=None,scale_pos="corner",group=None,upside_down=False,label="",label_rotate=False,fontscale=1,
                            vcf=None,SNP_colors="auto",exchange_haplotypes=False,bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None:
             raise KnownException("Please provide a bam file for the coverage track.")
@@ -28,9 +28,8 @@ class coverage_track:
         self.fontscale=float(fontscale)
         self.scale = scale
         self.scale_max = scale_max
-        if self.scale_max is not None: self.scale_max=float(self.scale_max)
+        self.group=group
         self.scale_pos = scale_pos
-        if scale=="auto per region": self.scale_pos = "corner all" # If each region has its own scale, we cannot use one global label for the whole track
         self.upside_down= upside_down
         self.vcf = vcf
         self.SNP_colors=SNP_colors
@@ -44,11 +43,15 @@ class coverage_track:
         
 
     def draw(self, regions, box ,hmargin,warnings=[]):
-        if self.scale=="auto": self.scale_max = self.compute_max_regions(regions)
         boxes = split_box(box,regions,hmargin)
         for i in range(len(regions)):
             show_scale_inside = self.scale_pos=="corner all" or (self.scale_pos=="corner" and i==0)
-            self.draw_region(regions[i][0],boxes[i],show_scale_inside=show_scale_inside)
+            if i<len(self.scale_max): scale_max_region=self.scale_max[i]
+            else: 
+                scale_max_region=self.scale_max[0]
+                if len(self.scale_max)>1: warnings.append("You provided only "+str(len(self.scale_max))+" values for scale_max, even though "+str(len(regions))+" were used. "\
+                                                            "The first scale_max parameter will be used for all regions for which no scale_max value was provided.")
+            self.draw_region(regions[i][0],boxes[i],scale_max=scale_max_region,show_scale_inside=show_scale_inside)
         self.draw_title(box)
 
         for x in self.kwargs:
@@ -56,7 +59,7 @@ class coverage_track:
 
         if not self.atleast_one_region_has_coverage: warnings.append("The coverage was null for all displayed regions in the bam file "+self.filename+".")
 
-    def draw_region(self,region,box,show_scale_inside):
+    def draw_region(self,region,box,scale_max,show_scale_inside):
         region = correct_region_chr(region,self.samfile.references)
         if self.bounding_box: draw_bounding_box(box)
         coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
@@ -67,8 +70,6 @@ class coverage_track:
         
         max_coverage = np.max(coverage_bin) * 1.1
         if max_coverage>=1: self.atleast_one_region_has_coverage=True
-        if max_coverage<1 or max_coverage!=max_coverage: max_coverage=1
-        if self.scale=="auto per region": self.scale_max=max_coverage
         rect_width = (box["right"] - box["left"]) / len(coverage_bin)
 
 
@@ -81,9 +82,9 @@ class coverage_track:
             rect_left = box["left"] + i*rect_width
 
             if region.orientation=="+":
-                rect_height = coverage_bin[i]/self.scale_max * (box["top"]-box["bottom"])
+                rect_height = coverage_bin[i]/scale_max * (box["top"]-box["bottom"])
             else:
-                rect_height = coverage_bin[len(coverage_bin)-1-i]/self.scale_max * (box["top"]-box["bottom"])
+                rect_height = coverage_bin[len(coverage_bin)-1-i]/scale_max * (box["top"]-box["bottom"])
             #rect = patches.Rectangle((rect_left,box["bottom"]),
             #                        rect_width,rect_height,color=self.color,lw=0.2,zorder=1)  
             #box["ax"].add_patch(rect)
@@ -105,7 +106,7 @@ class coverage_track:
         box["ax"].add_patch(polygon)
 
         if show_scale_inside:
-            upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+            upperlimit_string = "{:d}".format(int(scale_max))
             lowerlimit_string = "0"
             label="["+lowerlimit_string+"-"+upperlimit_string+"]"
             box["ax"].text(box["left"]+0.05,box["top"]-0.02,label,horizontalalignment="left",verticalalignment="top",fontsize=6*self.fontscale)
@@ -119,21 +120,23 @@ class coverage_track:
                         self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
         if self.scale_pos=="left":
             if not self.upside_down:
-                upperlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                upperlimit_string = "{:d}".format(int(self.scale_max[0]))
                 lowerlimit_string = "0" 
             else:
-                lowerlimit_string = "{:.1f}".format(self.scale_max) if self.scale_max>=1 else "{:.2f}".format(self.scale_max)
+                lowerlimit_string = "{:d}".format(int(self.scale_max[0]))
                 upperlimit_string = "0" 
             box["ax"].text(box["left"] - 0.5,box["top"],
                         upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
             box["ax"].text(box["left"] - 0.5,box["bottom"],
                         lowerlimit_string,horizontalalignment="right",verticalalignment="bottom",fontsize=6*self.fontscale)
-        
 
-    def compute_max_regions(self,regions):
-        max_cov=0
-        for region in regions:
-            reg = region[0]
+
+    def compute_max(self,regions,per_region=False):
+        l=[]
+        max_cov=1
+        for i in range(len(regions)):
+            if per_region: max_cov=1
+            reg = regions[i][0]
             region = correct_region_chr(reg,self.samfile.references)
             coverage=np.sum(self.samfile.count_coverage(region.chr,region.start,region.end),axis=0)
             coverage=np.nan_to_num(coverage,nan=0)
@@ -145,11 +148,9 @@ class coverage_track:
                 if new_value==new_value:coverage_bin.append(new_value)
                 coverage_bin+= []
             max_cov=max(max_cov,np.max(coverage_bin) * 1.1)
-        if max_cov<1 or max_cov!=max_cov: max_cov=1
-        return round(max_cov)
-
-
-
-
+            if max_cov<1 or max_cov!=max_cov: max_cov=1
+            if per_region: l.append(round(max_cov))
+        if not per_region: l.append(round(max_cov))
+        return l
 
 

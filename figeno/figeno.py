@@ -316,6 +316,9 @@ class tracks_plot:
         if max_size>100*min_size:
             warnings.append("You used regions with very different sizes, so the smaller regions may not be visible.")
 
+        # Check if group autoscale was used, in which case compute them.
+        self.compute_scales()
+
         if self.figure_layout=="horizontal": 
             self.draw_horizontal(**self.output,warnings=warnings)
         elif self.figure_layout=="stacked":
@@ -506,6 +509,55 @@ class tracks_plot:
         plt.cla() 
         plt.clf() 
         plt.close('all')
+
+    def compute_scales(self):
+        self.compute_scales_instance(bigwig_track,"bigwig")
+        self.compute_scales_instance(coverage_track,"coverage")
+
+    def compute_scales_instance(self,instance=bigwig_track,instance_name="bigwig"):
+        group2scales={}
+        group2scaletype={}
+        for t in self.tracks_list:
+            if isinstance(t,instance):
+                if t.scale=="custom":
+                    if t.scale_max=="": t.scale_max=None
+                    if t.scale_max is None: raise KnownException("Please provide the scale_max parameter if you use a custom scale.")
+                    if isinstance(t.scale_max,str) and "," in t.scale_max:
+                        try:t.scale_max=[float(x) for x in t.scale_max.split(",")]
+                        except: raise KnownException("The scale_max parameter in a "+instance_name+" track should be a number (or a list of numbers separated by commas): "+str(self.scale_max))
+                    else:
+                        try: t.scale_max=[float(t.scale_max)]
+                        except: raise KnownException("The scale_max parameter in a "+instance_name+" track should be a number: "+str(self.scale_max))
+                elif t.scale=="auto":
+                    t.scale_max=t.compute_max(self.regions,per_region=False)
+                elif t.scale=="group auto":
+                    if not hasattr(t,"group"): raise KnownException("Please provide the group parameter, if you use the group auto scale.")
+                    maximum=t.compute_max(self.regions,per_region=False)
+                    if t.group in group2scaletype:
+                        if group2scaletype[t.group]!="group auto": raise KnownException("Please use the same scale (group auto or group auto per region) for all bigwig tracks of the same group.")
+                    else: group2scaletype[t.group]="group auto"
+                    if t.group in group2scales: group2scales[t.group] = max(maximum,group2scales[t.group])
+                    else: group2scales[t.group] = maximum
+                elif t.scale=="auto per region":
+                    t.scale_max= t.compute_max(self.regions,per_region=True)
+                elif t.scale=="group auto per region":
+                    if not hasattr(t,"group"): raise KnownException("Please provide the group parameter, if you use the group auto per region scale.")
+                    if t.group in group2scaletype:
+                        if group2scaletype[t.group]!="group auto per region": raise KnownException("Please use the same scale (group auto or group auto per region) for all bigwig tracks of the same group.")
+                    else: group2scaletype[t.group]="group auto per region"
+                    maxima=t.compute_max(self.regions,per_region=True)
+                    if t.group in group2scales: group2scales[t.group] = [max(group2scales[t.group][i],maxima[i]) for i in range(len(maxima))]
+                    else: group2scales[t.group] = maxima
+                else:
+                    raise KnownException("Invalid scale for "+instance_name+" track: "+str(t.scale)+". Must be auto, auto per region, group auto, group auto per region, or custom.")
+
+        for t in self.tracks_list:
+            if isinstance(t,instance):
+                if t.scale=="group auto" or t.scale=="group auto per region":
+                    t.scale_max=group2scales[t.group]
+                if len(t.scale_max)>1 and t.scale_pos!="none": t.scale_pos="corner all"
+                
+
 
 def figeno_make(config=None,config_file=None,warnings=[]):
     if config is None and config_file is None: raise Exception("ERROR: a config or a config_file is required for figeno_make.")

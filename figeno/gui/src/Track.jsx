@@ -244,7 +244,9 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                     <label htmlFor={"scale"+track.id}>Scale:</label>
                     <select id={"scale"+track.id} value={track.scale} onChange={(e) =>{set_value("scale",e.target.value)}}> 
                                 <option className="dropDownOption" key="auto" value="auto">auto</option>
+                                <option className="dropDownOption" key="group auto" value="group auto">group auto</option>
                                 <option className="dropDownOption" key="auto per region" value="auto per region">auto per region</option>
+                                <option className="dropDownOption" key="group auto per region" value="group auto per region">group auto per region</option>
                                 <option className="dropDownOption" key="custom"  value="custom">custom</option>
                     </select>
                 </div>
@@ -254,6 +256,13 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                     <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
                 </div>):""
                 }
+                {(track.scale=="group auto" || track.scale=="group auto per region")?(
+                    <div className='formItem'>
+                    <label htmlFor={"group"+track.id}>Group:</label>
+                    <input id={"group"+track.id} style={{width:"3em"}} value={track.group} onChange={(e) => set_value("group",e.target.value)} ></input>
+                </div>):""
+                }
+
                 <div className='formItem'>
                     <label htmlFor={"scale_pos"+track.id}>Scale pos:</label>
                     <select id={"scale_pos"+track.id} value={track.scale_pos} onChange={(e) =>{set_value("scale_pos",e.target.value)}}> 
@@ -294,7 +303,9 @@ function CoverageTrack({track,set_value,openColorPanel, setFileDialogData,setFil
                     <label htmlFor={"scale"+track.id}>Scale:</label>
                     <select id={"scale"+track.id} value={track.scale} onChange={(e) =>{set_value("scale",e.target.value)}}> 
                                 <option className="dropDownOption" key="auto" value="auto">auto</option>
+                                <option className="dropDownOption" key="group auto" value="group auto">group auto</option>
                                 <option className="dropDownOption" key="auto per region" value="auto per region">auto per region</option>
+                                <option className="dropDownOption" key="group auto per region" value="group auto per region">group auto per region</option>
                                 <option className="dropDownOption" key="custom"  value="custom">custom</option>
                     </select>
                 </div>
@@ -302,6 +313,12 @@ function CoverageTrack({track,set_value,openColorPanel, setFileDialogData,setFil
                     <div className='formItem'>
                     <label htmlFor={"scale_max"+track.id}>Max:</label>
                     <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
+                </div>):""
+                }
+                {(track.scale=="group auto" || track.scale=="group auto per region")?(
+                    <div className='formItem'>
+                    <label htmlFor={"group"+track.id}>Group:</label>
+                    <input id={"group"+track.id} style={{width:"3em"}} value={track.group} onChange={(e) => set_value("group",e.target.value)} ></input>
                 </div>):""
                 }
                 <div className='formItem'>

@@ -22,6 +22,7 @@ def correct_region_chr(region,chromosomes,file=""):
         error_message="Could not find chromosome "+region.chr
         if file!="": error_message+=" in file "+file+"."
         else: error_message+="."
+        error_message+=" Only the following chromosome names were found: "+", ".join(chromosomes)+" (the chr prefix can be omitted)."
         raise KnownException(error_message)
 
 def split_box(box,regions,hmargin):

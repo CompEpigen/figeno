@@ -158,12 +158,15 @@ export default function App() {
         t.bedmethyls = t.bedmethyls.map((b)=>{const newBed={...b};delete newBed.id; return newBed;})
       }
       else if (t.type=="bigwig" || t.type=="coverage"){
-        if (t.scale=="auto"){
+        if (t.scale!="custom"){
           delete t.scale_max;
+        }
+        if (t.scale!="group auto" && t.scale!="group auto per region"){
+          delete t.group;
         }
       }
       else if (t.type=="hic"){
-        if (t.scale=="auto"){
+        if (t.scale!="auto"){
           delete t.scale_min;
           delete t.scale_max;
         }

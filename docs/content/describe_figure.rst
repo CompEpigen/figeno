@@ -151,12 +151,18 @@ Parameters:
 * ``scale``: how the maximum value for the y-axis is chosen
 
   * ``auto`` (default): will select as maximum the maximum across all regions.
+
+  * ``group auto`` (default): will select as maximum the maximum across all regions, for all tracks in the same group (defined by the group parameter, see below).
   
   * ``auto per region``: will select as maximum the maximum of each region (so a different scale is used for each region)
+
+  * ``group auto per region``: will select as maximum the maximum of each region (so a different scale is used for each region), for all tracks in the same group (defined by the group parameter, see below).
   
   * ``custom``: manually specify the maximum value. Can either specify a single value, which will then be used for all regions, or a comma-separated list of values (one per region)
 
 * ``scale_max``: in case "scale" is "custom", indicate the maximum value for the y-axis.
+
+* ``group``: if "scale" is "group auto" or "group auto per region", all tracks with the same value for this parameter will be scaled together.
   
 * ``scale_pos``: where the scale (min and max value of the y-axis) will be displayed
 
@@ -218,12 +224,18 @@ Parameters:
 * ``scale``: how the maximum value for the y-axis is chosen
 
   * ``auto`` (default): will select as maximum the maximum across all regions.
+
+  * ``group auto`` (default): will select as maximum the maximum across all regions, for all tracks in the same group (defined by the group parameter, see below).
   
   * ``auto per region``: will select as maximum the maximum of each region (so a different scale is used for each region)
+
+  * ``group auto per region``: will select as maximum the maximum of each region (so a different scale is used for each region), for all tracks in the same group (defined by the group parameter, see below).
   
   * ``custom``: manually specify the maximum value. Can either specify a single value, which will then be used for all regions, or a comma-separated list of values (one per region)
-  
+
 * ``scale_max``: in case "scale" is "custom", indicate the maximum value for the y-axis.
+
+* ``group``: if "scale" is "group auto" or "group auto per region", all tracks with the same value for this parameter will be scaled together.
   
 * ``scale_pos``: where the scale (min and max value of the y-axis) will be displayed
 
