@@ -339,7 +339,8 @@ def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,colla
     else: infile =open(gff3_file,"r")
     for line in infile:
         if line.startswith("#"): continue 
-        linesplit = line.split("\t")
+        if line=="\n": continue
+        linesplit = line.rstrip("\n").split("\t")
         if len(linesplit)<9: raise KnownException("Wrong format for the genes file (there should be at least 9 columns per line).")
         
         if chr is not None and linesplit[0].lstrip("chr") != chr.lstrip("chr"): continue
@@ -427,7 +428,7 @@ def find_genecoord_wrapper(gene_name,reference,genes_file=None):
         if reference in ["hg19","hg38","mm10"]:
             
             with resources.as_file(resources.files(figeno.data) / (reference+"_genes.txt.gz")) as infile:
-                (chr,min_coord,max_coord) = find_genecoord_refseq(gene_name,infile)
+                (chr,min_coord,max_coord) = find_genecoord_refseq(gene_name,infile,custom_ref=False)
                 with resources.as_file(resources.files(figeno.data) / (reference+"_cytobands.tsv")) as infile2: #Ensure the end is smaller than the chr size.
                     chr_length=-1
                     with open(infile2,"r") as f:
@@ -452,7 +453,7 @@ def find_genecoord_wrapper(gene_name,reference,genes_file=None):
         else:
             return find_genecoord_refseq(gene_name,genes_file)
 
-def find_genecoord_refseq(gene_name,file=None):
+def find_genecoord_refseq(gene_name,file=None,custom_ref=True):
     chr=""
     min_coord=1e10
     max_coord=0
@@ -467,9 +468,11 @@ def find_genecoord_refseq(gene_name,file=None):
         if line.startswith("#"): continue 
         linesplit = line.split("\t")
         if linesplit[12].upper()==gene_name.upper():
-            chr=linesplit[2].lstrip("chr")
-            min_coord=min(min_coord,int(linesplit[4]))
-            max_coord=max(max_coord,int(linesplit[5]))
+            chr_tmp=linesplit[2].lstrip("chr")
+            if (not custom_ref) and (not "_" in chr_tmp): # avoid alternative contigs...
+                chr=linesplit[2].lstrip("chr")
+                min_coord=min(min_coord,int(linesplit[4]))
+                max_coord=max(max_coord,int(linesplit[5]))
 
     if chr!="":
         length=max_coord-min_coord
