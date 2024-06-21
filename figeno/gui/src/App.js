@@ -166,7 +166,7 @@ export default function App() {
         }
       }
       else if (t.type=="hic"){
-        if (t.scale!="auto"){
+        if (t.scale=="auto"){
           delete t.scale_min;
           delete t.scale_max;
         }
