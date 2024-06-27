@@ -48,7 +48,6 @@ class copynumber_track:
         self.color_gain=color_gain
         self.color_cnloh=color_cnloh
         self.genes = genes
-        if "," in self.genes: self.genes = self.genes.split(",")
         self.reference=reference
         self.genes_file=genes_file
         self.chr_lengths=chr_lengths

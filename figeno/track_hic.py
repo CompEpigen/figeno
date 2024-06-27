@@ -1,4 +1,5 @@
 import cooler
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -54,6 +55,14 @@ class hic_track:
         if self.file=="" or self.file is None:
             raise KnownException("Please provide a file for the hic track. This file must be in .cool format.")
         try:
+            if self.file.endswith(".mcool"):
+                f=h5py.File(self.file,'r')
+                resolutions=list(f["resolutions"].keys())
+                selected_resolution=resolutions[0]
+                warnings.append("You used a .mcool file without specifying the resolution ("+self.file+"), so the resolution was automatically set to "+str(selected_resolution)+". This .mcool file contains the following resolutions: "+\
+                                ", ".join([str(x) for x in resolutions])+". You can select the resolution by adding ::resolutions//"+str(selected_resolution)+" to the filename.")
+                self.file+="::resolutions//"+str(selected_resolution)
+               
             c=cooler.Cooler(self.file)
         except: 
             raise KnownException("Failed to open file for the hic track: "+self.file+".\nThis file must be in .cool format.\nIf you have data in .hic format,"\

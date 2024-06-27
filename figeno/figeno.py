@@ -421,6 +421,7 @@ class tracks_plot:
         self.update_total_width(width)
         self.update_regions_width_symmetrical()
         self.update_margins()
+        if len(self.regions)==1: warnings.append("The symmetrical layout is intended for displaying more than one region.")
 
         #for i in range(0,len(self.tracks_list)-1):
         #    if isinstance(self.tracks_list[i],sv_track) and isinstance(self.tracks_list[i+1],copynumber_track):
