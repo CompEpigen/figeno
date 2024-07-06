@@ -288,10 +288,10 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
             # Find transcript and gene names 
             gene_name,transcript_name = "",""
             for x in linesplit[8].split(";"):
-                if x.startswith(" gene_name"):
+                if x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
-                elif x.startswith(" transcript_name"):
+                elif x.lstrip(" ").startswith("transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
             if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
@@ -307,10 +307,10 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
             if (start is not None) and (end is not None) and (exon_start>end or exon_end < start):continue
             gene_name,transcript_name = "",""
             for x in linesplit[8].split(";"):
-                if x.startswith(" transcript_name"):
+                if x.lstrip(" ").startswith("transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
-                if x.startswith(" gene_name"):
+                if x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
             if (gene_names is not None) and (not gene_name in gene_names): continue
@@ -485,13 +485,16 @@ def find_genecoord_refseq(gene_name,file=None,custom_ref=True):
 def find_genecoord_gtf(gene_name,file):
     if file.endswith(".gz") : infile = gzip.open(file,"rt")
     else: infile =open(file,"r")
+    current_chr=""
+    current_start=-1
+    current_end=-1
 
     for line in infile:
         if line.startswith("#"): continue 
         linesplit = line.split("\t")
         if linesplit[2] in ["gene","miRNA_gene","rRNA_gene"]:
             for x in linesplit[8].split(";"):
-                if x.startswith(" gene_name"):
+                if x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     name = x[:x.find("\"")]
                     if gene_name.upper()==name.upper():
@@ -504,7 +507,26 @@ def find_genecoord_gtf(gene_name,file):
                         if start<=0: start=0
                         return (chr,start,end)
                     else: break
-    return ("",0,1)
+        if linesplit[2] in ["transcript"]:
+            for x in linesplit[8].split(";"):
+                if x.lstrip(" ").startswith("gene_name"):
+                    x = x[x.find("\"")+1:]
+                    name = x[:x.find("\"")]
+                    if gene_name.upper()==name.upper():
+                        chr=linesplit[0].lstrip("chr")
+                        start=int(linesplit[3])
+                        end=int(linesplit[4])
+                        length=end-start
+                        start-=max(10,int(0.05*length))
+                        end+=max(10,int(0.05*length))
+                        if start<=0: start=0
+                        if current_chr=="":
+                            current_chr,current_start,current_end=chr,start,end
+                        else:
+                            current_start=min(start,current_start)
+                            current_end=max(end,current_end)
+                    else: break
+    return (current_chr,current_start,current_end)
 
 def find_genecoord_gff3(gene_name,file):
     if file.endswith(".gz") : infile = gzip.open(file,"rt")
