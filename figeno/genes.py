@@ -179,7 +179,7 @@ def read_transcripts_names(file,gene_names):
 
       
 
-def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True,only_protein_coding=True):
+def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True,only_protein_coding=True,warnings=[]):
     """Wrapper depending on the file type"""
     if gene_names =="auto" or gene_names=="": gene_names = None
     if gene_names is not None: 
@@ -190,7 +190,7 @@ def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collaps
     elif file.endswith("gff3") or file.endswith("gff3.gz"):
         return read_genes_gff3(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding) 
     elif file.endswith("gtf") or file.endswith("gtf.gz"):
-        return read_genes_gtf(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding) 
+        return read_genes_gtf(file,chr,start,end,gene_names,collapsed=collapsed,only_protein_coding=only_protein_coding,warnings=warnings) 
     else:
         raise KnownException("The extension for genes file "+str(file)+" was not recognized. The filename must end with .txt(.gz) for RefSeq format, .gtf(.gz) for gtf or .gff3(.gz) for gff3.")
         
@@ -267,7 +267,7 @@ def read_genes_refseq(file,chr=None,start=None,end=None,gene_names=None,collapse
 
 
 
-def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True):
+def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collapsed=True,only_protein_coding=True,warnings=[]):
     if gene_names is not None: gene_names=gene_names.upper()
     transcripts={}
     name2exons={}
@@ -294,8 +294,16 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                 elif x.lstrip(" ").startswith("transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
+                elif transcript_name=="" and x.lstrip(" ").startswith("transcript_id"):
+                    x = x[x.find("\"")+1:]
+                    transcript_name = x[:x.find("\"")]
             if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
-            if only_protein_coding and (not "protein_coding" in linesplit[8]): continue
+            if only_protein_coding and (not "protein_coding" in linesplit[8]):
+                if ("gene_biotype" in linesplit[8]): continue
+                else: 
+                    warn_message="Could not filter for protein coding genes because this information was not provided in the gtf file."
+                    if not warn_message in warnings: warnings.append(warn_message) 
+                
             if collapsed: name = gene_name
             else: name=transcript_name
             transcript = Transcript(gene_name,linesplit[0].lstrip("chr"),transcript_start,transcript_end,transcript_orientation,[])
@@ -310,7 +318,10 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                 if x.lstrip(" ").startswith("transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
-                if x.lstrip(" ").startswith("gene_name"):
+                elif transcript_name=="" and x.lstrip(" ").startswith("transcript_id"):
+                    x = x[x.find("\"")+1:]
+                    transcript_name = x[:x.find("\"")]
+                elif x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
             if (gene_names is not None) and (not gene_name in gene_names): continue

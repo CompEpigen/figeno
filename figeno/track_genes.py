@@ -29,7 +29,7 @@ class genes_track:
     def draw(self, regions, box ,hmargin=0,warnings=[]):
         boxes = split_box(box,regions,hmargin)
         self.margin_between_genes = 1.5*np.sum([abs(r[0].end-r[0].start) for r in regions]) / abs(box["right"]-box["left"]) # in bp
-        lines_regions = self.read_transcripts_lines_regions(regions)
+        lines_regions = self.read_transcripts_lines_regions(regions,warnings=warnings)
         max_region_size=0
         for i in range(len(regions)):
             max_region_size=max(max_region_size,abs(regions[i][0].end-regions[i][0].start))
@@ -175,7 +175,7 @@ class genes_track:
                 box["ax"].text(box["left"] - 1.0,(box["top"]+box["bottom"])/2,
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
                 
-    def read_transcripts_lines_regions(self,regions):
+    def read_transcripts_lines_regions(self,regions,warnings=[]):
         regions = [reg[0] for reg in regions]
         lines_regions=[]
         max_nlines=0
@@ -188,7 +188,7 @@ class genes_track:
                     raise KnownException("When using a custom reference genome, you have to provide a genes file if you want to display a genes track. See https://figeno.readthedocs.io/en/latest/content/describe_figure.html#general for the format of this file.")
             else:
                 transcripts = read_transcripts(self.genes_file,region.chr,region.start,region.end,self.genes,
-                                               collapsed=self.collapsed,only_protein_coding=self.only_protein_coding)
+                                               collapsed=self.collapsed,only_protein_coding=self.only_protein_coding,warnings=warnings)
             
             # Assign transcripts to lines, so that they do not overlap
             transcripts= sorted(transcripts,key=lambda x:x.start)
