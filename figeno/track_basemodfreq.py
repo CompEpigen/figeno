@@ -10,7 +10,7 @@ import matplotlib.patches as patches
 
 #from figeno.genes import draw_genes, draw_genes_transcript
 #from figeno.plot_ase import draw_chr_axis
-from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box
+from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box, chr_to_int
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
@@ -302,10 +302,3 @@ def create_basemod_table_bedmethyl(mod,region,file,min_coverage=5):
 
     df = pd.DataFrame(d)
     return df
-
-
-
-
-
-
-

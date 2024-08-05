@@ -480,7 +480,7 @@ def find_genecoord_refseq(gene_name,file=None,custom_ref=True):
         linesplit = line.split("\t")
         if linesplit[12].upper()==gene_name.upper():
             chr_tmp=linesplit[2].lstrip("chr")
-            if (not custom_ref) or (not "_" in chr_tmp): # avoid alternative contigs...
+            if (custom_ref) or (not "_" in chr_tmp): # avoid alternative contigs...
                 chr=linesplit[2].lstrip("chr")
                 min_coord=min(min_coord,int(linesplit[4]))
                 max_coord=max(max_coord,int(linesplit[5]))

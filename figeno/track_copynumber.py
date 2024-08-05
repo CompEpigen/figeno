@@ -189,7 +189,7 @@ class copynumber_track:
             if self.genes_file is None or self.genes_file=="":
                 if self.reference in ["hg19","hg38","mm10"]:
                     with resources.as_file(resources.files(figeno.data) / (self.reference+"_genes.txt.gz")) as infile:
-                        transcripts = read_transcripts(infile,gene_names=self.genes)
+                        transcripts = read_transcripts(infile,chr=region.chr,start=region.start,end=region.end,gene_names=self.genes)
                 else:
                     raise KnownException("Please provide a genes file, if you want to higlight genes in the copy number track (this genes file is only required if you use a custom reference).")
             else:
