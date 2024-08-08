@@ -1,8 +1,6 @@
 import os
 import gzip
 import importlib_resources as resources
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import pathlib
 
 import figeno.data
@@ -11,172 +9,6 @@ from figeno.utils import KnownException
 from collections import namedtuple
 Transcript = namedtuple('Transcript', 'name chr start end strand exons')
 Gene = namedtuple('Gene', 'gene_id gene_name chr start end strand biotype')
-
-
-
-
-
-def read_transcript_name_gtf(gtf_file,gene_name,transcript_name=None):
-    """
-    Used for plotting.
-    """
-    exons=[]
-    if transcript_name is None:
-        if gene_name=="MECOM":
-            transcript_name = "MECOM-201"
-        else:
-            transcript_name = gene_name+"-001"
-    transcript_found=False
-    if gtf_file.endswith(".gz") : infile = gzip.open(gtf_file,"rt")
-    else: infile =open(gtf_file,"r")
-    for line in infile:
-        if line.startswith("#"): continue 
-        linesplit = line.split("\t")
-        if not "transcript_name \""+transcript_name+"\"" in linesplit[8]: continue
-        if linesplit[2]=="transcript":
-            chr = linesplit[0]
-            transcript_end=int(linesplit[4]) 
-            transcript_start = int(linesplit[3])
-            transcript_orientation = linesplit[6]
-            transcript_found=True
-        if linesplit[2]=="exon":
-            exons.append((int(linesplit[3]),int(linesplit[4])))
-    infile.close()
-    if not transcript_found: 
-        if transcript_name==gene_name+"-001":
-            return read_transcript_name_gtf(gtf_file,gene_name,gene_name+"-002")
-        return False
-    return Transcript(gene_name,chr,transcript_start,transcript_end,transcript_orientation,exons)
-
-
-def read_transcripts_region_gtf(gtf_file,chr,start,end,transcript_name=None):
-    gene_names=set()
-    gene_name2transcript={}
-    transcript2exons={}
-    transcript2infos={}
-
-    if gtf_file.endswith(".gz") : infile = gzip.open(gtf_file,"rt")
-    else: infile =open(gtf_file,"r")
-    for line in infile:
-        if line.startswith("#"): continue 
-        linesplit = line.split("\t")
-        
-        
-        if linesplit[0].lstrip("chr") != chr.lstrip("chr"): continue
-        if linesplit[2]=="gene":
-            gene_name = ""
-            filter_gene=False
-            for x in linesplit[8].split(";"):
-                if x.startswith(" gene_name"):
-                    x = x[x.find("\"")+1:]
-                    gene_name = x[:x.find("\"")]
-                if x.startswith(" gene_biotype"):
-                    x = x[x.find("\"")+1:]
-                    biotype = x[:x.find("\"")]
-                    if biotype!="protein_coding": filter_gene=True
-            if not filter_gene:
-                gene_names.add(gene_name)
-        elif linesplit[2]=="transcript":
-            transcript_end=int(linesplit[4]) 
-            transcript_start = int(linesplit[3])
-            if transcript_start>end or transcript_end < start:continue
-            transcript_orientation = linesplit[6]
-            # Find transcript and gene names 
-            gene_name,transcript_name = "",""
-            for x in linesplit[8].split(";"):
-                if x.startswith(" gene_name"):
-                    x = x[x.find("\"")+1:]
-                    gene_name = x[:x.find("\"")]
-                elif x.startswith(" transcript_name"):
-                    x = x[x.find("\"")+1:]
-                    transcript_name = x[:x.find("\"")]
-            transcript2infos[transcript_name] = Transcript(gene_name,chr,transcript_start,transcript_end,transcript_orientation,[])
-            if not transcript_name in transcript2exons: transcript2exons[transcript_name] = []
-            if not gene_name in gene_name2transcript:
-                gene_name2transcript[gene_name] = transcript_name
-            elif transcript_name.endswith("001"): gene_name2transcript[gene_name] = transcript_name
-            elif transcript_name.endswith("002") and (not gene_name2transcript[gene_name].endswith("001")): gene_name2transcript[gene_name] = transcript_name
-            
-        elif linesplit[2]=="exon":
-            exon_end=int(linesplit[4]) 
-            exon_start = int(linesplit[3])
-            if exon_start>end or exon_end < start:continue
-            transcript_name = ""
-            for x in linesplit[8].split(";"):
-                if x.startswith(" transcript_name"):
-                    x = x[x.find("\"")+1:]
-                    transcript_name = x[:x.find("\"")]
-            if not transcript_name in transcript2exons: transcript2exons[transcript_name] = []
-            transcript2exons[transcript_name].append((exon_start,exon_end))
-    infile.close()
-    if "MECOM" in gene_name2transcript: gene_name2transcript["MECOM"] = "MECOM-201"
-    result=[]
-    for gene_name in gene_names:
-        if not gene_name in gene_name2transcript: continue
-        transcript_name = gene_name2transcript[gene_name]
-        tx= transcript2infos[transcript_name]
-        exons = transcript2exons[transcript_name]
-        transcript = Transcript(tx.name,tx.chr,tx.start,tx.end,tx.strand,exons)
-        result.append(transcript)
-
-    return result
-
-
-def read_transcripts_region(file,chr,start,end,transcript_name=None):
-    transcripts=[]
-
-    if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath):
-        if file.name.endswith(".gz") : infile = gzip.open(file,"rt")
-        else: infile =open(file,"r")
-    elif file.endswith(".gz") : infile = gzip.open(file,"rt")
-    else: infile =open(file,"r")
-    for line in infile:
-        if line.startswith("#"): continue 
-        linesplit = line.split("\t")
-        
-        if linesplit[2].lstrip("chr") != chr.lstrip("chr"): continue
-        txStart = int(linesplit[4])
-        txEnd = int(linesplit[5])
-        if start<=txEnd and end>=txStart:
-            name=linesplit[12]
-            strand = linesplit[3]
-            exons=[]
-            exon_starts = linesplit[9].split(",")
-            exon_ends = linesplit[10].split(",")
-            exons = []
-            for i in range(len(exon_starts)-1):
-                exons.append((int(exon_starts[i]),int(exon_ends[i])))
-            transcripts.append(Transcript(name,chr,txStart,txEnd,strand,exons))
-    infile.close()
-    return transcripts
-
-def read_transcripts_names(file,gene_names):
-    transcripts=[]
-    genes_found=set()
-
-    if isinstance(file,pathlib.PosixPath) or isinstance(file,pathlib.WindowsPath):
-        if file.name.endswith(".gz") : infile = gzip.open(file,"rt")
-        else: infile =open(file,"r")
-    elif file.endswith(".gz") : infile = gzip.open(file,"rt")
-    else: infile =open(file,"r")
-    for line in infile:
-        if line.startswith("#"): continue 
-        linesplit = line.split("\t")
-        if linesplit[12] in gene_names and not linesplit[12] in genes_found:
-            genes_found.add(linesplit[12])
-            txStart = int(linesplit[4])
-            txEnd = int(linesplit[5])
-            name=linesplit[12]
-            strand = linesplit[3]
-            exons=[]
-            exon_starts = linesplit[9].split(",")
-            exon_ends = linesplit[10].split(",")
-            transcripts.append(Transcript(name,linesplit[2].lstrip("chr"),txStart,txEnd,strand,exons))
-    infile.close()
-    return transcripts
-
-
-
       
 
 def read_transcripts(file,chr=None,start=None,end=None,gene_names="auto",collapsed=True,only_protein_coding=True,warnings=[]):
@@ -324,7 +156,8 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                 elif x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
-            if (gene_names is not None) and (not gene_name in gene_names): continue
+            
+            if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
             if collapsed: name = gene_name
             else: name=transcript_name
             if not name in name2exons: name2exons[name] = []
