@@ -163,9 +163,14 @@ def main(args=None):
         logging.getLogger('werkzeug').disabled = True
     port=5000
     if args is not None: port = args.port
-    print("Starting server on http://localhost:"+str(port))
+    #print("Starting server on http://localhost:"+str(port))
     #webbrowser.open_new_tab('http://localhost:'+str(port)+'/')
-    app.run(debug=debug,port=port)
+    if args.host!="":
+        print("Starting server on "+args.host+":"+str(port))
+        app.run(debug=debug,port=port,host=args.host)
+    else:
+        print("Starting server on http://localhost:"+str(port))
+        app.run(debug=debug,port=port)
 
 if __name__=="__main__":
     main()
