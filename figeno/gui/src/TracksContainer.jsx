@@ -155,7 +155,8 @@ export const defaultTrackValues={
         color_dup:"#e55039",
         color_t2t:"#8e44ad",
         color_h2h:"#8e44ad",
-        color_trans:"#27ae60"
+        color_trans:"#27ae60",
+        min_sv_height:0.1
     },
     "copynumber":{
         height:"30",

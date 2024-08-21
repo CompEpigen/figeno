@@ -10,7 +10,7 @@ from figeno.utils import KnownException,correct_region_chr, split_box,draw_bound
 
 class sv_track:
     def __init__(self,file=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
-                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,
+                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,min_sv_height=0.1,
                  fontscale=1,bounding_box=True,height=10,margin_above=1.5,**kwargs):
         self.file=file
         self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a file (for use with python API).
@@ -24,7 +24,9 @@ class sv_track:
         self.color_t2t=color_t2t
         self.color_trans=color_trans
         self.lw=float(lw)
-
+        self.min_sv_height=float(min_sv_height)
+        if self.min_sv_height>1: self.min_sv_height=1.0
+        if self.min_sv_height<0: self.min_sv_height=0.0
         self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
         self.height = float(height)
@@ -131,7 +133,7 @@ class sv_track:
                     y = box["top"] if self.upside_down else box["bottom"] - 0.2
                     control_theta = (x1+x2)/2
                     control_r = 0
-                    if i==j: control_r = y * max(0,0.9-abs(df_SV_regions.loc[a,"pos1"]-df_SV_regions.loc[a,"pos2"]) / 400000000)
+                    if i==j: control_r = y * max(0,(1.0-self.min_sv_height)-abs(df_SV_regions.loc[a,"pos1"]-df_SV_regions.loc[a,"pos2"]) / 400000000)
 
                     pp1 = patches.PathPatch(mpath.Path([(x1, y), (control_theta, control_r), (x2, y)],[Path.MOVETO, Path.CURVE3, Path.CURVE3]),facecolor="none",edgecolor=df_SV_regions.loc[a,"color"])
                     boxes[0]["ax"].add_patch(pp1)

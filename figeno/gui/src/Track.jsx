@@ -653,6 +653,15 @@ function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialo
 
 
         </div>
+        <div className="optionGroup">
+
+            <div className='formItem'>
+                <label htmlFor={"min_sv_height"+track.id}>Min SV height:</label>
+                <input id={"min_sv_height"+track.id} style={{width:"2em"}} value={track.min_sv_height}  onChange={(e) => set_value("min_sv_height",e.target.value)} ></input>
+            </div>
+
+
+        </div>
             
         </>
     )

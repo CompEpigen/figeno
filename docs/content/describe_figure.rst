@@ -373,6 +373,9 @@ Parameters:
 
 * ``color_del``, ``color_dup``, ``color_T2T``, ``color_H2H``, ``color_trans``: color of the arc representing the SV, depending on the SV type (respectively: deletion, duplication, tail-to-tail inversion, head-to-head inversion, translocation).
 
+* ``min_sv_height``: when a circular layout is used, minimum height of the SVs, between 0 and 1 (default: 0.1). Increasing this value will result in short SVs (where both breakends are close) to have a larger height.
+
+
 copynumber
 ^^^^^^^^^^
 
