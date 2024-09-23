@@ -216,6 +216,10 @@ function BedTrack({track,set_value,openColorPanel, setFileDialogData,setFileDial
                 <label htmlFor={"show_names"+track.id}>Show names:</label>
                 <input type="checkbox" id={"show_names"+track.id} checked={track.show_names} onChange={() => set_value("show_names",!track.show_names)} ></input>
             </div>
+            <div className='formItem'>
+                <label htmlFor={"show_strand"+track.id}>Show strand:</label>
+                <input type="checkbox" id={"show_strand"+track.id} checked={track.show_strand} onChange={() => set_value("show_strand",!track.show_strand)} ></input>
+            </div>
 
         </div>
         </>

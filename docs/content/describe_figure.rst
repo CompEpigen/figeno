@@ -135,6 +135,8 @@ Parameters:
 
 * ``show_names``: if True, will display the name of each region above the corresponding rectangle. This requires that the bed file contains a fourth column indicating the name of each region.
 
+* ``show_strand``: if True, will display arrows indicating the strand of each region. This requires that the bed file contains a sixth column indicating the strand of each region ("+", "-", or ".").
+
 bigwig
 ^^^^^^^^
 

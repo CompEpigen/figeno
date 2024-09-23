@@ -35,13 +35,14 @@ export const defaultTrackValues={
         show_gene_names:true
     },
     "bed":{
-        height:"10",
+        height:"3",
         margin_above:"1.5",
         bounding_box:false,
         fontscale:1.0,
         file:"",
         color:"#444444",
         show_names:false,
+        show_strand:false,
         label:"",
         label_rotate:false
     },
