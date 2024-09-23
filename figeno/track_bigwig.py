@@ -62,12 +62,13 @@ class bigwig_track:
 
     def draw_region(self,region,box,scale_max,nbins,show_scale_inside):
         if self.bounding_box: draw_bounding_box(box)
+        if nbins>region.end-region.start: nbins=region.end-region.start
 
         region = correct_region_chr(region,self.bw.chroms())
         values_binned=self.bw.stats(region.chr,region.start,region.end,nBins=nbins,exact=abs(region.end-region.start)<1000000,type="mean")
         values_binned = [x if x is not None else 0 for x in values_binned]
         if region.orientation=="-": values_binned = values_binned[::-1]
-        n_bases_per_bin = (region.end-region.start) // nbins
+        n_bases_per_bin = (region.end-region.start) / nbins #float
         
         rect_width = (box["right"] - box["left"]) / nbins
 
@@ -80,11 +81,12 @@ class bigwig_track:
             polygon_vertices=[(box["right"],box["top"]) , (box["left"],box["top"])]
         for i in range(nbins):
             x=box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
-            if not self.upside_down:
-                y= box["bottom"] + values_binned[i]/scale_max * (box["top"]-box["bottom"])
-            else:
-                y= box["top"] - values_binned[i]/scale_max * (box["top"]-box["bottom"])
-            polygon_vertices.append((x,y))
+            if values_binned[i] is not None:
+                if not self.upside_down:
+                    y= box["bottom"] + values_binned[i]/scale_max * (box["top"]-box["bottom"])
+                else:
+                    y= box["top"] - values_binned[i]/scale_max * (box["top"]-box["bottom"])
+                polygon_vertices.append((x,y))
         if "projection" in box and box["projection"]=="polar":
             polygon_vertices = interpolate_polar_vertices(polygon_vertices)
         polygon = patches.Polygon(polygon_vertices,lw=0.0,color=self.color)
