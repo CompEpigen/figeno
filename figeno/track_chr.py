@@ -9,7 +9,7 @@ import figeno.data
 from figeno.utils import KnownException, split_box, draw_bounding_box , interpolate_polar_vertices, compute_rotation_text, polar2cartesian, cartesian2polar
 
 class chr_track:
-    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,lw_scale=1.0,no_margin=False,reference="custom",cytobands_file="",
+    def __init__(self,style="default",unit="kb",ticklabels_pos="below",ticks_interval="auto",ticks_angle=0,lw_scale=1.0,chr_prefix="chr",no_margin=False,reference="custom",cytobands_file="",
                  fontscale=1,bounding_box=False,height=12,margin_above=1.5,label="",label_rotate=False,**kwargs):
         self.style=style
         self.unit=unit
@@ -19,6 +19,7 @@ class chr_track:
         self.lw_scale= float(lw_scale)
         while self.ticks_angle<-180: self.ticks_angle+=360
         while self.ticks_angle>180: self.ticks_angle-=360
+        self.chr_prefix=chr_prefix
         self.no_margin=no_margin
         self.reference=reference
         self.fontscale=float(fontscale)
@@ -149,9 +150,9 @@ class chr_track:
         # Chr label
         if self.ticklabels_pos!="none":
             if self.ticklabels_pos=="below" and (not "upside_down" in box):
-                box["ax"].text((box["left"]+box["right"])/2,box["bottom"],"chr"+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
+                box["ax"].text((box["left"]+box["right"])/2,box["bottom"],self.chr_prefix+region.chr,horizontalalignment="center",verticalalignment="bottom",fontsize=9*self.fontscale)
             else:
-                box["ax"].text((box["left"]+box["right"])/2,box["top"],"chr"+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
+                box["ax"].text((box["left"]+box["right"])/2,box["top"],self.chr_prefix+region.chr,horizontalalignment="center",verticalalignment="top",fontsize=9*self.fontscale)
     
     def draw_region_arrow(self,region,box):
         arrow_height = (box["top"]-box['bottom']) * 0.5 *self.lw_scale
@@ -193,10 +194,10 @@ class chr_track:
                            fontsize=8*self.fontscale)
 
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
-            box["ax"].text((box["right"]+box["left"])/2,box["top"]-arrow_height*1.55,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="top",
+            box["ax"].text((box["right"]+box["left"])/2,box["top"]-arrow_height*1.55,self.chr_prefix+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="top",
                            fontsize=10*self.fontscale)
         else:
-            box["ax"].text((box["right"]+box["left"])/2,box["bottom"]+arrow_height*1.55,"chr"+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="bottom",
+            box["ax"].text((box["right"]+box["left"])/2,box["bottom"]+arrow_height*1.55,self.chr_prefix+region.chr.lstrip("chr"),horizontalalignment="center",verticalalignment="bottom",
                            fontsize=10*self.fontscale)
             
     def draw_region_ideogram(self,region,box):
@@ -204,12 +205,12 @@ class chr_track:
         if self.ticklabels_pos=="below" and (not "upside_down" in box):
             y = box["bottom"] + (box["top"]-box["bottom"]) * 0.75
             if self.fontscale>0:
-                box["ax"].text((box["left"]+box["right"])/2, box["top"]-height-1, "chr"+region.chr,
+                box["ax"].text((box["left"]+box["right"])/2, box["top"]-height-1, self.chr_prefix+region.chr,
                            horizontalalignment="center", verticalalignment="top",fontsize=10*self.fontscale)
         elif self.ticklabels_pos=="above":
             y = box["bottom"] + (box["top"]-box["bottom"]) * 0.25
             if self.fontscale>0:
-                box["ax"].text((box["left"]+box["right"])/2, box["bottom"] + height+1, "chr"+region.chr,
+                box["ax"].text((box["left"]+box["right"])/2, box["bottom"] + height+1, self.chr_prefix+region.chr,
                            horizontalalignment="center", verticalalignment="bottom",fontsize=10*self.fontscale)
         else:
             y= (box["bottom"]+box["top"]) / 2

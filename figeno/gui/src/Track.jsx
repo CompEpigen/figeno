@@ -148,6 +148,10 @@ function ChrTrack({track,set_value}){
             <div className='formItem'>
                 <label htmlFor={"ticks_angle"+track.id}>Ticks angle (°):</label>
                 <input id={"ticks_angle"+track.id} style={{width:"3em"}} value={track.ticks_angle}  onChange={(e)=>set_value("ticks_angle",e.target.value)} ></input>
+            </div>
+            <div className='formItem'>
+                <label htmlFor={"chr_prefix"+track.id}>Chr prefix:</label>
+                <input id={"chr_prefix"+track.id} style={{width:"3em"}} value={track.chr_prefix}  onChange={(e)=>set_value("chr_prefix",e.target.value)} ></input>
             </div> 
             </>):""}
         </div>

@@ -18,7 +18,8 @@ export const defaultTrackValues={
         ticklabels_pos:"below",
         unit:"kb",
         ticks_interval:"auto",
-        ticks_angle:0
+        ticks_angle:0,
+        chr_prefix: "chr"
     },
     "genes":{
         height:"10",

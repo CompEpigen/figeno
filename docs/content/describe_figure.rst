@@ -93,6 +93,7 @@ Parameters:
 
 * ``ticks_angle``: Angle in degrees at which the ticks are written. The default (0) results in horizontal ticks, but you can also tilt them by increasing this value to e.g. 30. Rotating the ticks might result in them overlapping with the chromosome name, so you might want to post-process the figure in a vector graphics editor by manualling moving the chromosome name in case of overlap.
 
+* ``chr_prefix``: Prefix to add before the chromosome names (default: "chr").
 
 genes
 ^^^^^  
