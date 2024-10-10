@@ -197,11 +197,11 @@ def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,colla
             gene_id,transcript_id, transcript_name = "","",""
             for x in linesplit[8].split(";"):
                 if x.startswith("Parent"):
-                    gene_id = x[x.find(":")+1:]
-                elif x.startswith("Name"):
+                    gene_id = x[x.find("=")+1:]
+                elif x.startswith("Name") or x.startswith("transcript_name"):
                     transcript_name = x[x.find("=")+1:]
                 elif x.startswith("ID"):
-                    transcript_id = x[x.find(":")+1:]
+                    transcript_id = x[x.find("=")+1:]
             transcript={"id":transcript_id,"name":transcript_name,"chr":linesplit[0].lstrip("chr"),"start":transcript_start,"end":transcript_end,"orientation":transcript_orientation}
             transcriptID2transcript[transcript_id]=transcript
             if not gene_id in geneID2transcriptIDs: geneID2transcriptIDs[gene_id]=[]
@@ -214,7 +214,7 @@ def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,colla
             transcript_id = ""
             for x in linesplit[8].split(";"):
                 if x.startswith("Parent"):
-                    transcript_id = x[x.find(":")+1:]
+                    transcript_id = x[x.find("=")+1:]
             if not transcript_id in transcriptID2exons: transcriptID2exons[transcript_id]=[]
             add_exon(transcriptID2exons[transcript_id],(exon_start,exon_end))
 
@@ -226,13 +226,15 @@ def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,colla
             if only_protein_coding:
                 if "biotype" in linesplit[8]:
                     if not "biotype=protein_coding" in linesplit[8]: continue
+                elif "gene_type" in linesplit[8]:
+                    if not "gene_type=protein_coding" in linesplit[8]: continue
                 else:
                     if linesplit[2]!="gene": continue
             gene_id,gene_name="",""
             for x in linesplit[8].split(";"):
                 if x.startswith("ID"):
-                    gene_id = x[x.find(":")+1:]
-                elif x.startswith("Name"):
+                    gene_id = x[x.find("=")+1:]
+                elif x.startswith("Name") or x.startswith("gene_name"):
                     gene_name = x[x.find("=")+1:]
             geneID2gene_name[gene_id]=gene_name
     infile.close()
@@ -241,6 +243,7 @@ def read_genes_gff3(gff3_file,chr=None,start=None,end=None,gene_names=None,colla
     for gene_id in geneID2gene_name:
         if gene_id in geneID2transcriptIDs:
             gene_name=geneID2gene_name[gene_id]
+            if gene_name=="": gene_name = gene_id
             if (gene_names is not None) and (not gene_name.upper() in gene_names): continue
             if collapsed:
                 transcripts_chr=""
@@ -381,7 +384,7 @@ def find_genecoord_gff3(gene_name,file):
         linesplit = line.split("\t")
         if linesplit[2] in ["gene","miRNA_gene","rRNA_gene"]:
             for x in linesplit[8].split(";"):
-                if x.startswith("Name"):
+                if x.startswith("Name") or x.startswith("ID") or x.startswith("gene_name"):
                     name=x[x.find("=")+1:]
                     if gene_name.upper()==name.upper():
                         chr=linesplit[0].lstrip("chr")
@@ -392,7 +395,7 @@ def find_genecoord_gff3(gene_name,file):
                         end+=max(10,int(0.05*length))
                         if start<=0: start=0
                         return (chr,start,end)
-                    else: break
+                    else: continue
     return ("",0,1)
 
 
