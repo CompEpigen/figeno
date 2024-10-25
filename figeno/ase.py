@@ -1,11 +1,6 @@
-import argparse
-import os
 import numpy as np
 import pandas as pd
 import vcfpy
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 from figeno.genes import Gene
 
 
@@ -25,8 +20,11 @@ def read_SNPs_RNA(ase_file,gene=None,chr=None,start=None,end=None,exons=None,min
     df = df.loc[df["contig"]==chr]
     df = df.loc[(df["position"]>=start) & (df["position"]<=end)]
     df = df.loc[(df["refCount"]+df["altCount"]>=min_depth)]
-    df = df[["contig","position","variantID","refAllele","altAllele","refCount","altCount"]]
+    variables_selected=["contig","position","variantID","refAllele","altAllele","refCount","altCount"]
+    if "refCount_DNA" in df.columns: variables_selected+=["refCount_DNA","altCount_DNA"]
+    df = df[variables_selected]
     df["VAF"] = [min(df.loc[i,"refCount"],df.loc[i,"altCount"]) / (df.loc[i,"refCount"]+df.loc[i,"altCount"]) for i in df.index]
+    df["VAF_DNA"] = [min(df.loc[i,"refCount_DNA"],df.loc[i,"altCount_DNA"]) / (df.loc[i,"refCount_DNA"]+df.loc[i,"altCount_DNA"]) for i in df.index]
     in_exons=[]
     if exons is not None:
         for i in df.index:
