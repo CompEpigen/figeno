@@ -163,7 +163,7 @@ A simple template with a single hic track (showing chromatin interactions from H
 asm
 ^^^
 
-Allele-specific methylation: show the alignments colored by methylation and split by haplotype, as well as the methylation frequency split by haplotype.
+Allele-specific methylation: show the alignments colored by methylation and split by haplotype, as well as the methylation frequency split by haplotype. This requires the reads to be phased (with an HP tag, e.g. with whatshap) and to contain base modification information (with MM and ML tags).
 
 .. image:: images/template_asm.png 
 
@@ -668,8 +668,479 @@ For WGS data, you can use the "symmetrical" layout to show the copy-number data 
   
 
    
+Multiple bigwig tracks
+^^^^^^^^^^^^^^^^^^^^^^
+
+Multiple bigwig tracks can be combined, for example to show different epigenetic marks.
+
+.. image:: images/figure_multiple_bigwigs.png 
+
+.. toggle:: 
+
+  .. code:: json
+
+    {
+		"general": {
+			"layout": "horizontal",
+			"reference": "hg19"
+		},
+		"output": {
+			"file": "figure_multiple_bigwigs.png",
+			"dpi": 600,
+			"width": 180
+		},
+		"regions": [
+			{
+				"chr": "12",
+				"start": 11790322,
+				"end": 12500000
+			}
+		],
+		"highlights": [],
+		"tracks": [
+			{
+				"type": "bigwig",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "ATAC",
+				"label_rotate": false,
+				"file": "/path/to/ATAC.bigwig",
+				"color": "#f39c12",
+				"n_bins": 500,
+				"scale": "auto",
+				"scale_pos": "corner",
+				"upside_down": false
+			},
+			{
+				"type": "bigwig",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "H3K4me1",
+				"label_rotate": false,
+				"file": "/path/t8/H3K4me1.bigWig",
+				"color": "#9b59b6",
+				"n_bins": 500,
+				"scale": "auto",
+				"scale_pos": "corner",
+				"upside_down": false
+			},
+			{
+				"type": "bigwig",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "H3K27ac",
+				"label_rotate": false,
+				"file": "/path/to/H3K27ac.bigWig",
+				"color": "#2980b9",
+				"n_bins": 500,
+				"scale": "auto",
+				"scale_pos": "corner",
+				"upside_down": false
+			},
+			{
+				"type": "bigwig",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "P300",
+				"label_rotate": false,
+				"file": "/path/to/P300.bigWig",
+				"color": "#27ae60",
+				"n_bins": 500,
+				"scale": "auto",
+				"scale_pos": "corner",
+				"upside_down": false
+			},
+			{
+				"type": "genes",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"collapsed": true,
+				"only_protein_coding": true,
+				"exon_color": "#2980b9",
+				"genes": "auto",
+				"show_gene_names": true
+			},
+			{
+				"type": "chr_axis",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"lw_scale": "1.0",
+				"ticklabels_pos": "below",
+				"unit": "kb",
+				"ticks_interval": "auto",
+				"ticks_angle": 0,
+				"chr_prefix": "chr"
+			}
+		]
+	}
 
 
+Multiple ONT samples with allele-specific methylation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here, an imprinted gene is shown, with allele-specific methylation observed in three samples, and the imprinting control region highlighted. 
+To group the reads by haplotype, they have to be phased, using for example whatshap, so that each phased read has an HP tag in the bam file. The haplotype (1 or 2) is arbitrary, so here in order to always show the methylated (maternal) haplotype first, exchange_haplotypes was set to true for the first sample.
+Compared to the default settings, vgap_frac was reduced to 0.05 for the alignments tracks (to reduce the vertical space between reads), height was reduced to 25 for the alignments track, show_unphased was set to false (to only show phased reads), and margin_above was increased for the alignments track. 
+
+.. image:: images/figure_multiple_asm.png 
+
+.. toggle:: 
+
+  .. code:: json
+
+    {
+		"general": {
+			"layout": "horizontal",
+			"reference": "hg19"
+		},
+		"output": {
+			"file": "figure_multiple_asm.png",
+			"dpi": 800,
+			"width": 180
+		},
+		"regions": [
+			{
+				"chr": "20",
+				"start": 42134174,
+				"end": 42181756
+			}
+		],
+		"highlights": [
+			{
+				"chr": "20",
+				"start": 42142300,
+				"end": 42144100,
+				"color": "#eba434",
+				"opacity": 0.3
+			}
+		],
+		"tracks": [
+			{
+				"type": "alignments",
+				"height": 25,
+				"margin_above": 1.5,
+				"bounding_box": true,
+				"fontscale": 1,
+				"file": "/path/to/sample1.haplotagged.bam",
+				"label": "Sample 1",
+				"label_rotate": true,
+				"hgap_bp": 30,
+				"vgap_frac": "0.05",
+				"read_color": "#cccccc",
+				"link_splitreads": false,
+				"group_by": "haplotype",
+				"show_unphased": false,
+				"exchange_haplotypes": true,
+				"show_haplotype_colors": true,
+				"haplotype_colors": [
+					"#27ae60",
+					"#e67e22",
+					"#808080"
+				],
+				"haplotype_labels": [
+					"HP1",
+					"HP2",
+					"Unphased"
+				],
+				"color_by": "basemod",
+				"color_unmodified": "#0f57e5",
+				"basemods": [
+					[
+						"C",
+						"m",
+						"#f40202"
+					]
+				],
+				"fix_hardclip_basemod": false
+			},
+			{
+				"type": "alignments",
+				"height": 25,
+				"margin_above": 2.5,
+				"bounding_box": true,
+				"fontscale": 1,
+				"file": "/path/to/sample2.haplotagged.bam",
+				"label": "Sample 2",
+				"label_rotate": true,
+				"hgap_bp": 30,
+				"vgap_frac": "0.05",
+				"read_color": "#cccccc",
+				"link_splitreads": false,
+				"group_by": "haplotype",
+				"show_unphased": false,
+				"exchange_haplotypes": false,
+				"show_haplotype_colors": true,
+				"haplotype_colors": [
+					"#27ae60",
+					"#e67e22",
+					"#808080"
+				],
+				"haplotype_labels": [
+					"HP1",
+					"HP2",
+					"Unphased"
+				],
+				"color_by": "basemod",
+				"color_unmodified": "#0f57e5",
+				"basemods": [
+					[
+						"C",
+						"m",
+						"#f40202"
+					]
+				],
+				"fix_hardclip_basemod": false
+			},
+			{
+				"type": "alignments",
+				"height": 25,
+				"margin_above": 2.5,
+				"bounding_box": true,
+				"fontscale": 1,
+				"file": "/path/to/sample3.haplotagged.bam",
+				"label": "Sample 3",
+				"label_rotate": true,
+				"hgap_bp": 30,
+				"vgap_frac": "0.05",
+				"read_color": "#cccccc",
+				"link_splitreads": false,
+				"group_by": "haplotype",
+				"show_unphased": false,
+				"exchange_haplotypes": false,
+				"show_haplotype_colors": true,
+				"haplotype_colors": [
+					"#27ae60",
+					"#e67e22",
+					"#808080"
+				],
+				"haplotype_labels": [
+					"HP1",
+					"HP2",
+					"Unphased"
+				],
+				"color_by": "basemod",
+				"color_unmodified": "#0f57e5",
+				"basemods": [
+					[
+						"C",
+						"m",
+						"#f40202"
+					]
+				],
+				"fix_hardclip_basemod": false
+			},
+			{
+				"type": "genes",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"collapsed": true,
+				"only_protein_coding": true,
+				"exon_color": "#2980b9",
+				"genes": "auto",
+				"show_gene_names": true
+			},
+			{
+				"type": "chr_axis",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"lw_scale": "1.0",
+				"ticklabels_pos": "below",
+				"unit": "kb",
+				"ticks_interval": "auto",
+				"ticks_angle": 0,
+				"chr_prefix": "chr"
+			}
+		]
+	}
 
 
+Linking split reads
+^^^^^^^^^^^^^^^^^^^
 
+If a read, and especially a long read, spans a breakpoint, it will be aligned to two different positions in the genome (split read). Figeno can display links between different alignments of a split read (when both alignments are in the regions being displayed), which can be helpful to visualize the breakpoints.
+Here, we show nanopore reads for a sample with a rearrangement near MNX1, resulting in MNX1 activation by hijacking an enhancer in the CDK6 region.
+
+.. image:: images/figure_linkSR.png 
+
+.. toggle:: 
+
+  .. code:: json
+
+	{
+		"general": {
+			"layout": "horizontal",
+			"reference": "hg19"
+		},
+		"output": {
+			"dpi": 800,
+			"file": "figure_linkSR.png",
+			"width": 180
+		},
+		"regions": [
+			{
+				"chr": "7",
+				"start": 92400000,
+				"end": 92440000,
+				"color": "#95cdcd"
+			},
+			{
+				"chr": "7",
+				"start": 156840000,
+				"end": 156790000,
+				"color": "#f4a460"
+			}
+		],
+		"highlights": [],
+		"tracks": [
+			{
+				"type": "alignments",
+				"height": 35,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"file": "/path/to/sample.haplotagged.bam",
+				"label": "",
+				"label_rotate": true,
+				"hgap_bp": 30,
+				"vgap_frac": "0.4",
+				"read_color": "#cccccc",
+				"link_splitreads": true,
+				"splitread_color": "#999999",
+				"link_color": "#999999",
+				"link_lw": "0.7",
+				"only_show_splitreads": true,
+				"min_splitreads_breakpoints": 2,
+				"group_by": "none",
+				"color_by": "none"
+			},
+			{
+				"type": "genes",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"collapsed": true,
+				"only_protein_coding": true,
+				"exon_color": "#2980b9",
+				"genes": "auto",
+				"show_gene_names": true
+			},
+			{
+				"type": "chr_axis",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "arrow",
+				"lw_scale": "1.0",
+				"ticklabels_pos": "below",
+				"unit": "kb",
+				"ticks_interval": "auto",
+				"ticks_angle": 0,
+				"chr_prefix": "chr"
+			}
+		]
+	}
+
+Linking split reads: foldback inversion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here is an example of nanopore reads spanning a foldback inversion (resulting from a breakage-fusion-bridge cycle, and leading to amplification of a genomic region), where the links between split reads can show this foldback inversion.
+
+.. image:: images/figure_foldback.png 
+
+.. toggle:: 
+
+  .. code:: json
+	
+	{
+		"general": {
+			"layout": "horizontal",
+			"reference": "hg19"
+		},
+		"output": {
+			"file": "figure_foldback.png",
+			"dpi": 800,
+			"width": 150
+		},
+		"regions": [
+			{
+				"chr": "19",
+				"start": 13826000,
+				"end": 13834000
+			}
+		],
+		"highlights": [],
+		"tracks": [
+			{
+				"type": "alignments",
+				"height": 70,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"file": "/path/to/sample.haplotagged.bam",
+				"label": "",
+				"label_rotate": false,
+				"hgap_bp": "180",
+				"vgap_frac": "0.5",
+				"read_color": "#cccccc",
+				"link_splitreads": true,
+				"splitread_color": "#f39c12",
+				"link_color": "#000000",
+				"link_lw": "0.5",
+				"only_show_splitreads": true,
+				"min_splitreads_breakpoints": 2,
+				"group_by": "none",
+				"color_by": "none"
+			},
+			{
+				"type": "chr_axis",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"lw_scale": "1.0",
+				"ticklabels_pos": "below",
+				"unit": "kb",
+				"ticks_interval": "auto",
+				"ticks_angle": 0,
+				"chr_prefix": "chr"
+			}
+		]
+	}
