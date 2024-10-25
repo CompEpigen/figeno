@@ -174,7 +174,7 @@ def find_splitreads(samfile,regions,keep_unphased=True,min_splitreads_breakpoint
             current_group=[l[0]]
             current_index=1
             while current_index<len(l):
-                if abs(l[current_index-1].qend-l[current_index].qstart)<100: current_group.append(l[current_index])
+                if abs(l[current_index-1].qend-l[current_index].qstart)<150: current_group.append(l[current_index])
                 else:
                     adjacent_groups.append(current_group)
                     max_grouplength= max(max_grouplength,len(current_group))
@@ -226,8 +226,8 @@ def splitreads2breakpoints(splitreads):
                 strand1 = "-" if (r1.read.flag&16)==0 else "+"
                 chr2 = r2.read.reference_name
                 pos2 = r2.read.reference_start if (r2.read.flag&16)==0 else r2.read.reference_end
-                strand2 = "+" if (r1.read.flag&16)==0 else "-"
-                if chr_to_int(chr1)>chr_to_int(chr2) or (chr_to_int(chr1)==chr_to_int(chr2) and pos2>pos1):
+                strand2 = "+" if (r2.read.flag&16)==0 else "-"
+                if chr_to_int(chr1)>chr_to_int(chr2) or (chr_to_int(chr1)==chr_to_int(chr2) and pos2<pos1):
                     chr1,chr2 = chr2,chr1
                     pos1,pos2 = pos2,pos1
                     strand1,strand2=strand2,strand1
