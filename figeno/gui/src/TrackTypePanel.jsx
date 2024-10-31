@@ -5,7 +5,7 @@ import { TrackIcon } from './Track';
 
 
 export function TrackTypePanel({setTrackType,close}){
-    const track_types = ["chr_axis", "genes", "bed", "bigwig", "coverage", "alignments", "basemod_freq", "hic", "sv", "copynumber"];
+    const track_types = ["chr_axis", "genes", "bed", "bigwig", "coverage", "alignments", "basemod_freq", "hic", "sv", "copynumber", "ase"];
     const popover = useRef();
     useClickOutside(popover, close);
 

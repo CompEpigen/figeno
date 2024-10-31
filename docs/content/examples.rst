@@ -1144,3 +1144,87 @@ Here is an example of nanopore reads spanning a foldback inversion (resulting fr
 			}
 		]
 	}
+
+Allele-specific expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ase track can be used to visualize allele-specific expression. For each variant, the minor allele frequency in the DNA is shown at the top (showing that the variants are heterozygous), and the minor allele frequency in the RNA-seq data is shown at the bottom.
+Here, we see that only one allele of L3MBTL1 is expressed, because this gene is imprinted.
+
+.. image:: images/figure_ase.png 
+	:width: 500
+
+.. toggle:: 
+
+  .. code:: json
+	
+	{
+		"general": {
+			"layout": "horizontal",
+			"reference": "hg19"
+		},
+		"output": {
+			"file": "/home/e840r/Documents/Scripts/figeno/figeno/gui/figure_ase.png",
+			"dpi": 400,
+			"width": 100
+		},
+		"regions": [
+			{
+				"chr": "20",
+				"start": 42134174,
+				"end": 42181756
+			}
+		],
+		"highlights": [],
+		"tracks": [
+			{
+				"type": "ase",
+				"height": 50,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "RNA,DNA",
+				"label_rotate": true,
+				"file": "/path/to/sample.tsv",
+				"vcf_DNA": "",
+				"min_depth": "6",
+				"color1": "#e55039",
+				"color2": "#4a69bd",
+				"max_bar_width": "10.0",
+				"lw": "0.1",
+				"only_exonic": false,
+				"grid": false
+			},
+			{
+				"type": "genes",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"collapsed": true,
+				"only_protein_coding": true,
+				"exon_color": "#2980b9",
+				"genes": "auto",
+				"show_gene_names": true
+			},
+			{
+				"type": "chr_axis",
+				"height": 10,
+				"margin_above": 1.5,
+				"bounding_box": false,
+				"fontscale": 1,
+				"label": "",
+				"label_rotate": false,
+				"style": "default",
+				"lw_scale": "1.0",
+				"ticklabels_pos": "below",
+				"unit": "kb",
+				"ticks_interval": "auto",
+				"ticks_angle": 0,
+				"chr_prefix": "chr"
+			}
+		]
+	}

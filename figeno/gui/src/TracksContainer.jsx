@@ -187,6 +187,23 @@ export const defaultTrackValues={
         color_gain:"#e55039",
         color_cnloh:"#f6b93b"
     },
+    "ase":{
+        height:"50",
+        margin_above:"1.5",
+        bounding_box:false,
+        fontscale:1.0,
+        label:"RNA,DNA",
+        label_rotate:true,
+        file:"",
+        vcf_DNA:"",
+        min_depth:"6",
+        color1:"#e55039",
+        color2:"#4a69bd",
+        max_bar_width:"10.0",
+        lw: "0.1",
+        only_exonic: false,
+        grid:false
+    },
     "other":{
         height:"8",
         margin_above:"1.5",
@@ -227,7 +244,7 @@ export function TracksContainer({tracksList,setTracksList,openColorPanel, openTr
 
     function create_track({id,type,track={}}){
         let new_track = {id:id, type:type};
-        if (["chr_axis","genes","bed","bigwig","coverage","alignments", "basemod_freq","hic","sv","copynumber"].includes(new_track.type)){
+        if (["chr_axis","genes","bed","bigwig","coverage","alignments", "basemod_freq","hic","sv","copynumber","ase"].includes(new_track.type)){
             for (const attribute in defaultTrackValues[new_track.type]){
                 new_track[attribute] = track.hasOwnProperty(attribute) ? track[attribute] : defaultTrackValues[new_track.type][attribute]
             }

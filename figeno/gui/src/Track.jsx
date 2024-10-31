@@ -42,6 +42,9 @@ export function Track({track, set_value, change_track_type, copy_track, delete_t
         if (track.type=="copynumber"){
             return CopynumberTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
         }
+        if (track.type=="ase"){
+            return AseTrack({"track":track,"set_value":set_value,"openColorPanel":openColorPanel,"setFileDialogData":setFileDialogData,"setFileDialogActive":setFileDialogActive});
+        }
     }
     function handleTrackIcon(){
         openTrackTypePanel((t)=>{set_value("type",t)})
@@ -784,6 +787,49 @@ function CopynumberTrack({track,set_value,openColorPanel, setFileDialogData,setF
     )
 }
 
+function AseTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
+    const fileClass= (track.file.endsWith(".tsv"))? "":"unsetPath"; 
+    return (
+        <>
+            <div className="optionGroup">
+                <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass}  setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <PathEntry id={"vcf_DNA"+track.id} label="VCF DNA:" value={track.vcf_DNA} set_value={(val) => set_value("vcf_DNA",val)} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
+                <div className='formItem' >
+                    <label htmlFor={"color1"+track.id}>Color 1: </label>
+                    <ColorButton id={"color1"+track.id} color={track.color1} setColor={(c)=>set_value("color1",c)} openColorPanel={openColorPanel}></ColorButton>
+                </div>
+                <div className='formItem' >
+                    <label htmlFor={"color2"+track.id}>Color 2: </label>
+                    <ColorButton id={"color2"+track.id} color={track.color2} setColor={(c)=>set_value("color2",c)} openColorPanel={openColorPanel}></ColorButton>
+                </div>
+            </div>
+            <div className="optionGroup">
+                <div className='formItem'>
+                    <label htmlFor={"min_depth"+track.id}>Min depth:</label>
+                    <input id={"min_depth"+track.id} style={{width:"3em"}} value={track.min_depth} onChange={(e) => set_value("min_depth",e.target.value)} ></input>
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"max_bar_width"+track.id}>Max bar width:</label>
+                    <input id={"max_bar_width"+track.id} style={{width:"3em"}} value={track.max_bar_width} onChange={(e) => set_value("max_bar_width",e.target.value)} ></input>
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"lw"+track.id}>lw:</label>
+                    <input id={"lw"+track.id} style={{width:"3em"}} value={track.lw} onChange={(e) => set_value("lw",e.target.value)} ></input>
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"only_exonic"+track.id}>Only exonic:</label>
+                    <input type="checkbox" id={"only_exonic"+track.id} checked={track.only_exonic} onChange={() => set_value("only_exonic",!track.only_exonic)} />
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"grid"+track.id}>Grid:</label>
+                    <input type="checkbox" id={"grid"+track.id} checked={track.grid} onChange={() => set_value("grid",!track.grid)} />
+                </div>
+
+            </div>
+           
+        </>
+    )
+}
 
 export function TrackIcon({track_type, onClick}){
     return(
@@ -884,6 +930,19 @@ export function TrackIcon({track_type, onClick}){
             <g fill="none" strokeLinecap="round">
              <path d="m1.034 3.3054c1.2872-0.15163 0.51235 2.4665 1.2218 3.5084 0.23162 0.34177 1.1852 0.15204 1.5823 0.1485 1.1557-0.010299 0.47151-2.9717 1.3575-3.7475 0.41083-0.37614 2.7615-0.18619 3.8657-0.17441" opacity=".97208" stroke="#27ae60" strokeWidth=".5"/>
              <path d="m0.93871 3.1564c1.9901-0.039321 5.146-0.22674 5.547 0.17847 0.42505 0.42951 0.57483 1.2406 1.0938 1.288 0.66505 0.060831 1.1817-1.1639 1.4669-1.5903" opacity=".97208" stroke="#e67e22" strokeWidth=".5"/>
+            </g>
+           </svg>
+        ):""}
+
+        {(track_type=="ase")?(
+            <svg width="15mm" height="15mm" version="1.1" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+            <g stroke-linejoin="round" strokeLinecap="round">
+            <rect x="2.8333" y="3" width="1.6667" height="1.6667" fill="#e55039" opacity=".97208" stroke-width=".1093"/>
+            <rect x="2.8333" y="1.3333" width="1.6667" height="1.6667" fill="#4a69bd" opacity=".97208" stroke-width=".1093"/>
+            <rect x="2.8333" y="5.3333" width="1.6667" height="3.3333" fill="#4a69bd" opacity=".97208" stroke-width=".15458"/>
+            <rect x="5.5" y="3.2029" width="1.6667" height="1.4637" fill="#e55039" opacity=".97208" stroke-width=".10243"/>
+            <rect x="5.5" y="1.3333" width="1.6667" height="1.8887" fill="#4a69bd" opacity=".97208" stroke-width=".11635"/>
+            <rect x="5.5" y="5.3333" width="1.6667" height="3.3333" fill="#4a69bd" opacity=".97208" stroke-width=".15458"/>
             </g>
            </svg>
         ):""}
