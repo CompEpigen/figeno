@@ -44,6 +44,8 @@ export const defaultTrackValues={
         color:"#444444",
         show_names:false,
         show_strand:false,
+        use_file_colors:false,
+        collapsed:false,
         label:"",
         label_rotate:false
     },

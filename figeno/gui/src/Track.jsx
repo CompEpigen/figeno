@@ -210,15 +210,22 @@ function GenesTrack({track,set_value,openColorPanel}){
 
 
 function BedTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
-    const fileClass= ((!track.file.endsWith(".bed")) && (!track.file.endsWith(".tsv")))? "unsetPath":""; 
+    const fileClass= ((!track.file.endsWith(".bed")) && (!track.file.endsWith(".tsv")) && (!track.file.endsWith(".bed.gz")) && (!track.file.endsWith(".tsv.gz")))? "unsetPath":""; 
     return (
         <>
         <div className="optionGroup">
             <PathEntry id={"file"+track.id} label="File:" value={track.file} set_value={(val) => set_value("file",val)} className={fileClass} setFileDialogData={setFileDialogData} setFileDialogActive={setFileDialogActive}/>
-            <div className='formItem' >
+            <div className='formItem'>
+                <label htmlFor={"use_file_colors"+track.id}>Use file colors: </label>
+                <input type="checkbox" id={"use_file_colors"+track.id} checked={track.use_file_colors} onChange={() => set_value("use_file_colors",!track.use_file_colors)} ></input>
+            </div>
+            {(!track.use_file_colors)?(
+                <div className='formItem' >
                 <label htmlFor={"color"+track.id} >Color:</label>
                 <ColorButton id={"color"+track.id} color={track.color} setColor={(c)=>set_value("color",c)} openColorPanel={openColorPanel}></ColorButton>
-            </div>
+                </div>):""
+            }
+            
             <div className='formItem'>
                 <label htmlFor={"show_names"+track.id}>Show names:</label>
                 <input type="checkbox" id={"show_names"+track.id} checked={track.show_names} onChange={() => set_value("show_names",!track.show_names)} ></input>
@@ -227,6 +234,11 @@ function BedTrack({track,set_value,openColorPanel, setFileDialogData,setFileDial
                 <label htmlFor={"show_strand"+track.id}>Show strand:</label>
                 <input type="checkbox" id={"show_strand"+track.id} checked={track.show_strand} onChange={() => set_value("show_strand",!track.show_strand)} ></input>
             </div>
+            <div className='formItem'>
+                <label htmlFor={"collapsed"+track.id}>Collapsed:</label>
+                <input type="checkbox" id={"collapsed"+track.id} checked={track.collapsed} onChange={() => set_value("collapsed",!track.collapsed)} ></input>
+            </div>
+            
 
         </div>
         </>

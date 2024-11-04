@@ -110,9 +110,9 @@ Parameters:
   
   * ``TSS_arrow``: draw exons as rectangle, and add an arrow above the TSS indicating the orientation. Best suited when only one gene is shown.
   
-* collapsed: if true (default), all transcripts corresponding to the same gene will be shown together, otherwise there will be one line per transcript.
+* ``collapsed``: if true (default), all transcripts corresponding to the same gene will be shown together, otherwise there will be one line per transcript.
 
-* only_protein_coding: if true (default), only show protein coding genes. Otherwise, show all genes found in the region.
+* ``only_protein_coding``: if true (default), only show protein coding genes. Otherwise, show all genes found in the region.
   
 * ``exon_color``: choose the color of the exons.
 
@@ -132,11 +132,15 @@ Parameters:
 
 * ``file``: path to the bed file.
 
+* ``use_file_colors``: If true, will use the color provided in the ninth column of the bed file (in format R,G,B with values between 0 and 255 for each channel). If false (default), a color must be provided with the color parameter, and this color will be used for all intervals of the track.
+
 * ``color``: color for the rectangles.
 
-* ``show_names``: if True, will display the name of each region above the corresponding rectangle. This requires that the bed file contains a fourth column indicating the name of each region.
+* ``show_names``: if true, will display the name of each region above the corresponding rectangle. This requires that the bed file contains a fourth column indicating the name of each region.
 
-* ``show_strand``: if True, will display arrows indicating the strand of each region. This requires that the bed file contains a sixth column indicating the strand of each region ("+", "-", or ".").
+* ``show_strand``: if true, will display arrows indicating the strand of each region. This requires that the bed file contains a sixth column indicating the strand of each region ("+", "-", or ".").
+
+* ``collapsed``: if true, will display all intervals on the same row. If false (default), will use several rows to avoid overlaps (in which case you might want to increase the height of the track if there are many rows).
 
 bigwig
 ^^^^^^^^
