@@ -209,7 +209,7 @@ export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogD
             <div className="optionGroup">
 
                 <div className='formItem'>
-                    <label htmlFor={"style"+track.id}>Style:</label>
+                    <label title="Style for the track. Lines is the default and will show lines connecting the values for each sample. Dots is recommended if the data is sparse, and will show a dot for each value." htmlFor={"style"+track.id}>Style:</label>
                     <select id={"style"+track.id} value={track.style} onChange={(e) =>{set_value("style",e.target.value)}}> 
                             <option className="dropDownOption" key="default" value="lines">lines</option>
                             <option className="dropDownOption" key="dots" value="dots">dots</option>
@@ -219,11 +219,11 @@ export function BasemodfreqTrack({track,set_value,openColorPanel, setFileDialogD
                 {(track.style=="lines")?(
                 <>
                     <div className='formItem'>
-                        <label htmlFor={"smooth"+track.id}>Smooth:</label>
+                        <label title="If 0, will simply use the raw base modification frequency at each position. If x>0, will average with the next x and previous x positions." htmlFor={"smooth"+track.id}>Smooth:</label>
                         <input id={"smooth"+track.id} style={{width:"3em"}} value={track.smooth} onChange={(e) => set_value("smooth",e.target.value)}/>
                     </div>
                     <div className='formItem'>
-                        <label htmlFor={"gap_frac"+track.id}>gap_frac:</label>
+                        <label title="If two values are separated by a distance > grap_frac * region_size, they won't be connected by a line. This is meant to avoid straight lines in case there is a large region with no values." htmlFor={"gap_frac"+track.id}>gap_frac:</label>
                         <input id={"gap_frac"+track.id} style={{width:"3em"}} value={track.gap_frac} onChange={(e) => set_value("gap_frac",e.target.value)}/>
                     </div>
                 </>
