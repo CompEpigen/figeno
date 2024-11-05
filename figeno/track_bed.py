@@ -48,7 +48,8 @@ class bed_track:
         
         boxes = split_box(box,regions,hmargin)
         lines_regions=self.read_records_regions(regions)
-        if (box["top"]-box["bottom"])/len(lines_regions[0])<3.5 and self.show_names:
+        number_of_lines=max(1,len(lines_regions[0]))
+        if (box["top"]-box["bottom"])/number_of_lines<3.5 and self.show_names:
             warnings.append("The bed track is very dense ({} lines for a height of {} mm). You might want to increase the height for this track or to not show names.".format(len(lines_regions[0]),self.height))
         for i in range(len(regions)):
             self.draw_region(regions[i][0],boxes[i],lines_regions[i],warnings)
@@ -59,12 +60,13 @@ class bed_track:
 
     def draw_region(self,region,box,lines,warnings):
         if self.bounding_box: draw_bounding_box(box)
+        number_of_lines=max(1,len(lines))
         
         if self.show_names: 
-            rect_height = (box["top"]-box["bottom"]) * 0.4 / len(lines)
+            rect_height = (box["top"]-box["bottom"]) * 0.4 / number_of_lines
             #rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.08
         else:
-            rect_height = (box["top"]-box["bottom"]) * 0.7 / len(lines)
+            rect_height = (box["top"]-box["bottom"]) * 0.7 / number_of_lines
             #rect_bottom = box["bottom"] +  (box["top"]-box["bottom"]) * 0.15
 
         # Params for strand
@@ -76,7 +78,7 @@ class bed_track:
         fontsize = 8*self.fontscale if len(lines)<=1 else 6*self.fontscale
 
         for line_index,line in enumerate(lines):
-            line_bottom = box["bottom"] + (box["top"]-box["bottom"])/len(lines) * line_index + (box["top"]-box["bottom"]) * 0.15 / len(lines)
+            line_bottom = box["bottom"] + (box["top"]-box["bottom"])/number_of_lines * line_index + (box["top"]-box["bottom"]) * 0.15 / len(lines)
             for bedrect in line:
                 if region.orientation=="+":
                     converted_start = box["left"] + (bedrect.start-region.start) / (region.end-region.start) * (box["right"] - box["left"])
