@@ -123,6 +123,9 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                 if x.lstrip(" ").startswith("gene_name"):
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
+                elif (x.lstrip(" ").startswith("gene_id") or x.lstrip(" ").startswith("gene")) and gene_name=="":
+                    x = x[x.find("\"")+1:]
+                    gene_name = x[:x.find("\"")]
                 elif x.lstrip(" ").startswith("transcript_name"):
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
@@ -154,6 +157,9 @@ def read_genes_gtf(gtf_file,chr=None,start=None,end=None,gene_names=None,collaps
                     x = x[x.find("\"")+1:]
                     transcript_name = x[:x.find("\"")]
                 elif x.lstrip(" ").startswith("gene_name"):
+                    x = x[x.find("\"")+1:]
+                    gene_name = x[:x.find("\"")]
+                elif (x.lstrip(" ").startswith("gene_id") or x.lstrip(" ").startswith("gene")) and gene_name=="":
                     x = x[x.find("\"")+1:]
                     gene_name = x[:x.find("\"")]
             
