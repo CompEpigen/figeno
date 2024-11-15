@@ -347,7 +347,7 @@ def find_genecoord_gtf(gene_name,file):
         linesplit = line.split("\t")
         if linesplit[2] in ["gene","miRNA_gene","rRNA_gene"]:
             for x in linesplit[8].split(";"):
-                if x.lstrip(" ").startswith("gene_name"):
+                if x.lstrip(" ").startswith("gene_name") or x.lstrip(" ").startswith("gene"):
                     x = x[x.find("\"")+1:]
                     name = x[:x.find("\"")]
                     if gene_name.upper()==name.upper():
@@ -362,7 +362,7 @@ def find_genecoord_gtf(gene_name,file):
                     else: break
         if linesplit[2] in ["transcript"]:
             for x in linesplit[8].split(";"):
-                if x.lstrip(" ").startswith("gene_name"):
+                if x.lstrip(" ").startswith("gene_name") or x.lstrip(" ").startswith("gene"):
                     x = x[x.find("\"")+1:]
                     name = x[:x.find("\"")]
                     if gene_name.upper()==name.upper():
