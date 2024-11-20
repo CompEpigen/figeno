@@ -32,7 +32,8 @@ def read_SNPs_RNA(ase_file,gene=None,chr=None,start=None,end=None,exons=None,min
     if "refCount_DNA" in df.columns: variables_selected+=["refCount_DNA","altCount_DNA"]
     df = df[variables_selected]
     df["VAF"] = [min(df.loc[i,"refCount"],df.loc[i,"altCount"]) / (df.loc[i,"refCount"]+df.loc[i,"altCount"]) for i in df.index]
-    df["VAF_DNA"] = [min(df.loc[i,"refCount_DNA"],df.loc[i,"altCount_DNA"]) / (df.loc[i,"refCount_DNA"]+df.loc[i,"altCount_DNA"]) for i in df.index]
+    if "refCount_DNA" in df.columns:
+        df["VAF_DNA"] = [min(df.loc[i,"refCount_DNA"],df.loc[i,"altCount_DNA"]) / (df.loc[i,"refCount_DNA"]+df.loc[i,"altCount_DNA"]) for i in df.index]
     in_exons=[]
     if exons is not None:
         for i in df.index:

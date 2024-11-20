@@ -2,7 +2,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from figeno.cli import gui, init,make
 
-__version__ = "1.6.3"
+__version__ = "1.6.4"
 
 def main():
     parser = ArgumentParser("figeno",formatter_class=ArgumentDefaultsHelpFormatter)
