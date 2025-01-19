@@ -81,19 +81,13 @@ class alignments_track:
         self.bp_counts ={} # map breakpoint to its count
         self.splitreads_coords={}
         self.kwargs=kwargs
+
+        self.n_reads_basemod=0
+        self.n_reads_nobasemod=0
        
 
     def draw(self, regions, box ,hmargin,warnings=[]):
         regions = [(correct_region_chr(region, self.samfile.references),w) for (region,w) in regions]
-
-        # Check if MM and ML tags are set
-        if self.color_by=="basemod":
-            for read in self.samfile:
-                if (not read.has_tag("MM")) or (not read.has_tag("ML")):
-                    raise KnownException("MM and ML tags are missing from the bam file, but are required in order to visualize base modifications.\n\n"\
-                                         "For ONT data, these tags should automatically be added if you run dorado with a modified bases model "\
-                                        "(see https://github.com/nanoporetech/dorado#modified-basecalling).")
-                break
 
         if self.rephase: self.assign_SNPs_haplotypes(regions)
         self.compute_read_piles(regions,box,warnings=warnings)
@@ -104,6 +98,15 @@ class alignments_track:
         if self.link_splitreads:
             self.draw_splitread_lines(box)
         self.draw_title(box)
+
+        # Make sure that tags for basemodifications were found.
+        if self.color_by=="basemod":
+            if self.n_reads_basemod==0 and self.n_reads_nobasemod>0:
+                raise KnownException("MM and ML tags are missing from the bam file, but are required in order to visualize base modifications.\n\n"\
+                                         "For ONT data, these tags should automatically be added if you run dorado with a modified bases model "\
+                                        "(see https://github.com/nanoporetech/dorado#modified-basecalling).")
+            elif self.n_reads_nobasemod>0:
+                warnings.append(str(self.n_reads_nobasemod)+" reads did not have MM and ML tags (indicating the base modifications) and were therefore ignored.")
 
         for x in self.kwargs:
             warnings.append(x+" parameter was ignored in the alignments track because it is not one of the accepted parameters.")
@@ -154,8 +157,16 @@ class alignments_track:
         patches_methyl=[]
         for g in range(len(group_piles)):
             for y in range(len(group_piles[g])):
-                #if self.max_rows_group is not None and y>self.max_rows_group: continue
                 for read in group_piles[g][y]:
+
+                    # If coloring by basemod, skip reads with missing tags.
+                    if self.color_by=="basemod":
+                        if (not read.has_tag("MM")) or (not read.has_tag("ML")):
+                            self.n_reads_nobasemod+=1
+                            continue
+                        else:
+                            self.n_reads_basemod+=1
+
                     y_offset = y + self.group_offsets[g]
                     y_converted = convert_y(y_offset) - height
 
@@ -220,23 +231,15 @@ class alignments_track:
                         polygon = patches.Polygon(vertices,color=color,lw=0,zorder=1)
                         box["ax"].add_patch(polygon)
 
-                        #rect = patches.Rectangle((convert_x(read.reference_start),y_converted),convert_x(read.reference_end)-convert_x(read.reference_start),
-                        #                        height,color=readcolor(read),lw=0) # "#b3b3b3"
-                        #box["ax"].add_patch(rect)
                     if self.color_by=="basemod":
                         if (not "projection" in box) or box["projection"]!="polar": patches_methyl=[]
-                        #methyl = decode_read_basemod(read,"C","m")[0]
                         basemods = decode_read_basemods(read,self.basemods,self.samfile,fix_hardclip_basemod=self.fix_hardclip_basemod,warnings=warnings)
-                        #methyl = decode_read_m_hm(read)[0]
                         methyl_merged = merge_methylation_rectangles(basemods,int(region.end-region.start)/1000)
                         for rect_start,rect_end,color in methyl_merged:
                             if rect_end >=region.start and rect_start<=region.end:
                                 if color==0: color = self.color_unmodified
-                                #color= "#ee0000" if state==1 else "#1155dd"
                                 vertices=[(convert_x(rect_start),y_converted),(convert_x(rect_start),y_converted+height),(convert_x(rect_end),y_converted+height),(convert_x(rect_end),y_converted)]
                                 rect = patches.Polygon(vertices,color=color,lw=0,zorder=1.1)
-                                #rect = patches.Rectangle((convert_x(rect_start),y_converted),convert_x(rect_end)-convert_x(rect_start),height,color=color,lw=0,zorder=1.1)
-                                #box["ax"].add_patch(rect)
                                 patches_methyl.append(rect)
                         if (not "projection" in box) or box["projection"]!="polar":
                             box["ax"].add_collection(PatchCollection(patches_methyl,match_original=True,rasterized=self.rasterize))
@@ -271,8 +274,6 @@ class alignments_track:
             x1,y1 = polar2cartesian((box["left"],box["bottom"]))
             x2,_ = polar2cartesian((box["left"]+0.001,box["bottom"]))
             _,y2 = polar2cartesian((box["left"],box["top"]))
-            #rect = patches.Rectangle((x2,y1),width=-abs(x1-x2),height=abs(y1-y2),color="green")
-            #box["ax"].add_patch(rect)
             if self.group_by=="haplotype" and self.show_haplotype_colors:
                 for i in range(min(len(self.group_sizes),len(self.haplotype_colors))):
                     height_bar = abs(self.group_boundaries[i+1]-self.group_boundaries[i])
@@ -280,11 +281,6 @@ class alignments_track:
                     vertices = [(box["left"]+0.02,y_rect) , (box["left"]+0.02,y_rect+height_bar) , (box["left"],y_rect+height_bar) , (box["left"],y_rect)]
                     polygon = patches.Polygon(vertices,color=self.haplotype_colors[i],zorder=3, lw=0)
                     box["ax"].add_patch(polygon)
-                    #rect = patches.Rectangle((box["left"]+0.01,y_rect),0.01,height_bar,facecolor=self.haplotype_colors[i],zorder=3,edgecolor="black",lw=0)
-                    #box["ax"].add_patch(rect)
-            #else: labels_pos = box["left"]-0.1
-            #for i in range(min(len(self.group_sizes),len(self.haplotype_labels))):
-            #    box["ax"].text(labels_pos,(self.group_boundaries[i]+self.group_boundaries[i+1])/2,self.haplotype_labels[i],horizontalalignment="right",verticalalignment="center",rotation=90,fontsize=7*self.fontscale)
 
     def compute_read_piles(self,regions,box,warnings=[]):
 
