@@ -236,6 +236,8 @@ def create_basemod_table_bam(reads,base,mod,chr,start,end,samfile=None,fix_hardc
     pos2unmethylated={}
     for x in reads:
         for read in x:
+            if (not read.has_tag("MM")) or (not read.has_tag("ML")):
+                continue
             methyl = decode_read_basemods(read,[(base,mod,1)],samfile,fix_hardclip,warnings=warnings)
             for pos,end2,state in methyl:
                 if base=="C" and (read.flag&16)!=0:
