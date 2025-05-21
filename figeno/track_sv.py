@@ -10,7 +10,7 @@ from figeno.utils import KnownException,correct_region_chr, split_box,draw_bound
 
 class sv_track:
     def __init__(self,file=None,df_SVs=None,sv_across_regions=True,upside_down=False,label="BP",label_rotate=True,
-                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,min_sv_height=0.1,
+                 color_del="#4a69bd",color_dup="#e55039",color_h2h="#8e44ad",color_t2t="#8e44ad",color_trans="#27ae60",lw=0.6,min_sv_height=0.1, show_unpaired=True,
                  fontscale=1,bounding_box=True,height=10,margin_above=1.5,**kwargs):
         self.file=file
         self.df_SVs = df_SVs # Can directly provide a dataframe of SVs instead of providing a file (for use with python API).
@@ -27,6 +27,7 @@ class sv_track:
         self.min_sv_height=float(min_sv_height)
         if self.min_sv_height>1: self.min_sv_height=1.0
         if self.min_sv_height<0: self.min_sv_height=0.0
+        self.show_unpaired=show_unpaired
         self.fontscale=float(fontscale)
         self.bounding_box=bounding_box
         self.height = float(height)
@@ -40,7 +41,13 @@ class sv_track:
                 self.df_SVs = self.read_SVs_tsv()
             elif self.file.endswith(".vcf") or self.file.endswith(".vcf.gz"):
                 self.df_SVs = self.read_SVs_vcf()
-            else: raise KnownException("The extension was not recognized for the file in sv track: "+self.file+".\nAccepted extensions are .tsv, .vcf, or .vcf.gz.")
+            elif self.file.endswith(".bedpe") or self.file.endswith(".bed"):
+                self.df_SVs = self.read_SVs_bedpe()
+            else: raise KnownException("The extension was not recognized for the file in sv track: "+self.file+".\nAccepted extensions are .tsv, .vcf, .vcf.gz, or .bedpe.")
+            if pd.api.types.is_string_dtype(self.df_SVs["chr1"]):
+                self.df_SVs["chr1"] = self.df_SVs["chr1"].str.replace(f'^chr', '', regex=True)
+            if pd.api.types.is_string_dtype(self.df_SVs["chr2"]):
+                self.df_SVs["chr2"] = self.df_SVs["chr2"].str.replace(f'^chr', '', regex=True)
         if not "color" in self.df_SVs.columns:
             self.add_SV_color()
 
@@ -85,22 +92,23 @@ class sv_track:
             add_arc(**arc,lw=self.lw)
 
         # Show SVs leading to other regions
-        for i in range(len(regions)):
-            if self.sv_across_regions:
-                df_SV_others = select_SVs_otherregions(self.df_SVs,regions[i][0],regions)
-            else:
-                df_SV_others = select_SVs_otherregions(self.df_SVs,regions[i][0],[regions[i]])
-            for a in df_SV_others.index:
-                x=boxes[i]["left"] + (boxes[i]["right"]-boxes[i]["left"]) / (regions[i][0].end-regions[i][0].start) * (df_SV_others.loc[a,"pos1"]-regions[i][0].start)
-                if self.upside_down or "upside_down" in boxes[i]:
-                    y1 = boxes[i]["top"]
-                    y2=boxes[i]["top"] - (boxes[i]["top"]-boxes[i]["bottom"]) * chr_to_int(df_SV_others.loc[a,"chr2"]) / 30
-                    boxes[i]["ax"].text(x=x,y=y2-0.2,s=df_SV_others.loc[a,"chr2"],horizontalalignment="center",verticalalignment="top",color="black",fontsize=6*self.fontscale)
+        if self.show_unpaired:
+            for i in range(len(regions)):
+                if self.sv_across_regions:
+                    df_SV_others = select_SVs_otherregions(self.df_SVs,regions[i][0],regions)
                 else:
-                    y1 = boxes[i]["bottom"]
-                    y2=boxes[i]["bottom"] + (boxes[i]["top"]-boxes[i]["bottom"]) * chr_to_int(df_SV_others.loc[a,"chr2"]) / 30
-                    boxes[i]["ax"].text(x=x,y=y2,s=df_SV_others.loc[a,"chr2"],horizontalalignment="center",verticalalignment="bottom",color="black",fontsize=6*self.fontscale)
-                boxes[i]["ax"].plot([x,x],[y1,y2],color=df_SV_others.loc[a,"color"],linewidth=0.5)
+                    df_SV_others = select_SVs_otherregions(self.df_SVs,regions[i][0],[regions[i]])
+                for a in df_SV_others.index:
+                    x=boxes[i]["left"] + (boxes[i]["right"]-boxes[i]["left"]) / (regions[i][0].end-regions[i][0].start) * (df_SV_others.loc[a,"pos1"]-regions[i][0].start)
+                    if self.upside_down or "upside_down" in boxes[i]:
+                        y1 = boxes[i]["top"]
+                        y2=boxes[i]["top"] - (boxes[i]["top"]-boxes[i]["bottom"]) * chr_to_int(df_SV_others.loc[a,"chr2"]) / 30
+                        boxes[i]["ax"].text(x=x,y=y2-0.2,s=df_SV_others.loc[a,"chr2"],horizontalalignment="center",verticalalignment="top",color="black",fontsize=6*self.fontscale)
+                    else:
+                        y1 = boxes[i]["bottom"]
+                        y2=boxes[i]["bottom"] + (boxes[i]["top"]-boxes[i]["bottom"]) * chr_to_int(df_SV_others.loc[a,"chr2"]) / 30
+                        boxes[i]["ax"].text(x=x,y=y2,s=df_SV_others.loc[a,"chr2"],horizontalalignment="center",verticalalignment="bottom",color="black",fontsize=6*self.fontscale)
+                    boxes[i]["ax"].plot([x,x],[y1,y2],color=df_SV_others.loc[a,"color"],linewidth=0.5)
 
         self.draw_title(full_box)
 
@@ -173,7 +181,45 @@ class sv_track:
                         else: colors.append(self.color_t2t)
                 df_SVs["color"] = colors
             else:
-                df_SVs["color"]=["black" for i in df_SVs.index]
+                df_SVs["color"]=[self.color_del for i in df_SVs.index]
+        SVs=[]
+        for x in df_SVs.index:
+            SV1=(df_SVs.loc[x,"chr1"],df_SVs.loc[x,"pos1"],df_SVs.loc[x,"chr2"],df_SVs.loc[x,"pos2"],df_SVs.loc[x,"color"])
+            if not SV1 in SVs: SVs.append(SV1)
+            SV2=(df_SVs.loc[x,"chr2"],df_SVs.loc[x,"pos2"],df_SVs.loc[x,"chr1"],df_SVs.loc[x,"pos1"],df_SVs.loc[x,"color"])
+            if not SV2 in SVs: SVs.append(SV2)
+        df_SVs = pd.DataFrame(SVs,columns=["chr1","pos1","chr2","pos2","color"])
+        return df_SVs
+    
+    def read_SVs_bedpe(self):
+        try: df_SVs = pd.read_csv(self.file,sep="\t",dtype={0:str,3:str},header=None)
+        except Exception: 
+            raise KnownException("Failed to open bedpe file for sv track: "+str(self.file))
+        if df_SVs.shape[1]<6: raise KnownException("In sv track: bedpe file must have at least 6 columns.")
+        if df_SVs.shape[1]>=10:
+            df_SVs =df_SVs.iloc[:,[0,1,3,4,8,9]]
+            df_SVs.columns=["chr1","pos1","chr2","pos2","strand1","strand2"]
+        else:
+            df_SVs = df_SVs.iloc[:,[0,1,3,4]]
+            df_SVs.columns=["chr1","pos1","chr2","pos2"]
+        if not "color" in df_SVs.columns:
+            if "strand1" in df_SVs.columns and "strand2" in df_SVs.columns:
+                colors=[]
+                for i in df_SVs.index:
+                    chr1,chr2= df_SVs.loc[i,"chr1"],df_SVs.loc[i,"chr2"]
+                    if chr1!=chr2: 
+                        colors.append(self.color_trans)
+                    else:
+                        pos1,pos2=df_SVs.loc[i,"pos1"],df_SVs.loc[i,"pos2"]
+                        strand1,strand2=df_SVs.loc[i,"strand1"],df_SVs.loc[i,"strand2"]
+                        if pos2<pos1: strand1,strand2=strand2,strand1
+                        if strand1=="-" and strand2=="+": colors.append(self.color_del)
+                        elif strand1=="+" and strand2=="-": colors.append(self.color_dup)
+                        elif strand1=="+" and strand2=="-": colors.append(self.color_h2h)
+                        else: colors.append(self.color_t2t)
+                df_SVs["color"] = colors
+            else:
+                df_SVs["color"]=[self.color_del for i in df_SVs.index]
         SVs=[]
         for x in df_SVs.index:
             SV1=(df_SVs.loc[x,"chr1"],df_SVs.loc[x,"pos1"],df_SVs.loc[x,"chr2"],df_SVs.loc[x,"pos2"],df_SVs.loc[x,"color"])
@@ -239,14 +285,10 @@ def add_SV_color(self):
    
 
 def select_SVs_regions(df_SVs,region1,region2):
-    indices=[]
-    for i in df_SVs.index:
-        if df_SVs.loc[i,"chr1"] == region1.chr and df_SVs.loc[i,"chr2"] == region2.chr:
-            if df_SVs.loc[i,"pos1"]>=region1.start and df_SVs.loc[i,"pos1"]<=region1.end:
-                if df_SVs.loc[i,"pos2"]>=region2.start and df_SVs.loc[i,"pos2"]<=region2.end:
-                    indices.append(i)
-    df_SVs2 = df_SVs.loc[indices,:].copy(deep=True)
-    return df_SVs2
+    df_SVs = df_SVs.loc[(df_SVs["chr1"]==region1.chr) & (df_SVs["chr2"]==region2.chr),:]
+    df_SVs = df_SVs.loc[(df_SVs["pos1"]>=region1.start) & (df_SVs["pos1"]<=region1.end),:]
+    df_SVs = df_SVs.loc[(df_SVs["pos2"]>=region2.start) & (df_SVs["pos2"]<=region2.end),:]
+    return df_SVs
 
 def select_SVs_otherregions(df_SVs,region1,otherregions):
     """Select SVs from region1 which do not end up in any other regions"""

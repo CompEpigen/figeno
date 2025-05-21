@@ -63,7 +63,9 @@ export const defaultTrackValues={
         scale_max:"",
         group:"1",
         scale_pos:"corner",
-        upside_down:false
+        upside_down:false,
+        show_negative:false,
+        negative_color:"#2980b9"
     },
     "coverage":{
         height:"10",
@@ -160,7 +162,8 @@ export const defaultTrackValues={
         color_t2t:"#8e44ad",
         color_h2h:"#8e44ad",
         color_trans:"#27ae60",
-        min_sv_height:0.1
+        min_sv_height:0.1,
+        show_unpaired:true
     },
     "copynumber":{
         height:"30",

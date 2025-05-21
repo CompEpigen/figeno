@@ -302,6 +302,22 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                 </div>
 
             </div>
+
+            <div className="optionGroup">
+                <div className='formItem'>
+                    <label title="If true, will also plot negative values." htmlFor={"show_negative"+track.id}>Show negative:</label>
+                    <input type="checkbox" id={"show_negative"+track.id} checked={track.show_negative} onChange={() => set_value("show_negative",!track.show_negative)} />
+                </div>
+
+                {track.show_negative ? (<>
+                <div className='formItem' >
+                    <label title="Color for negative values." htmlFor={"negative_color"+track.id}>Negative color:</label>
+                    <ColorButton id={"negative_color"+track.id} color={track.negative_color} setColor={(c)=>set_value("negative_color",c)} openColorPanel={openColorPanel}></ColorButton>
+                </div>
+
+                </>):""}
+
+            </div>
            
         </>
     )
@@ -642,7 +658,7 @@ function HicTrack({track,set_value, setFileDialogData,setFileDialogActive}){
 }
 
 function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialogActive}){
-    const fileClass= (track.file.endsWith(".vcf") || track.file.endsWith(".vcf.gz") ||track.file.endsWith(".tsv"))? "":"unsetPath"; 
+    const fileClass= (track.file.endsWith(".vcf") || track.file.endsWith(".vcf.gz") ||track.file.endsWith(".tsv") || track.file.endsWith(".bedpe"))? "":"unsetPath"; 
     return (
         <>
         <div className="optionGroup">
@@ -681,6 +697,11 @@ function SvTrack({track,set_value,openColorPanel, setFileDialogData,setFileDialo
             <div className='formItem'>
                 <label title="For circular layout: minimum height of the SV, so that even short SVs are visible." htmlFor={"min_sv_height"+track.id}>Min SV height:</label>
                 <input id={"min_sv_height"+track.id} style={{width:"2em"}} value={track.min_sv_height}  onChange={(e) => set_value("min_sv_height",e.target.value)} ></input>
+            </div>
+
+            <div className='formItem'>
+                <label title="If true, will show SVs even if only one of the two ends is included in the regions displayed." htmlFor={"show_unpaired"+track.id}>Show unpaired:</label>
+                <input type="checkbox" id={"show_unpaired"+track.id} checked={track.show_unpaired} onChange={() => set_value("show_unpaired",!track.show_unpaired)} />
             </div>
 
 

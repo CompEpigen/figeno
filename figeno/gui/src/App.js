@@ -160,9 +160,13 @@ export default function App() {
       else if (t.type=="bigwig" || t.type=="coverage"){
         if (t.scale!="custom"){
           delete t.scale_max;
+          
         }
         if (t.scale!="group auto" && t.scale!="group auto per region"){
           delete t.group;
+        }
+        if (!t.show_negative && t.type=="bigwig"){
+          delete t.negative_color;
         }
       }
       else if (t.type=="hic"){

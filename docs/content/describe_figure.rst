@@ -183,6 +183,10 @@ Parameters:
   
 * ``upside_down``: if true, the track will be upside down.
 
+* ``show_negative``: if false (default), only show positive values. If true, will also show negative values, in which case the displayed range will be [-scale_max, scale_max].
+
+* ``negative_color``: if show_negative is true, color for the negative values.
+
 hic
 ^^^^^^^^
 
@@ -374,11 +378,11 @@ Track with arcs showing structural variants. If only one of the two breakends is
 
 Parameters:
 
-* ``file``: file containing the SV information. Can either be a vcf or a tsv file with at least the four columns: "chr1", "pos1", "chr2" and "pos2". For a tsv file, you can also provide the "strand1" and "strand2" columns in order to color SVs according to SV type (see below), or directly a "color" column, otherwise all SVs will be black.
+* ``file``: file containing the SV information. Can be a vcf, a bedpe file, or a tsv file with at least the four columns: "chr1", "pos1", "chr2" and "pos2". For a tsv file, you can also provide the "strand1" and "strand2" columns in order to color SVs according to SV type (see below), or directly a "color" column, otherwise all SVs will be black.
 
 * ``lw``: line width for the arcs showing the SVs. 
 
-* ``color_del``, ``color_dup``, ``color_T2T``, ``color_H2H``, ``color_trans``: color of the arc representing the SV, depending on the SV type (respectively: deletion, duplication, tail-to-tail inversion, head-to-head inversion, translocation).
+* ``color_del``, ``color_dup``, ``color_T2T``, ``color_H2H``, ``color_trans``: color of the arc representing the SV, depending on the SV type (respectively: deletion, duplication, tail-to-tail inversion, head-to-head inversion, translocation). If the input file contains neither colors nor orientation, then all arcs will be colored as ``color_del``.
 
 * ``min_sv_height``: when a circular layout is used, minimum height of the SVs, between 0 and 1 (default: 0.1). Increasing this value will result in short SVs (where both breakends are close) to have a larger height.
 
