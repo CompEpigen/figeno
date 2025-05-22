@@ -35,8 +35,6 @@ config_file="config.json"
 @app.route('/browse', methods=["POST"])
 def browse():
     global last_dir
-    global config_dir
-    global config_file
     data=request.get_json()
     if data["dialog_type"]=="open_file":
         start_dir = last_dir
