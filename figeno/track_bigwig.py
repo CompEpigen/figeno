@@ -33,7 +33,9 @@ class bigwig_track:
         self.bounding_box=bounding_box
         self.height = float(height)
         self.margin_above= float(margin_above)
-        self.scale_min = 0.0 if self.show_negative or scale_min is None else float(scale_min)
+        self.scale_min = 0.0 if scale_min is None else float(scale_min)
+        self.custom_min = scale_min is not None
+        if self.show_negative and self.scale_min>0: raise KnownException("Cannot have show_negative True and a custom minimum that is >0.")
         self.lw=float(lw)
         self.kwargs=kwargs
 
@@ -71,31 +73,28 @@ class bigwig_track:
         n_bases_per_bin = (region.end-region.start) / nbins #float
 
         if scale_max<=0: scale_max=0.001
-        values_binned = [max(min(scale_max,x),self.scale_min) for x in values_binned_original]
+        scale_min = self.scale_min
+        values_binned = [max(min(scale_max,x),scale_min) for x in values_binned_original]
         if self.show_negative:
-            values_binned_negative = [min(max(-scale_max,x),0) for x in values_binned_original]
+            values_binned = [max(min(scale_max,x),0) for x in values_binned_original]
+            scale_min = self.scale_min if self.custom_min else -scale_max
+            values_binned_negative = [min(max(scale_min,x),0) for x in values_binned_original]
 
-        if self.show_negative:
-            if not self.upside_down:
-                y0=(box["bottom"]+box["top"])/2
-                z=1/scale_max/2 * (box["top"]-box["bottom"])
-            else:
-                y0=(box["bottom"]+box["top"])/2
-                z=-1/scale_max/2 * (box["top"]-box["bottom"])
+        if not self.upside_down:
+            y0= box["bottom"] -scale_min/(scale_max-scale_min) * (box["top"]-box["bottom"])
+            z=1/(scale_max-scale_min) * (box["top"]-box["bottom"])
         else:
-            if not self.upside_down:
-                y0=box["bottom"]
-                z=1/(scale_max-self.scale_min) * (box["top"]-box["bottom"])
-            else:
-                y0=box["top"]
-                z=-1/(scale_max-self.scale_min) * (box["top"]-box["bottom"])
+            y0=box["top"] +scale_min/(scale_max-scale_min) * (box["top"]-box["bottom"])
+            z=-1/(scale_max-scale_min) * (box["top"]-box["bottom"])
 
         def compute_y(value):
-            return y0+(value-self.scale_min)*z
+            return y0+value*z
         
         
         polygon_vertices = [(box["right"],compute_y(self.scale_min)),(box["left"],compute_y(self.scale_min))]
-        polygon_vertices_negative = [(box["right"],compute_y(self.scale_min)),(box["left"],compute_y(self.scale_min))]
+        if self.show_negative:
+            polygon_vertices = [(box["right"],compute_y(0)),(box["left"],compute_y(0))]
+        polygon_vertices_negative = [(box["right"],compute_y(0)),(box["left"],compute_y(0))]
         for i in range(nbins):
             x=box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
             if values_binned[i] is not None:
@@ -117,7 +116,7 @@ class bigwig_track:
 
         if show_scale_inside and ((not "projection" in box) or box["projection"]!="polar"):
             upperlimit_string = "{:.1f}".format(scale_max) if scale_max>=1 else "{:.2f}".format(scale_max)
-            lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
+            lowerlimit_string = "0" if scale_min==0 else "{:.1f}".format(scale_min) if scale_max<=-1 else "{:.2f}".format(scale_min)
             label="["+lowerlimit_string+" - "+upperlimit_string+"]"
             box["ax"].text(box["left"]+0.05,box["top"]-0.02,label,horizontalalignment="left",verticalalignment="top",fontsize=6*self.fontscale)
        
@@ -134,10 +133,10 @@ class bigwig_track:
             if self.scale_pos=="left":
                 if not self.upside_down:
                     upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                    lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
+                    lowerlimit_string = "-"+upperlimit_string if (self.show_negative and not self.custom_min) else str(self.scale_min) if self.scale_min!=0 else "0"
                 else:
                     lowerlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                    upperlimit_string = "-"+lowerlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
+                    upperlimit_string = "-"+lowerlimit_string if (self.show_negative and not self.custom_min) else str(self.scale_min) if self.scale_min!=0 else "0"
                 x,y= polar2cartesian((box["left"],box["top"]))
                 theta,r = cartesian2polar((x-0.2,y))
                 box["ax"].text(theta,r,
@@ -155,7 +154,7 @@ class bigwig_track:
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             if self.scale_pos=="left":
                 upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min !=0 else "0"
+                lowerlimit_string = "-"+upperlimit_string if (self.show_negative and not self.custom_min) else str(self.scale_min) if self.scale_min !=0 else "0"
                 if not self.upside_down:
                     box["ax"].text(box["left"] - 0.5,box["top"],
                                 upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)
