@@ -187,6 +187,8 @@ Parameters:
 
 * ``negative_color``: if show_negative is true, color for the negative values.
 
+* ``lw``: Line width. The default is 0, but it can be increased in order to make narrow peaks more visible.
+
 hic
 ^^^^^^^^
 

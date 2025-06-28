@@ -61,6 +61,8 @@ export const defaultTrackValues={
         n_bins:500,
         scale:"auto",
         scale_max:"",
+        scale_min:"0",
+        lw:"0.0",
         group:"1",
         scale_pos:"corner",
         upside_down:false,

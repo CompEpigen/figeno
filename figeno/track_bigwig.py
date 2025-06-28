@@ -7,7 +7,7 @@ import pandas as pd
 from figeno.utils import KnownException, correct_region_chr, split_box,draw_bounding_box, interpolate_polar_vertices, polar2cartesian, cartesian2polar
 
 class bigwig_track:
-    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",upside_down=False,group=None,show_negative=False,negative_color=None,label="",label_rotate=False,fontscale=1,
+    def __init__(self,file,n_bins=500,scale="auto",scale_max=None,scale_pos="corner",color="gray",scale_min=None,lw=0.0,upside_down=False,group=None,show_negative=False,negative_color=None,label="",label_rotate=False,fontscale=1,
                  bounding_box=False,height=10,margin_above=1.5,**kwargs):
         if file=="" or file is None: raise KnownException("Please provide a file for the bigwig track.")
         if (not file.startswith("http")) and not os.path.exists(file): raise KnownException("The following file does not exist (in bigwig track): "+file)
@@ -33,6 +33,8 @@ class bigwig_track:
         self.bounding_box=bounding_box
         self.height = float(height)
         self.margin_above= float(margin_above)
+        self.scale_min = 0.0 if self.show_negative or scale_min is None else float(scale_min)
+        self.lw=float(lw)
         self.kwargs=kwargs
 
     def draw(self, regions, box ,hmargin,warnings=[]):
@@ -55,8 +57,10 @@ class bigwig_track:
 
 
 
+
     def draw_region(self,region,box,scale_max,nbins,show_scale_inside):
         if scale_max<0: raise KnownException("scale_max for bigwig tracks must be >=0.")
+        if self.scale_min>=scale_max: raise KnownException("scale_max must be > scale_min")
         if self.bounding_box: draw_bounding_box(box)
         if nbins>region.end-region.start: nbins=region.end-region.start
 
@@ -67,7 +71,7 @@ class bigwig_track:
         n_bases_per_bin = (region.end-region.start) / nbins #float
 
         if scale_max<=0: scale_max=0.001
-        values_binned = [max(min(scale_max,x),0) for x in values_binned_original]
+        values_binned = [max(min(scale_max,x),self.scale_min) for x in values_binned_original]
         if self.show_negative:
             values_binned_negative = [min(max(-scale_max,x),0) for x in values_binned_original]
 
@@ -81,17 +85,17 @@ class bigwig_track:
         else:
             if not self.upside_down:
                 y0=box["bottom"]
-                z=1/scale_max * (box["top"]-box["bottom"])
+                z=1/(scale_max-self.scale_min) * (box["top"]-box["bottom"])
             else:
                 y0=box["top"]
-                z=-1/scale_max * (box["top"]-box["bottom"])
+                z=-1/(scale_max-self.scale_min) * (box["top"]-box["bottom"])
 
         def compute_y(value):
-            return y0+value*z
+            return y0+(value-self.scale_min)*z
         
         
-        polygon_vertices = [(box["right"],compute_y(0)),(box["left"],compute_y(0))]
-        polygon_vertices_negative = [(box["right"],compute_y(0)),(box["left"],compute_y(0))]
+        polygon_vertices = [(box["right"],compute_y(self.scale_min)),(box["left"],compute_y(self.scale_min))]
+        polygon_vertices_negative = [(box["right"],compute_y(self.scale_min)),(box["left"],compute_y(self.scale_min))]
         for i in range(nbins):
             x=box["left"] + i*n_bases_per_bin/(region.end-region.start) * (box["right"] - box["left"])
             if values_binned[i] is not None:
@@ -104,16 +108,16 @@ class bigwig_track:
             polygon_vertices = interpolate_polar_vertices(polygon_vertices)
             if self.show_negative:
                 polygon_vertices_negative = interpolate_polar_vertices(polygon_vertices_negative)
-        polygon = patches.Polygon(polygon_vertices,lw=0.0,color=self.color)
+        polygon = patches.Polygon(polygon_vertices,lw=self.lw,color=self.color)
         box["ax"].add_patch(polygon)
         if self.show_negative:
-            polygon_neg = patches.Polygon(polygon_vertices_negative,lw=0.0,color=self.negative_color)
+            polygon_neg = patches.Polygon(polygon_vertices_negative,lw=self.lw,color=self.negative_color)
             box["ax"].add_patch(polygon_neg)
 
 
         if show_scale_inside and ((not "projection" in box) or box["projection"]!="polar"):
             upperlimit_string = "{:.1f}".format(scale_max) if scale_max>=1 else "{:.2f}".format(scale_max)
-            lowerlimit_string = "0" if not self.show_negative else "-"+upperlimit_string
+            lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
             label="["+lowerlimit_string+" - "+upperlimit_string+"]"
             box["ax"].text(box["left"]+0.05,box["top"]-0.02,label,horizontalalignment="left",verticalalignment="top",fontsize=6*self.fontscale)
        
@@ -130,10 +134,10 @@ class bigwig_track:
             if self.scale_pos=="left":
                 if not self.upside_down:
                     upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                    lowerlimit_string = "0" if not self.show_negative else "-"+upperlimit_string
+                    lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
                 else:
                     lowerlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                    upperlimit_string = "0" if not self.show_negative else "-"+upperlimit_string
+                    upperlimit_string = "-"+lowerlimit_string if self.show_negative else str(self.scale_min) if self.scale_min!=0 else "0"
                 x,y= polar2cartesian((box["left"],box["top"]))
                 theta,r = cartesian2polar((x-0.2,y))
                 box["ax"].text(theta,r,
@@ -151,7 +155,7 @@ class bigwig_track:
                             self.label,rotation=rotation,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             if self.scale_pos=="left":
                 upperlimit_string = "{:.1f}".format(self.scale_max[0]) if self.scale_max[0]>=1 else "{:.2f}".format(self.scale_max[0])
-                lowerlimit_string = "0" if not self.show_negative else "-"+upperlimit_string
+                lowerlimit_string = "-"+upperlimit_string if self.show_negative else str(self.scale_min) if self.scale_min !=0 else "0"
                 if not self.upside_down:
                     box["ax"].text(box["left"] - 0.5,box["top"],
                                 upperlimit_string,horizontalalignment="right",verticalalignment="top",fontsize=6*self.fontscale)

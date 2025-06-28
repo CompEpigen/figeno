@@ -160,7 +160,7 @@ export default function App() {
       else if (t.type=="bigwig" || t.type=="coverage"){
         if (t.scale!="custom"){
           delete t.scale_max;
-          
+          delete t.scale_min;
         }
         if (t.scale!="group auto" && t.scale!="group auto per region"){
           delete t.group;

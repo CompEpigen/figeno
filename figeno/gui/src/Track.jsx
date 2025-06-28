@@ -273,11 +273,16 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                                 <option className="dropDownOption" key="custom"  value="custom">custom</option>
                     </select>
                 </div>
-                {(track.scale=="custom")?(
-                    <div className='formItem'>
+                {(track.scale=="custom")?(<>
+                <div className='formItem'>
                     <label htmlFor={"scale_max"+track.id}>Max:</label>
                     <input id={"scale_max"+track.id} style={{width:"3em"}} value={track.scale_max} onChange={(e) => set_value("scale_max",e.target.value)} ></input>
-                </div>):""
+                </div>
+                <div className='formItem'>
+                    <label htmlFor={"scale_min"+track.id}>Min:</label>
+                    <input id={"scale_min"+track.id} style={{width:"3em"}} value={track.scale_min} onChange={(e) => set_value("scale_min",e.target.value)} ></input>
+                </div>
+                </>):""
                 }
                 {(track.scale=="group auto" || track.scale=="group auto per region")?(
                     <div className='formItem'>
@@ -316,6 +321,10 @@ function BigWigTrack({track,set_value,openColorPanel, setFileDialogData,setFileD
                 </div>
 
                 </>):""}
+                <div className='formItem'>
+                    <label htmlFor={"lw"+track.id}>Line width:</label>
+                    <input id={"lw"+track.id} style={{width:"3em"}} value={track.lw} onChange={(e) => set_value("lw",e.target.value)} ></input>
+                </div>
 
             </div>
            
