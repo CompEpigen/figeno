@@ -14,11 +14,19 @@ from figeno.utils import KnownException, correct_region_chr, split_box,draw_boun
 from figeno.bam import read_read_groups, decode_read_basemods
 
 class basemodfreq_track:
-    def __init__(self,style="lines",smooth=4,gap_frac=0.1,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5,**kwargs):
+    def __init__(self,style="lines",smooth=4,gap_frac=0.1,ymin=0.0,ymax=1.0,bams=[],bedmethyls=[],show_legend=False,label="Methylation freq",label_rotate=True,fontscale=1,bounding_box=True,height=25,margin_above=1.5,**kwargs):
         self.style=style
         self.smooth=int(smooth) # if set to a value x>0, will have average at each position the methylation values at this position, and at the next and previous x positions. If set to 0, does not perform any smoothing.
         if self.style=="dots": self.smooth=0
         self.gap_frac=float(gap_frac)
+        self.ymin=float(ymin)
+        self.ymax=float(ymax)
+        if self.ymax<self.ymin:
+            raise KnownException("ymax must be greater than ymin for a basemodfreq track.")
+        if self.ymin<0 or self.ymin>1:
+             raise KnownException("ymin must be between 0 and 1 for a basemodfreq track.")
+        if self.ymax<0 or self.ymax>1:
+             raise KnownException("ymax must be between 0 and 1 for a basemodfreq track.")
         self.bams = bams
         self.bedmethyls = bedmethyls
         if len(bams)==0 and len(bedmethyls)==0: raise KnownException("Please include at least one file in the basemod_freq track.")
@@ -107,7 +115,7 @@ class basemodfreq_track:
             df = dfs[j]
             df = df.loc[df["coverage"]>=min_coverage,:]
             x = [transform_coord(pos) for pos in df["pos"]]
-            y = [box["bottom"] + margin_y + val/100 * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
+            y = [box["bottom"] + margin_y + max(0,min(1,(val/100-self.ymin)/(self.ymax-self.ymin))) * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
             if df.shape[0]>0: self.is_empty=False
             boundaries=[0]
             for i in range(len(x)-1):
@@ -169,7 +177,7 @@ class basemodfreq_track:
 
         if df.shape[0]>0: self.is_empty=False
         x = [transform_coord(pos) for pos in df["pos"]]
-        y = [box["bottom"] + margin_y + val/100 * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
+        y = [box["bottom"] + margin_y + max(0,min(1,(val/100-self.ymin)/(self.ymax-self.ymin))) * (box["top"]-box["bottom"] -2 * margin_y) for val in df["smoothed"]]
 
         boundaries=[0]
         for i in range(len(x)-1):
@@ -188,15 +196,18 @@ class basemodfreq_track:
 
 
     def draw_title(self,box):
+        bottom_label = "0" if self.ymin==0.0 else str(self.ymin)
+        mid_label = "0.5" if (self.ymax+self.ymin)/2==0.5 else str((self.ymax+self.ymin)/2)
+        top_label = "1" if self.ymax == 1.0 else str(self.ymax) 
         if (not "projection" in box) or box["projection"]!="polar":
             tick_width=0.5
             margin_y = (box["top"]-box["bottom"]) * 0.03
             box["ax"].plot([box["left"],box["left"]+tick_width],[box["bottom"]+margin_y,box["bottom"]+margin_y],color="black",linewidth=0.8,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,box["bottom"]+margin_y,"0",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,box["bottom"]+margin_y,bottom_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             box["ax"].plot([box["left"],box["left"]+tick_width],[(box["bottom"]+box["top"])/2,(box["bottom"]+box["top"])/2],color="black",linewidth=0.8,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,(box["bottom"]+box["top"])/2,"0.5",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,(box["bottom"]+box["top"])/2,mid_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             box["ax"].plot([box["left"],box["left"]+tick_width],[box["top"]-margin_y,box["top"]-margin_y],color="black",linewidth=0.8,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,box["top"]-margin_y,"1",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,box["top"]-margin_y,top_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"]-tick_width*12*self.fontscale,(box["bottom"]+box["top"])/2,self.label,rotation=rotation,verticalalignment="center",horizontalalignment="right",fontsize=7*self.fontscale)
@@ -204,11 +215,11 @@ class basemodfreq_track:
             tick_width=-0.005
             margin_y = (box["top"]-box["bottom"]) * 0.03
             box["ax"].plot([box["left"],box["left"]+tick_width],[box["bottom"]+margin_y,box["bottom"]+margin_y],color="black",linewidth=1,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,box["bottom"]+margin_y,"0",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,box["bottom"]+margin_y,bottom_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             box["ax"].plot([box["left"],box["left"]+tick_width],[(box["bottom"]+box["top"])/2,(box["bottom"]+box["top"])/2],color="black",linewidth=1,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,(box["bottom"]+box["top"])/2,"0.5",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,(box["bottom"]+box["top"])/2,mid_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             box["ax"].plot([box["left"],box["left"]+tick_width],[box["top"]-margin_y,box["top"]-margin_y],color="black",linewidth=1,zorder=4)
-            box["ax"].text(box["left"]-tick_width*1.0,box["top"]-margin_y,"1",horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
+            box["ax"].text(box["left"]-tick_width*1.0,box["top"]-margin_y,top_label,horizontalalignment="right",verticalalignment="center",fontsize=7*self.fontscale)
             
             rotation = 90 if self.label_rotate else 0
             box["ax"].text(box["left"]-tick_width*6,(box["bottom"]+box["top"])/2,self.label,rotation=rotation,verticalalignment="center",horizontalalignment="right",fontsize=8*self.fontscale)

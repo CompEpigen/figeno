@@ -126,6 +126,8 @@ export const defaultTrackValues={
         style:"lines",
         smooth:4,
         gap_frac:0.1,
+        ymin:0,
+        ymax:1,
         bams:[],
         bedmethyls:[]
     },

@@ -338,6 +338,10 @@ Parameters:
 
 * ``gap_frac``: only applicable if style is "lines". If two positions are separated by more than this value multiplied by the length of the region, the line will be split. This is to avoid long straight lines in places where there is no data. If you set this value to 1, there will always be a continous lines. Default: 0.1. 
 
+* ``ymin``: minimum value for the y axis (default: 0).
+
+* ``ymax``: maximum value for the y axis (default: 1).
+
 * ``bams``: list of dictionaries with the following keys:
   
   * ``file``: path to a bam file with MM/ML tags.
