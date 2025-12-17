@@ -3,6 +3,7 @@ import pysam
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.path as path
+import matplotlib.patheffects as path_effects
 from matplotlib.collections import PatchCollection
 import numpy as np
 import pandas as pd
@@ -20,7 +21,9 @@ class alignments_track:
                  group_by="none",exchange_haplotypes=False,show_unphased=True,show_haplotype_colors=False,haplotype_colors=[],haplotype_labels=[],rephase=False,
                  color_by="none",color_unmodified="#1155dd",basemods=[["C","m","#f40202"]],fix_hardclip_basemod=False,rasterize=True,
                  link_splitreads=False, min_splitreads_breakpoints=2,only_show_splitreads=False, only_one_splitread_per_row=True, link_lw=0.2,hgap_bp=100, vgap_frac=0.3,
-                 is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5,**kwargs):
+                 is_rna=False,fontscale=1,bounding_box=False,height=50,margin_above=1.5,
+                 cigar_insertion_threshold=None, cigar_deletion_threshold=None, 
+                 insertion_color="#4444FF", deletion_color="#FF4444", **kwargs):
         if file=="" or file is None:
             raise KnownException("Please provide a bam file for the alignments track.")
         if not os.path.isfile(file):
@@ -81,6 +84,10 @@ class alignments_track:
         self.bp_counts ={} # map breakpoint to its count
         self.splitreads_coords={}
         self.kwargs=kwargs
+        self.cigar_insertion_threshold = int(cigar_insertion_threshold) if cigar_insertion_threshold is not None else None
+        self.cigar_deletion_threshold = int(cigar_deletion_threshold) if cigar_deletion_threshold is not None else None
+        self.insertion_color = insertion_color
+        self.deletion_color = deletion_color
 
         self.n_reads_basemod=0
         self.n_reads_nobasemod=0
@@ -195,18 +202,125 @@ class alignments_track:
                             read_start,read_end = max(read_start,read_end),min(read_start,read_end)
                         else:
                             read_start,read_end = min(read_start,read_end),max(read_start,read_end)
-                        if ((read.flag&16)==0 and region.orientation=="+") or  ((read.flag&16)!=0 and region.orientation=="-"):
-                            vertices = [(read_start,y_converted) , (read_start,y_converted+height),(read_end,y_converted+height), 
-                                        (read_end+arrow_width,y_converted+height/2),(read_end,y_converted)]
+                        # Determine color first (for both the read and any split read properties)
+                        color = self.readcolor(read, breakpoints=self.breakpoints)
+                        if read.query_name in self.splitreads:
+                            color = self.splitread_color
+
+                        # Create read vertices
+                        if ((read.flag&16)==0 and region.orientation=="+") or ((read.flag&16)!=0 and region.orientation=="-"):
+                            vertices = [(read_start,y_converted),
+                                      (read_start,y_converted+height),
+                                      (read_end,y_converted+height), 
+                                      (read_end+arrow_width,y_converted+height/2),
+                                      (read_end,y_converted)]
                         else:
-                            vertices = [(read_start,y_converted) , (read_start-arrow_width,y_converted+height/2) ,(read_start,y_converted+height),
-                                        (read_end,y_converted+height),(read_end,y_converted)]
+                            vertices = [(read_start,y_converted),
+                                      (read_start-arrow_width,y_converted+height/2),
+                                      (read_start,y_converted+height),
+                                      (read_end,y_converted+height),
+                                      (read_end,y_converted)]
+
+                        # Draw base read first
+                        if "projection" in box and box["projection"]=="polar":
+                            vertices = [(max(box["right"],min(box["left"],u)),v) for (u,v) in vertices]
+                            vertices = interpolate_polar_vertices(vertices)
+                        else:
+                            vertices = [(min(box["right"],max(box["left"],u)),v) for (u,v) in vertices]
+                        polygon = patches.Polygon(vertices, color=color, lw=0, zorder=1)
+                        box["ax"].add_patch(polygon)
+
+                        # Add visualization for large indels if thresholds are set
+                        if (self.cigar_insertion_threshold is not None or self.cigar_deletion_threshold is not None) and read.cigarstring:
+                            indels = parse_cigar_for_large_indels(read.cigarstring, 
+                                                              self.cigar_insertion_threshold, 
+                                                              self.cigar_deletion_threshold)
+                            for op, length, ref_offset in indels:
+                                indel_pos = read.reference_start + ref_offset
+                                indel_x = convert_x(indel_pos)
+                                marker_height = height * 0.8  # Height of the indel marker
+                                
+                                if op == 'I':  # Insertion - box with length on the read
+                                    # Check if the insertion is within the visible region
+                                    if region.start <= indel_pos <= region.end:
+                                        # Create text with insertion length
+                                        text = f"+{length}"
+                                        
+                                        # Calculate fixed width based on figure dimensions rather than read height
+                                        figure_width = box["right"] - box["left"]
+                                        standard_text_width = figure_width * 0.02  # Fixed percentage of figure width
+                                        text_width = len(text) * standard_text_width  # Scale by text length
+                                        box_height = height  # Keep height relative to read
+                                        
+                                        # Create background box for insertion
+                                        rect = patches.Rectangle((indel_x - text_width/2, y_converted),
+                                                            text_width, box_height,
+                                                            facecolor=self.insertion_color,
+                                                            alpha=0.3,
+                                                            edgecolor=self.insertion_color,
+                                                            linewidth=0.5,
+                                                            zorder=2)
+                                        box["ax"].add_patch(rect)
+                                        
+                                        # Add text in the box
+                                        box["ax"].text(indel_x, y_converted + height/2,
+                                                 text,
+                                                 horizontalalignment='center',
+                                                 verticalalignment='center',
+                                                 fontsize=4,
+                                                 color='black',  # Black text for better contrast
+                                                 path_effects=[path_effects.withStroke(linewidth=0.5, 
+                                                                                  foreground=self.insertion_color,
+                                                                                  alpha=0.3)],  # Add subtle text outline
+                                                 zorder=3)
+                                elif op == 'D':  # Deletion - colored rectangle for full length
+                                    # Check if any part of the deletion is within the visible region
+                                    deletion_end = indel_pos + length
+                                    if not (deletion_end < region.start or indel_pos > region.end):
+                                        # Calculate visible portion of deletion
+                                        visible_start = max(indel_pos, region.start)
+                                        visible_end = min(deletion_end, region.end)
+                                        del_start_x = convert_x(visible_start)
+                                        del_end_x = convert_x(visible_end)
+                                        
+                                        # Create rectangle for visible portion of deletion
+                                        rect = patches.Rectangle((del_start_x, y_converted),
+                                                            del_end_x - del_start_x,
+                                                            height,
+                                                            color=self.deletion_color,
+                                                            alpha=0.3,
+                                                            zorder=2)
+                                        box["ax"].add_patch(rect)
+                                        
+                                        # Add markers at start and end of deletion
+                                        triangle_vertices_start = [
+                                            (del_start_x, y_converted - height * 0.1),  # Tip
+                                            (del_start_x - height * 0.2, y_converted),  # Base left
+                                            (del_start_x + height * 0.2, y_converted),  # Base right
+                                        ]
+                                        triangle_vertices_end = [
+                                            (del_end_x, y_converted - height * 0.1),  # Tip
+                                            (del_end_x - height * 0.2, y_converted),  # Base left
+                                            (del_end_x + height * 0.2, y_converted),  # Base right
+                                        ]
+                                    
+                                        # Create and add the triangle patches
+                                        for vertices in [triangle_vertices_start, triangle_vertices_end]:
+                                            triangle = patches.Polygon(vertices, 
+                                                                    color=self.deletion_color, 
+                                                                    alpha=0.8,
+                                                                    zorder=2)
+                                            box["ax"].add_patch(triangle)
                         if "projection" in box and box["projection"]=="polar":
                             vertices = [(max(box["right"],min(box["left"],u)),v) for (u,v) in vertices]
                             vertices = interpolate_polar_vertices(vertices)
                         else:
                             vertices = [(min(box["right"],max(box["left"],u)),v) for (u,v) in vertices]
                         color=self.readcolor(read,breakpoints=self.breakpoints)
+
+                        # Create and add the base read polygon first
+                        polygon = patches.Polygon(vertices, color=color, lw=0, zorder=1)
+                        box["ax"].add_patch(polygon)
 
                         # Splitreads
                         if read.query_name in self.splitreads: 
@@ -226,10 +340,6 @@ class alignments_track:
                                 else:
                                     self.add_splitread_coords(read.query_name,qstart,read_start,y_converted+height/2,"left")
                                     self.add_splitread_coords(read.query_name,qend,read_end+arrow_width,y_converted+height/2,"right")
-
-
-                        polygon = patches.Polygon(vertices,color=color,lw=0,zorder=1)
-                        box["ax"].add_patch(polygon)
 
                     if self.color_by=="basemod":
                         if (not "projection" in box) or box["projection"]!="polar": patches_methyl=[]
@@ -452,12 +562,14 @@ class alignments_track:
         print(SNPs)
 
     def readcolor(self,read,breakpoints=[]):
+        # First check if it's one of our tracked split reads
+        if read.query_name in self.splitreads:
+            return self.splitread_color
+        # Then check breakpoints
         for bp in breakpoints:
             if read_overlaps_breakpoint(read,bp):
                 return bp.color
-            if read.has_tag("SA"): 
-                print("AA")
-                return self.splitread_color
+        # Default to base read color
         return self.read_color
 
 
@@ -543,3 +655,37 @@ def cigar2reference_span_length(cigar):
         current_start = current_pos+1
         current_pos = current_start+1
     return length
+
+def parse_cigar_for_large_indels(cigar, ins_threshold=None, del_threshold=None):
+    """Parse CIGAR string and return list of large insertions and deletions.
+    Returns a list of tuples (op, length, ref_pos) where:
+    - op is 'I' for insertion or 'D' for deletion
+    - length is the length of the indel
+    - ref_pos is the reference position where the indel occurs"""
+    indels = []
+    ref_pos = 0  # Reference position counter
+    current_start = 0
+    current_pos = 1
+    
+    while current_pos < len(cigar):
+        # Parse the length
+        while current_pos < len(cigar) and cigar[current_pos].isdigit():
+            current_pos += 1
+        
+        length = int(cigar[current_start:current_pos])
+        op = cigar[current_pos]
+        
+        # Check for insertions and deletions
+        if op == 'I' and ins_threshold is not None and length >= ins_threshold:
+            indels.append(('I', length, ref_pos))
+        elif op == 'D' and del_threshold is not None and length >= del_threshold:
+            indels.append(('D', length, ref_pos))
+            
+        # Update reference position
+        if op not in ['S', 'H', 'I', 'P']:
+            ref_pos += length
+            
+        current_start = current_pos + 1
+        current_pos = current_start + 1
+        
+    return indels

@@ -1145,6 +1145,92 @@ Here is an example of nanopore reads spanning a foldback inversion (resulting fr
 		]
 	}
 
+Large indel visualization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The alignments track can visualize large insertions and deletions from CIGAR strings. Deletions are shown as semi-transparent red rectangles with triangular markers at the start and end points, while insertions are marked with boxes along with the number of bases in the insert. This is particularly useful for visualizing structural variants that are captured in the CIGAR strings of long-read data.
+
+.. image:: images/figure_alignments.png
+
+.. toggle::
+
+  .. code:: json
+  
+    {
+        "general": {
+            "layout": "horizontal",
+            "reference": "hg19"
+        },
+        "output": {
+            "file": "figure_alignments.png",
+            "dpi": 400,
+            "width": 180
+        },
+        "regions": [
+            {
+                "chr": "7",
+                "start": 92400000,
+                "end": 92440000
+            }
+        ],
+        "highlights": [],
+        "tracks": [
+            {
+                "type": "alignments",
+                "file": "/path/to/sample.bam",
+                "height": 35,
+                "margin_above": 1.5,
+                "bounding_box": false,
+                "fontscale": 1,
+                "label": "Long reads",
+                "label_rotate": true,
+                "read_color": "#cccccc",
+                "splitread_color": "#FF9F00",
+                "link_splitreads": true,
+                "cigar_deletion_threshold": 50,
+                "cigar_insertion_threshold": 50,
+                "deletion_color": "#FF4444",
+                "insertion_color": "#4444FF",
+                "hgap_bp": 30,
+                "vgap_frac": 0.3
+            },
+            {
+                "type": "genes",
+                "height": 10,
+                "margin_above": 1.5,
+                "bounding_box": false,
+                "fontscale": 1,
+                "label": "",
+                "label_rotate": false,
+                "style": "default",
+                "collapsed": true,
+                "only_protein_coding": true,
+                "exon_color": "#2980b9",
+                "genes": "auto"
+            },
+            {
+                "type": "chr_axis",
+                "height": 10,
+                "margin_above": 1.5,
+                "bounding_box": false,
+                "fontscale": 1,
+                "label": "",
+                "label_rotate": false,
+                "style": "default",
+                "unit": "kb",
+                "ticklabels_pos": "below",
+                "ticks_interval": "auto"
+            }
+        ]
+    }
+
+The key parameters for indel visualization are:
+
+* ``cigar_deletion_threshold``: Minimum length of deletions to visualize (in base pairs)
+* ``cigar_insertion_threshold``: Minimum length of insertions to visualize (in base pairs)
+* ``deletion_color``: Color used for deletion overlays
+* ``insertion_color``: Color used for insertion overlays
+
 Allele-specific expression
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
